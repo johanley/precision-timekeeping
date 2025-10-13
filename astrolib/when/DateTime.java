@@ -20,7 +20,7 @@ public final class DateTime implements Comparable<DateTime> {
    @param minute range [0,59]
    @param seconds range [0,61.0) for the UTC timescale, and [0,60.0) for all other timescales. The extra second exists because of leap seconds. 
   */
-  public static DateTime gregorian(int year, int month, int day, int hour, int minute, double seconds, Timescale timescale) {
+  public static DateTime gregorianCalendar(int year, int month, int day, int hour, int minute, double seconds, Timescale timescale) {
     return new DateTime(Date.gregorian(year, month, day), Time.from(hour, minute, seconds, timescale));
   }
   
@@ -34,14 +34,14 @@ public final class DateTime implements Comparable<DateTime> {
    @param minute range [0,59]
    @param seconds range [0,61.0) for the UTC timescale, and [0,60.0) for all other timescales. The extra second exists because of leap seconds. 
   */
-  public static DateTime julian(int year, int month, int day, int hour, int minute, double seconds, Timescale timescale) {
+  public static DateTime julianCalendar(int year, int month, int day, int hour, int minute, double seconds, Timescale timescale) {
     return new DateTime(Date.julian(year, month, day), Time.from(hour, minute, seconds, timescale));
   }
   
   public static DateTime from(Date date, Time time) {
     return new DateTime(date, time);
   }
-
+  
   public Date date() { return date; }
   public Time time() { return time; }
   
@@ -76,8 +76,8 @@ public final class DateTime implements Comparable<DateTime> {
   }
   
   /** The returned JulianDate is sensitive to the presence of leap seconds in the day, if any. */
-  public JulianDate julianDate() {
-    return date.calendar().jd(date.year(), date.month(), fractionalDay(), time.timescale());
+  public JulianDate toJulianDate() {
+    return date.calendar().toJulianDate(this);
   }
   
   /** Intended for logging only. 2025-01-01 01:01:01 */

@@ -1,7 +1,5 @@
 package astrolib.when;
 
-import static astrolib.when.Calendar.*;
-
 import java.time.Month;
 import java.util.Arrays;
 
@@ -15,24 +13,8 @@ import astrolib.util.Mathy;
 */
 final class JulianDateConverter {
 
-  /** Jan 0.0 in the year 0, in the Julian calendar.  */
-  static final double JULIAN_BASE = 1_721_056.5;
-  
-  /** Jan 0.0 in the year 0, in the Gregorian calendar.  */
-  static final double GREGORIAN_BASE = 1_721_058.5;
-  
-  static JulianDateConverter forJulianCalendar() {
-    return new JulianDateConverter(JULIAN_BASE, JULIAN);
-  }
-  
-  static JulianDateConverter forGregorianCalendar() {
-    return new JulianDateConverter(GREGORIAN_BASE, Calendar.GREGORIAN);
-  }
-
-  /** @param jan_0_year_0 the Julian date for Jan 0.0 in the year 0 in the given calendar.  */
-  JulianDateConverter(double jan_0_year_0, Calendar calendar){
-    this.jan_0_year_0 = jan_0_year_0;
-    this.calendar = calendar;
+  static JulianDateConverter using(Calendar calendar) {
+    return new JulianDateConverter(calendar);
   }
   
   /** 
@@ -64,6 +46,12 @@ final class JulianDateConverter {
   private double jan_0_year_0;
   private Calendar calendar;
 
+  /** A converter for the given calendar. */
+  private JulianDateConverter(Calendar calendar){
+    this.jan_0_year_0 = calendar.julianDateJan0Year0();
+    this.calendar = calendar;
+  }
+  
   private double nonNegYears(int year, int month, double day) {
     //1. full cycles in the calendar  
     int numCycles = year / calendar.cycleYears();

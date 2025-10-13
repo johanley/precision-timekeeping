@@ -2,23 +2,13 @@ package astrolib.when;
 
 import java.time.Month;
 
-/** 
- Supported calendars.
- 
- <P> (SOFA supports the Gregorian calendar, but not the Julian calendar (not to be confused with the Julian date.) 
-*/
+/** Supported calendars. */
 public enum Calendar implements CalendarOps {
 
   /** Not used very often. Leap years are divisble by 4. */
-  JULIAN (4, 3*365 + 366){ 
+  JULIAN (4, 3*365 + 366, 1_721_056.5){ 
     @Override public boolean isLeap(int year) {
       return year % 4 == 0;
-    }
-    @Override public JulianDate jd(int year, int month, double fractionalDay, Timescale timescale) {
-      return JulianDateConverter.forJulianCalendar().toJulianDate(year, month, fractionalDay, timescale);
-    }
-    @Override public DateTime date(JulianDate jd) {
-      return JulianDateConverter.forJulianCalendar().toDateTime(jd);
     }
   }, 
   
@@ -27,19 +17,13 @@ public enum Calendar implements CalendarOps {
    Leap years are divisible by 4. 
    In addition, if the year is a century-year (1900, 2000, 2100, etc.) then it must also be divisible by 400.  
   */
-  GREGORIAN (400, (3*365 + 366) * 25 * 4 /*centuries*/ - 3 /*oddball century-years with no leap day*/){ 
+  GREGORIAN (400, (3*365 + 366) * 25 * 4 /*centuries*/ - 3 /*oddball century-years with no leap day*/, 1_721_058.5){ 
     @Override public boolean isLeap(int year) {
       boolean res = (year % 4 == 0);
       if (year % 100 == 0) {
         res = (year % 400 == 0);
       }
       return res;
-    }
-    @Override public JulianDate jd(int year, int month, double fractionalDay, Timescale timescale) {
-      return JulianDateConverter.forGregorianCalendar().toJulianDate(year, month, fractionalDay, timescale);
-    }
-    @Override public DateTime date(JulianDate jd) {
-      return JulianDateConverter.forGregorianCalendar().toDateTime(jd);
     }
   };
 
@@ -52,12 +36,25 @@ public enum Calendar implements CalendarOps {
   public int numDaysIn(int year) {
     return isLeap(year) ? LEAP_YEAR_NUM_DAYS : NORMAL_YEAR_NUM_DAYS;
   }
+
+  /** Convert a date-time in this calendar to a Julian date. */
+  public JulianDate toJulianDate(DateTime dt) {
+    return JulianDateConverter.using(this).toJulianDate(dt);
+  }
+  
+  /** Convert a Julian date to a date-time in this calendar. */
+  public DateTime toDateTime(JulianDate jd) {
+    return JulianDateConverter.using(this).toDateTime(jd);
+  }
   
   /** Number of years in a full cycle of this calendar. */
   public int cycleYears() { return cycleYears; }
   
   /** Number of days in a full cycle of this calendar. */
   public int cycleDays() { return cycleDays; }
+
+  /** The Julian date on January 0.0 on year 0 for this calendar. */
+  public double julianDateJan0Year0() {  return julianDateJan0Year0; }
   
   /** 
    For the given (fractional) date, return the (fractional) number of days since Jan 0.0.
@@ -97,19 +94,18 @@ public enum Calendar implements CalendarOps {
     return result;
   }
 
-  private Calendar(int cycleYears, int cycleDays) {
+  private Calendar(int cycleYears, int cycleDays, double julianDateJan0Year0) {
     this.cycleYears = cycleYears;
     this.cycleDays = cycleDays;
+    this.julianDateJan0Year0 = julianDateJan0Year0;
   }
   private int cycleYears;
   private int cycleDays;
+  private double julianDateJan0Year0; //no timescale
   
   /** The number of days remaining in the given month, from the given day. */
   private static double daysRemainingInMonth(int month, double day, boolean isLeap) {
     int length = Month.of(month).length(isLeap);
     return (length + 1) - day;
   }
-
-  
-
 }

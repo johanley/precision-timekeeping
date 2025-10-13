@@ -53,6 +53,12 @@ public final class JulianDate {
     return new JulianDate(jd, 0.0, timescale);
   }
 
+  /** Return the date-time corresponding to this Julian date, using the given calendar. */
+  public DateTime toDateTime(Calendar calendar) {
+    JulianDateConverter convert = JulianDateConverter.using(calendar);
+    return convert.toDateTime(this);
+  }
+
   public Timescale timescale() { return timescale; }
   
   public double jd() { return jd; }
