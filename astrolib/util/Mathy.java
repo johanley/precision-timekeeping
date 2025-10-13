@@ -21,11 +21,11 @@ public final class Mathy {
   }
   
   /** Chop off the non-integral part of a number. For negative numbers, not the same as floor.*/
-  public static double truncate(double value) {
+  public static int truncate(double value) {
     double result = Math.floor(value);
     if (value < 0) {
       result = result + 1;
     }
-    return result;
+    return (int)result;
   }
 }

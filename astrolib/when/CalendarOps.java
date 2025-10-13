@@ -7,9 +7,9 @@ public interface CalendarOps {
   public boolean isLeap(int year);
 
   /** Convert a date-time in this calendar to a Julian date. */
-  public double jd(int year, int month, double fractionalDay);
+  public JulianDate jd(int year, int month, double fractionalDay, Timescale timescale);
   
-  /** Convert a Julien date to a date-time in this calendar. */
-  //public Date date(JulianDate jd);
+  /** Convert a Julian date to a date-time in this calendar. */
+  public DateTime date(JulianDate jd);
   
 }

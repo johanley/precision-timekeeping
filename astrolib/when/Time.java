@@ -117,7 +117,7 @@ public final class Time implements Comparable<Time> {
     }
     double manySeconds = fraction * numSecondsInDay;
     //THE NUMBER OF SECONDS FLOW REGULARLY, EXCEPT POSSIBLY FOR THE LAST MINUTE OF THE DAY
-    int hours = (int)Mathy.truncate(manySeconds / SECONDS_PER_HOUR );
+    int hours = Mathy.truncate(manySeconds / SECONDS_PER_HOUR );
     double remainder = manySeconds - hours * SECONDS_PER_HOUR;
     int minutes = (int)Mathy.truncate(remainder / SECONDS_PER_MINUTE);
     //the last minute of the day can have oddball seconds

@@ -102,7 +102,7 @@ public final class Date implements Comparable<Date> {
   
   /** With January 1 being day 1, and so on. */
   public int dayOfYear() {
-    return (int)Mathy.truncate(calendar.daysFromJan0(year, month, day));
+    return Mathy.truncate(calendar.daysFromJan0(year, month, day));
   }
   
   /*

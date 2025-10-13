@@ -22,24 +22,20 @@ public final class LogUtil {
   
   /** Pad a number less than 10 with one zero on the left. */
   public static String zeroPad(int value) {
-    String res = value + "";
-    if (value < 9) {
-      res = "0" + res;
-    }
-    return res;
+    return padding(value) + value;
   }
   
   /** Pad a number less than 10 with one zero on the left. */
   public static String zeroPad(double value) {
-    String res = value + "";
-    if (value < 9) {
-      res = "0" + res;
-    }
-    return res;
+    return padding(value) + value;
   }
-  
 
   /** In a servlet environment, it may be convenient to turn off all logging. */
   private static final boolean LOGGING_ON = true;
+  
+  private static String padding(double value) {
+    return  value < 9 ? "0" : "";
+  }
+
 
 }

@@ -38,7 +38,7 @@ public final class DateTime implements Comparable<DateTime> {
     return new DateTime(Date.julian(year, month, day), Time.from(hour, minute, seconds, timescale));
   }
   
-  public static DateTime dateTime(Date date, Time time) {
+  public static DateTime from(Date date, Time time) {
     return new DateTime(date, time);
   }
 
@@ -76,12 +76,11 @@ public final class DateTime implements Comparable<DateTime> {
   }
   
   /** The returned JulianDate is sensitive to the presence of leap seconds in the day, if any. */
-  public JulianDate from() {
-    double val = date.calendar().jd(date.year(), date.month(), fractionalDay());
-    return JulianDate.from(val, time.timescale());
+  public JulianDate julianDate() {
+    return date.calendar().jd(date.year(), date.month(), fractionalDay(), time.timescale());
   }
   
-  /** Intended for logging only. 2025-1-1 1:1:1 */
+  /** Intended for logging only. 2025-01-01 01:01:01 */
   @Override public String toString() {
     return date.toString() + " " + time.toString(); 
   }
