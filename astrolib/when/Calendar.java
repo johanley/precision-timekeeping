@@ -15,7 +15,7 @@ public enum Calendar implements CalendarOps {
   /** 
    The most commonly used calendar, and the basis of civil timekeeping.
    Leap years are divisible by 4. 
-   In addition, if the year is a century-year (1900, 2000, 2100, etc.) then it must also be divisible by 400.  
+   However, if the year is a century-year (1900, 2000, 2100, etc.) then it must also be divisible by 400.  
   */
   GREGORIAN (400, (3*365 + 366) * 25 * 4 /*centuries*/ - 3 /*oddball century-years with no leap day*/, 1_721_058.5){ 
     @Override public boolean isLeap(int year) {
@@ -27,33 +27,24 @@ public enum Calendar implements CalendarOps {
     }
   };
 
-  /** {@value} */
+  /** Number of days in a leap year: {@value} */
   public static final int LEAP_YEAR_NUM_DAYS = 366;
   
-  /** {@value} */
+  /** Number of days in a non-leap year: {@value} */
   public static final int NORMAL_YEAR_NUM_DAYS = 365;
-  
+
+  /** Return the number of days in the given year. */
   public int numDaysIn(int year) {
     return isLeap(year) ? LEAP_YEAR_NUM_DAYS : NORMAL_YEAR_NUM_DAYS;
   }
 
-  /** Convert a date-time in this calendar to a Julian date. */
-  public JulianDate toJulianDate(DateTime dt) {
-    return JulianDateConverter.using(this).toJulianDate(dt);
-  }
-  
-  /** Convert a Julian date to a date-time in this calendar. */
-  public DateTime toDateTime(JulianDate jd) {
-    return JulianDateConverter.using(this).toDateTime(jd);
-  }
-  
   /** Number of years in a full cycle of this calendar. */
   public int cycleYears() { return cycleYears; }
   
   /** Number of days in a full cycle of this calendar. */
   public int cycleDays() { return cycleDays; }
 
-  /** The Julian date on January 0.0 on year 0 for this calendar. */
+  /** The Julian date for January 0.0, year 0, for this calendar. */
   public double julianDateJan0Year0() {  return julianDateJan0Year0; }
   
   /** 
@@ -70,7 +61,7 @@ public enum Calendar implements CalendarOps {
     return result;
   }
   
-  /** Return the number of days until Dec 32.0. */
+  /** Return the number of days until Dec 32.0 in this calendar. */
   public double daysFromDec32(int year, int month, double day) {
     int monthAccumulator = 0;
     //count backwards in time
@@ -94,6 +85,12 @@ public enum Calendar implements CalendarOps {
     return result;
   }
 
+  /**
+   Constructor. 
+   @param cycleYears the number of years in a complete cycle of the calendar 
+   @param cycleDays the number of days in a complete cycle of the calendar
+   @param julianDateJan0Year0 the Julian date for January 0.0, year 0, for the calendar
+  */
   private Calendar(int cycleYears, int cycleDays, double julianDateJan0Year0) {
     this.cycleYears = cycleYears;
     this.cycleDays = cycleDays;
@@ -101,7 +98,7 @@ public enum Calendar implements CalendarOps {
   }
   private int cycleYears;
   private int cycleDays;
-  private double julianDateJan0Year0; //no timescale
+  private double julianDateJan0Year0; //with no timescale
   
   /** The number of days remaining in the given month, from the given day. */
   private static double daysRemainingInMonth(int month, double day, boolean isLeap) {

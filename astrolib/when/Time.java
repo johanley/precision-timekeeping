@@ -34,6 +34,11 @@ public final class Time implements Comparable<Time> {
     return new Time(fraction, numSecondsInDay, timescale);
   }
   
+  /** Midnight 00:00:00 in the given timescale. */
+  public static Time zero(Timescale timescale) {
+    return new Time(0, 0, 0.0, timescale);
+  }
+  
   public int hour() { return hour; }
   public int minute() { return minute; }
   public double seconds() { return seconds; }

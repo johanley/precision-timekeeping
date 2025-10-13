@@ -87,6 +87,9 @@ public final class JulianDate {
     return Mathy.sign(jd) * dayNum;
   }
 
+  /** For debugging/logging only. */
+  @Override public String toString() { return jd + " " + timescale; }
+
   /** {@value} */
   public static final double MODIFIED_JD_ORIGIN = 2400000.5;
   

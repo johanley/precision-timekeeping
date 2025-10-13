@@ -151,6 +151,19 @@ public final class Date implements Comparable<Date> {
     return minusDaysImpl(days); 
   }
 
+  /** Convert this date to a date in a different calendar. */
+  public Date convertTo(Calendar toCalendar) {
+    if (this.calendar == toCalendar) {
+      throw new IllegalArgumentException("Calendar conversion aborted. Trying to convert to the same calendar: " + toCalendar);
+    }
+    //to avoid possible hard-to-spot rounding differences near 0h, temporarily add some time to this date:
+    Time oneHour = Time.from(1, 0, 0.0, Timescale.TT);
+    DateTime nonce = DateTime.from(this, oneHour);
+    JulianDate jd = JulianDateConverter.using(this.calendar).toJulianDate(nonce);
+    DateTime converted = JulianDateConverter.using(toCalendar).toDateTime(jd);
+    return converted.date();
+  }
+
   /** Intended for logging only. Example: <em>2025-01-01 GR</em> */
   @Override public String toString() {
     String sep = "-";

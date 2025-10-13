@@ -15,3 +15,5 @@
 - most astronomical libraries that create a Julian date from a given date have restrictions in the range of accepted years. This seems increasingly problematic. 
 For example, modern theories of long-term precession can be used over timescales of tens of thousands of years. In this library, I avoid such restrictions on the year.
 - the amount of precision in an IEEE 754 double is not quite enough to model a Julian date precisely. Could a BigDecimal be used in Java, to address that?
+- cursory look: SOFA's tests don't seem to be very extensive
+- NOVAS: its julian_date function doesn't document any conditions on the input year, but I think there is one

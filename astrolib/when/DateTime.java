@@ -37,9 +37,28 @@ public final class DateTime implements Comparable<DateTime> {
   public static DateTime julianCalendar(int year, int month, int day, int hour, int minute, double seconds, Timescale timescale) {
     return new DateTime(Date.julian(year, month, day), Time.from(hour, minute, seconds, timescale));
   }
+
+  /**
+   Factory method for a date-time in the given calendar.
   
+   @param year has no minimum or maximum value here, but the caller may choose to limit its range 
+   @param month range [1,12]
+   @param day range [1,31], with an extra check according to the month-year
+   @param hour range [0,23]
+   @param minute range [0,59]
+   @param seconds range [0,61.0) for the UTC timescale, and [0,60.0) for all other timescales. The extra second exists because of leap seconds. 
+  */
+  public static DateTime from(int year, int month, int day, int hour, int minute, double seconds, Calendar calendar, Timescale timescale) {
+    return new DateTime(Date.from(year, month, day, calendar), Time.from(hour, minute, seconds, timescale));
+  }
+
   public static DateTime from(Date date, Time time) {
     return new DateTime(date, time);
+  }
+
+  /** Build a DateTime in the given calendar, using a Julian date. */
+  public static DateTime from(JulianDate julianDate, Calendar calendar) {
+    return JulianDateConverter.using(calendar).toDateTime(julianDate);
   }
   
   public Date date() { return date; }
@@ -75,9 +94,9 @@ public final class DateTime implements Comparable<DateTime> {
     return date.day() + time.fraction(secondsInDay());
   }
   
-  /** The returned JulianDate is sensitive to the presence of leap seconds in the day, if any. */
+  /** Convert this DateTime to a JulianDate. */
   public JulianDate toJulianDate() {
-    return date.calendar().toJulianDate(this);
+    return JulianDateConverter.using(date.calendar()).toJulianDate(this);
   }
   
   /** Intended for logging only. 2025-01-01 01:01:01 */
