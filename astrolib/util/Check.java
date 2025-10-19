@@ -1,5 +1,8 @@
 package astrolib.util;
 
+import java.math.BigDecimal;
+import static astrolib.when.big.BigDecimalHelper.*;
+
 public final class Check {
 
   /** Return true only if the text has visible content. */
@@ -18,6 +21,15 @@ public final class Check {
   public static void range(Double val, Double min, Double max) {
     if (val < min || val >= max) {
       throw new IllegalArgumentException(val + " is not in range [" + min + ".." + max + ")");
+    }
+  }
+  
+  /** Throw exception if given value is not in range [min, max). The max is excluded. */
+  public static void range(BigDecimal val, Double min, Double max) {
+    BigDecimal aMin = big(min);
+    BigDecimal aMax = big(max);
+    if (val.compareTo(aMin) < 0 || val.compareTo(aMax) >= 0) {
+      throw new IllegalArgumentException(val + " is not in range [" + aMin.toPlainString() + ".." + aMax.toPlainString() + ")");
     }
   }
 

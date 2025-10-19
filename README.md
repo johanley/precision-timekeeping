@@ -17,3 +17,4 @@ For example, modern theories of long-term precession can be used over timescales
 - the amount of precision in an IEEE 754 double is not quite enough to model a Julian date precisely. Could a BigDecimal be used in Java, to address that?
 - cursory look: SOFA's tests don't seem to be very extensive
 - NOVAS: its julian_date function doesn't document any conditions on the input year, but I think there is one
+- I think the idea of 'tagging' every date with a calendar, and every time with a timescale, is a sound one.

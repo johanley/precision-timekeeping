@@ -25,11 +25,13 @@ public final class PlayWithDates {
 
     //Explanatory Supplement 1961, page 417
     log(NL + "Convert from the Gregorian calendar to the Julian calendar: ");
-    convertBetweenCalendars(200, 3, 1);
-    convertBetweenCalendars(300, 3, 1);
-    convertBetweenCalendars(300, 3, 2);
-    convertBetweenCalendars(1800, 3, 11);
-  }
+    convertFromGregorianToJulian(200, 3, 1);
+    convertFromGregorianToJulian(300, 3, 1);
+    convertFromGregorianToJulian(300, 3, 2);
+    convertFromGregorianToJulian(1800, 3, 11);
+
+    convertFromJulianToGregorian(-4712, 1, 1);
+}
 
   /** Convert in one direction, then in the reverse direction. */
   private static void convertTwice(int y, int mon, int d,   int h, int min, double s,   Calendar calendar, Timescale timescale) {
@@ -39,9 +41,16 @@ public final class PlayWithDates {
     log(dt + " => " + jd + " => " + dtAgain);
   }
   
-  private static void convertBetweenCalendars(int year, int month, int day) {
+  private static void convertFromGregorianToJulian(int year, int month, int day) {
     Date dt = Date.from(year, month, day, GREGORIAN);
     Date dtConverted = dt.convertTo(JULIAN);
     log(dt + " = " + dtConverted);
   }
+  
+  private static void convertFromJulianToGregorian(int year, int month, int day) {
+    Date dt = Date.from(year, month, day, JULIAN);
+    Date dtConverted = dt.convertTo(GREGORIAN);
+    log(dt + " = " + dtConverted);
+  }
+  
 }
