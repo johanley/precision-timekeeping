@@ -1,5 +1,6 @@
 package astrolib.when.big;
 
+import static astrolib.when.big.BigDecimalHelper.*;
 import java.math.BigDecimal;
 import java.time.Month;
 import java.util.Arrays;
@@ -89,7 +90,7 @@ final class BigJulianDateConverter {
     //1. full cycles in the calendar  
     BigDecimal target = jd.jd().subtract(BASE); //the target value we'll match below
     BigDecimal fullCycleDays = BigDecimal.valueOf(calendar.fullCycleDays());
-    long numCycles = target.divideAndRemainder(fullCycleDays)[0].longValue(); 
+    long numCycles = divvyAndRemainder(target, fullCycleDays)[0].longValue(); 
     long year = numCycles * calendar.fullCycleYears(); //starting value for the year; can increase below
     
     //this temp value is less than the target value, and approaches it from below
@@ -124,7 +125,7 @@ final class BigJulianDateConverter {
     //1. full cycles in the calendar  
     BigDecimal target = jd.jd().subtract(BASE); //the target value we'll match below
     BigDecimal fullCycleDays = BigDecimal.valueOf(calendar.fullCycleDays());
-    long numFullCycles = target.divideAndRemainder(fullCycleDays)[0].longValue(); 
+    long numFullCycles = divvyAndRemainder(target, fullCycleDays)[0].longValue(); 
     long year = numFullCycles * calendar.fullCycleYears(); //starting value for the year; can decrease below
     --year; //because going backwards through the calendar
     
@@ -159,7 +160,7 @@ final class BigJulianDateConverter {
   private BigDateTime buildDateTimeFrom(long year, int month, BigDecimal fractionalDays, BigJulianDate jd) {
     int day = fractionalDays.intValue();
     BigDate date = BigDate.from(year, month, day, calendar);
-    BigDecimal frac = fractionalDays.divideAndRemainder(BigDecimal.ONE)[1];
+    BigDecimal frac = divvyAndRemainder(fractionalDays, BigDecimal.ONE)[1];
     BigTime time = BigTime.from(frac, jd.timescale());
     return BigDateTime.from(date, time);
   }

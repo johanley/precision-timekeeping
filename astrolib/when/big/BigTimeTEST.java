@@ -49,7 +49,9 @@ public class BigTimeTEST {
     assertEquals(big("0.5"), t.fraction()); 
 
     t = BigTime.from(12, 30, BigDecimal.ZERO, BigTimescaleCommon.TAI);
-    assertEquals(big("0.5208333333333"), t.fraction()); //non-terminating decimals are tricky; best to provide rounding context
+
+   // non-terminating decimals are tricky; you need to provide a MathContext
+    assertEquals(big("0.5208333333333333"), t.fraction()); 
   }
   
   @Test public void fractionFails() {

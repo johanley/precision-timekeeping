@@ -46,7 +46,7 @@ public final class BigTime implements Comparable<BigTime> {
       BigDecimal hr = big(hour * SECONDS_PER_HOUR);
       BigDecimal min = big(minute * SECONDS_PER_MINUTE);
       BigDecimal totalSeconds = hr.add(min).add(seconds);
-      fraction = totalSeconds.divide(big(SECONDS_PER_DAY));
+      fraction = divvy(totalSeconds, big(SECONDS_PER_DAY));
     }
     return fraction;
   }
@@ -110,11 +110,11 @@ public final class BigTime implements Comparable<BigTime> {
     Check.range(fraction, 0.0, 1.0);
     BigDecimal totalSeconds = fraction.multiply(big(SECONDS_PER_DAY));
     
-    BigDecimal[] hourAndRemainder = totalSeconds.divideAndRemainder(big(SECONDS_PER_HOUR));
+    BigDecimal[] hourAndRemainder = divvyAndRemainder(totalSeconds, big(SECONDS_PER_HOUR));
     int hours = hourAndRemainder[INT_DIV].intValue();
     
     BigDecimal remainder = hourAndRemainder[REMAINDER]; //seconds
-    BigDecimal[] minutesAndRemainder = remainder.divideAndRemainder(big(SECONDS_PER_MINUTE));
+    BigDecimal[] minutesAndRemainder = divvyAndRemainder(remainder, big(SECONDS_PER_MINUTE));
     int minutes = minutesAndRemainder[INT_DIV].intValue();
     
     remainder = minutesAndRemainder[REMAINDER]; //seconds

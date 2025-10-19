@@ -167,7 +167,20 @@ public class BigDecimalTEST {
    assertEquals("8.57", d.toPlainString());
  }
  
- @Test public void division()
+ @Test public void divisionCanBlowUp() {
+   BigDecimal a = new BigDecimal("1");
+   BigDecimal b = new BigDecimal("3");
+   assertThrows(ArithmeticException.class, () -> a.divide(b));
+ }
  
- 
+ @Test public void divisionNoBlowUp() {
+   BigDecimal a = new BigDecimal("1");
+   BigDecimal b = new BigDecimal("3");
+   //to avoid blowup, specify the precision (number of digits) in the result
+   BigDecimal c = a.divide(b, new MathContext(5, RoundingMode.HALF_EVEN));
+   assertEquals("0.33333", c.toPlainString());
+   assertEquals(BigInteger.valueOf(33333), c.unscaledValue());
+   assertEquals(5, c.scale());
+   assertEquals(5, c.precision());
+ }
 }

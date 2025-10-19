@@ -2,6 +2,7 @@ package astrolib.when.big;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import static astrolib.when.big.BigDecimalHelper.*;
 
 /**
  The Julian date is a simple decimal number that increases monotonically with time.
@@ -55,7 +56,7 @@ public final class BigJulianDate {
   }
   
   public BigDecimal julianCenturiesSince(BigJulianDate that) {
-    return daysSince(that).divide(JULIAN_CENTURY_DAYS);
+    return divvy(daysSince(that), JULIAN_CENTURY_DAYS);
   }
   
   /** The fraction of the day.  Has the same sign as this Julian date. */
