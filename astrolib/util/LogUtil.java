@@ -34,7 +34,7 @@ public final class LogUtil {
   private static final boolean LOGGING_ON = true;
   
   private static String padding(double value) {
-    return  value < 9 ? "0" : "";
+    return  value < 10 ? "0" : "";
   }
 
 

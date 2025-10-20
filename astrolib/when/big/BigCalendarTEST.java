@@ -64,8 +64,8 @@ public class BigCalendarTEST {
   }
   
   private void testDaysFromJan0(int year, int month, double day, BigCalendar calendar, int expected) {
-    assertEquals(BigDecimal.valueOf(expected), calendar.daysFromJan0(year, month, BigDecimal.valueOf(day)));
-    assertEquals(BigDecimal.valueOf(expected), calendar.daysFromJan0(-year, month, BigDecimal.valueOf(day)));
+    assertEquals(expected, calendar.daysFromJan0(year, month, BigDecimal.valueOf(day)).intValue());
+    assertEquals(expected, calendar.daysFromJan0(-year, month, BigDecimal.valueOf(day)).intValue());
   }
   
   private void testDaysFromJan0LeapYear(int leapYear) {

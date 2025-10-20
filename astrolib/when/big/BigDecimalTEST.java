@@ -183,4 +183,29 @@ public class BigDecimalTEST {
    assertEquals(5, c.scale());
    assertEquals(5, c.precision());
  }
+ 
+ @Test public void integerDiv() {
+    BigDecimal a = new BigDecimal("9");
+    BigDecimal b = new BigDecimal("4");
+    //this rounds towards zero, for both positive and negative values; this is usually desirable
+    BigDecimal c = a.divideToIntegralValue(b);
+    assertEquals(2, c.intValue());
+    a = new BigDecimal("-9");
+    c = a.divideToIntegralValue(b);
+    assertEquals(-2, c.intValue());
+  }
+ 
+  @Test public void toBigInt() {
+    // toBigInteger() rounds towards zero, which is usually desirable
+    BigDecimal a = new BigDecimal("9.2");
+    assertEquals(9, a.toBigInteger().intValue());
+    a = new BigDecimal("-9.2");
+    assertEquals(-9, a.toBigInteger().intValue());
+  }
+  
+  @Test public void floor() {
+    BigDecimal a = new BigDecimal("-4.2");
+    BigDecimal b = a.setScale(0, RoundingMode.FLOOR);
+    System.out.println(b.toPlainString());
+  }
 }
