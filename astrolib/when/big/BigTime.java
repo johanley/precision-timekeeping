@@ -1,10 +1,10 @@
 package astrolib.when.big;
 
-import static astrolib.util.LogUtil.*;
 import static astrolib.util.Consts.*;
+import static astrolib.util.LogUtil.*;
 import static astrolib.when.big.BigDecimalHelper.*;
+
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Objects;
 
 import astrolib.util.Check;
@@ -46,7 +46,7 @@ public final class BigTime implements Comparable<BigTime> {
       BigDecimal hr = big(hour * SECONDS_PER_HOUR);
       BigDecimal min = big(minute * SECONDS_PER_MINUTE);
       BigDecimal totalSeconds = hr.add(min).add(seconds);
-      fraction = divvy(totalSeconds, big(SECONDS_PER_DAY));
+      fraction = divide(totalSeconds, big(SECONDS_PER_DAY));
     }
     return fraction;
   }
@@ -110,11 +110,11 @@ public final class BigTime implements Comparable<BigTime> {
     Check.range(fraction, 0.0, 1.0);
     BigDecimal totalSeconds = fraction.multiply(big(SECONDS_PER_DAY));
     
-    BigDecimal[] hourAndRemainder = divvyAndRemainder(totalSeconds, big(SECONDS_PER_HOUR));
+    BigDecimal[] hourAndRemainder = divideAndRemainder(totalSeconds, big(SECONDS_PER_HOUR));
     int hours = hourAndRemainder[INT_DIV].intValue();
     
     BigDecimal remainder = hourAndRemainder[REMAINDER]; //seconds
-    BigDecimal[] minutesAndRemainder = divvyAndRemainder(remainder, big(SECONDS_PER_MINUTE));
+    BigDecimal[] minutesAndRemainder = divideAndRemainder(remainder, big(SECONDS_PER_MINUTE));
     int minutes = minutesAndRemainder[INT_DIV].intValue();
     
     remainder = minutesAndRemainder[REMAINDER]; //seconds

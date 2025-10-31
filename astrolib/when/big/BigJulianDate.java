@@ -56,7 +56,7 @@ public final class BigJulianDate {
   }
   
   public BigDecimal julianCenturiesSince(BigJulianDate that) {
-    return divvy(daysSince(that), JULIAN_CENTURY_DAYS);
+    return divide(daysSince(that), JULIAN_CENTURY_DAYS);
   }
   
   /** The fraction of the day.  Has the same sign as this Julian date. */

@@ -92,7 +92,7 @@ final class BigJulianDateConverter {
     //1. full cycles in the calendar  
     BigDecimal target = jd.jd().subtract(BASE); //the target value we'll match below
     BigDecimal fullCycleDays = big(calendar.fullCycleDays());
-    long numFullCycles = floor(divvy(target, fullCycleDays)).longValue();
+    long numFullCycles = floor(divide(target, fullCycleDays)).longValue();
     long year = numFullCycles * calendar.fullCycleYears(); //starting value for the year; can increase below
     
     //this temp value is less than the target value, and approaches it from below
@@ -127,7 +127,7 @@ final class BigJulianDateConverter {
     //1. full cycles in the calendar  
     BigDecimal target = jd.jd().subtract(BASE); //the target value we'll match below
     BigDecimal fullCycleDays = big(calendar.fullCycleDays());
-    long numFullCycles = floor(divvy(target, fullCycleDays)).longValue() + 1 ;
+    long numFullCycles = floor(divide(target, fullCycleDays)).longValue() + 1 ;
     long year = numFullCycles * calendar.fullCycleYears(); //starting value for the year; can decrease below
     --year; //because going backwards through the calendar
     
@@ -163,7 +163,7 @@ final class BigJulianDateConverter {
   private BigDateTime buildDateTimeFrom(long year, int month, BigDecimal fractionalDays, BigJulianDate jd) {
     BigInteger day = integer(fractionalDays);
     BigDate date = BigDate.from(year, month, day.intValue(), calendar);
-    BigDecimal frac = divvyAndRemainder(fractionalDays, BigDecimal.ONE)[1];
+    BigDecimal frac = divideAndRemainder(fractionalDays, BigDecimal.ONE)[1];
     BigTime time = BigTime.from(frac, jd.timescale());
     return BigDateTime.from(date, time);
   }

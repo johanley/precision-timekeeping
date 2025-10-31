@@ -1,16 +1,18 @@
 package astrolib.when.big;
 
+import static astrolib.when.big.BigDecimalHelper.*;
 import java.math.BigDecimal;
 import java.time.Month;
 
 /** 
- Supported calendars. 
- (It's very likely that this set of implemented calendars will never change.) 
+ Supported calendars.
+  
+ <P>(It's very likely that this set of implemented calendars will never change.) 
 */
 public enum BigCalendar implements BigCalendarOps {
 
-  /** Not used very often. Leap years are divisble by 4. */
-  JULIAN (4, 3*365 + 366, BigDecimal.valueOf(1_721_056.5)){ 
+  /** Leap years are divisble by 4. */
+  JULIAN (4, 3*365 + 366, big(1_721_056.5)){ 
     @Override public boolean isLeap(long year) {
       return year % 4 == 0;
     }
@@ -18,10 +20,10 @@ public enum BigCalendar implements BigCalendarOps {
   
   /** 
    The most commonly used calendar, and the basis of civil timekeeping.
-   Leap years are divisible by 4. 
-   However, if the year is a century-year (1900, 2000, 2100, etc.) then it must also be divisible by 400.  
+   Leap years are divisible by 4; however, if the year is a 
+   century-year (1900, 2000, 2100, etc.) then it must also be divisible by 400.  
   */
-  GREGORIAN (400, (3*365 + 366) * 25 * 4 /*centuries*/ - 3 /*oddball century-years with no leap day*/, BigDecimal.valueOf(1_721_058.5)){ 
+  GREGORIAN (400, (3*365 + 366) * 25 * 4 /*centuries*/ - 3 /*oddball century-years with no leap day*/, big(1_721_058.5)){ 
     @Override public boolean isLeap(long year) {
       boolean res = (year % 4 == 0);
       if (year % 100 == 0) {
@@ -42,29 +44,32 @@ public enum BigCalendar implements BigCalendarOps {
     return isLeap(year) ? LEAP_YEAR_NUM_DAYS : NORMAL_YEAR_NUM_DAYS;
   }
 
-  /** Number of years in a full cycle of this calendar. */
+  /** Number of years in a complete cycle of this calendar. */
   public int fullCycleYears() { return fullCycleYears; }
   
-  /** Number of days in a full cycle of this calendar. */
+  /** Number of days in a complete cycle of this calendar. */
   public int fullCycleDays() { return fullCycleDays; }
 
-  /** The Julian date for January 0.0, year 0, for this calendar. */
+  /** 
+   The Julian date for January 0.0, year 0, for this calendar.
+   This corresponds to December 31 of the year -1. 
+  */
   public BigDecimal julianDateJan0Year0() {  return julianDateJan0Year0; }
   
   /** 
    For the given (fractional) date, return the (fractional) number of days since Jan 0.0.
    Jan 0.0 is just an alias for December 31 of the previous year.
-   Jan 1 is 1, Jan 2 is 2, etc. 
+   Jan 1 is day 1.0, Jan 2 is day 2.0, etc. 
   */
   public BigDecimal daysFromJan0(long year, int month, BigDecimal day) {
     int daysInCompletedMonths = 0;
     for(int before = Month.JANUARY.getValue(); before < month; ++before) {
       daysInCompletedMonths = daysInCompletedMonths + Month.of(before).length(isLeap(year)); 
     }
-    return day.add(BigDecimal.valueOf(daysInCompletedMonths));
+    return day.add(big(daysInCompletedMonths));
   }
   
-  /** Return the number of days until Dec 32.0 in this calendar. */
+  /** Return the number of days until Dec 32.0 in this calendar, for the given year and month. */
   public BigDecimal daysFromDec32(long year, int month, BigDecimal day) {
     int monthAccumulator = 0;
     //count backwards in time
@@ -72,7 +77,7 @@ public enum BigCalendar implements BigCalendarOps {
     for(int after = Month.DECEMBER.getValue(); after > month; --after) {
       monthAccumulator = monthAccumulator + Month.of(after).length(isLeap); 
     }
-    return BigDecimal.valueOf(monthAccumulator).add(daysRemainingInMonth(month, day, isLeap));
+    return big(monthAccumulator).add(daysRemainingInMonth(month, day, isLeap));
   }
 
   /** 
@@ -107,6 +112,6 @@ public enum BigCalendar implements BigCalendarOps {
   /** The number of days remaining in the given month, from the given day. */
   private static BigDecimal daysRemainingInMonth(int month, BigDecimal day, boolean isLeap) {
     int length = Month.of(month).length(isLeap);
-    return BigDecimal.valueOf(length + 1).subtract(day);
+    return big(length + 1).subtract(day);
   }
 }

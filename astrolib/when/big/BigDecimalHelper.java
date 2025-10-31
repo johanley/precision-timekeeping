@@ -1,14 +1,13 @@
 package astrolib.when.big;
 
 import java.math.BigDecimal;
-import astrolib.util.Check;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
-import org.junit.Test;
+import astrolib.util.Check;
 
-/** Curt operations with BigDecimal objects. */
+/** Convenience operations with BigDecimal objects, to make them more curt. */
 public final class BigDecimalHelper {
   
   public static final int INT_DIV = 0;
@@ -44,42 +43,45 @@ public final class BigDecimalHelper {
 
   /** 
    Wrapper for the <em>divide</em> method.
-   <P>In the case of a non-terminating decimal, the return value's precision is {@link #bigDecimalDivisionPrecision()}. 
+   <P>In the case of a non-terminating decimal, the return value's precision is {@link #infiniteCutoffPrecision()}. 
   */
-  public static BigDecimal divvy(BigDecimal a, BigDecimal b) {
+  public static BigDecimal divide(BigDecimal a, BigDecimal b) {
     BigDecimal res = null;
     try {
       res = a.divide(b);
     }
     catch(ArithmeticException ex) {
-      res = a.divide(b, new MathContext(bigDecimalDivisionPrecision(), RoundingMode.HALF_EVEN));
+      res = a.divide(b, new MathContext(infiniteCutoffPrecision(), RoundingMode.HALF_EVEN));
     }
     return res; 
   }
 
   /**
    Wrapper for the <em>divideAndRemainder</em> method.
-   <P>In the case of a non-terminating decimal, the return value's precision is {@link #bigDecimalDivisionPrecision()}. 
+   <P>In the case of a non-terminating decimal, the return value's precision is {@link #infiniteCutoffPrecision()}. 
   */
-  public static BigDecimal[] divvyAndRemainder(BigDecimal a, BigDecimal b) {
+  public static BigDecimal[] divideAndRemainder(BigDecimal a, BigDecimal b) {
     BigDecimal[] res = null;
     try {
       res = a.divideAndRemainder(b);
     }
     catch(ArithmeticException ex) {
-      res = a.divideAndRemainder(b, new MathContext(bigDecimalDivisionPrecision(), RoundingMode.HALF_EVEN));
+      res = a.divideAndRemainder(b, new MathContext(infiniteCutoffPrecision(), RoundingMode.HALF_EVEN));
     }
     return res; 
   }
 
   /** 
    The number of digits to use when 'cutting off' infinite decimals.
-   By default, returns the same precision as in MathContext.DECIMAL64. 
+   By default, returns the same precision as in MathContext.DECIMAL128. 
    This can be overridden, by setting a System property named <em>big-decimal-division-precision</em> to a positive integer.  
   */
-  public static int bigDecimalDivisionPrecision() {
-    String override = System.getProperty("big-decimal-division-precision");
-    return Check.textHasContent(override) ? Integer.valueOf(override) : MathContext.DECIMAL64.getPrecision();
+  public static int infiniteCutoffPrecision() {
+    String override = System.getProperty(OVERRIDE_INFINITE_CUTOFF);
+    return Check.textHasContent(override) ? Integer.valueOf(override) : MathContext.DECIMAL128.getPrecision();
   }
-
+  
+  /** {@value}. To override the value returned by {@link #infiniteCutoffPrecision()}, set a System property using this name. */
+  public static final String OVERRIDE_INFINITE_CUTOFF = "big-decimal-division-precision";
+  
 }
