@@ -22,7 +22,7 @@ For example, modern theories of long-term precession can be used over timescales
 - Global Navigation Satellite System GNSS = (GPS | Galileo | GLONASS | ...) All have atomic clocks. Precision ~2ns. Receivers are ~20ns, but can combine signals to get better results.
 - GNSS clocks and relativity: 7,000ns/day for speed (slower), but 45,000ns/day for gravity well (faster) [link](https://www.gpsworld.com/inside-the-box-gps-and-relativity/)
 - Clocks on the geoid run all at the same rate! [link](https://www.gpsworld.com/inside-the-box-gps-and-relativity/)  
-- The second [might be re-defined](https://www.scientificamerican.com/article/worlds-most-accurate-clocks-could-redefine-time/) in the future. Newer, more precise clocks are obsoleting the old definition of the second. The new clocks have optical frequencies (~10^10 Hz, ~0.1ns), not microwave frequencies (~4*10^14 Hz, ~0.000002ns).
+- The second [might be re-defined](https://www.scientificamerican.com/article/worlds-most-accurate-clocks-could-redefine-time/) in the future. Newer, more precise clocks are obsoleting the old definition of the second. The new clocks have optical frequencies (~4*10^14 Hz, ~0.000002ns), not microwave frequencies (~10^10 Hz, ~0.1ns).
 - The world's most accurate clocks can measure the GR time-dilation for differences in altitude on the order a 1mm!
 - Cell phone networks: [5G needs 130ns precision](https://www.gpsworld.com/gnss-clocks-prove-to-be-invisible-and-indispensable/), while 6G needs 5ns (2030s release?).
 - Financial markets: [100,000 ns](https://www.gpsworld.com/gnss-clocks-prove-to-be-invisible-and-indispensable/)
