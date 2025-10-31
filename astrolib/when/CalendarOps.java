@@ -4,6 +4,6 @@ package astrolib.when;
 public interface CalendarOps {
   
   /** Determine if a given year is a leap year in this calendar. */
-  public boolean isLeap(int year);
+  public boolean isLeap(long year);
 
 }

@@ -230,8 +230,6 @@ public class DateTEST {
     assertTrue(a.previous().eq(aMinus1));
   }
   
-  
-  
   private void orderingTest(int y, int m, int d) {
     for(Calendar calendar: Calendar.values()) {
       Date p = Date.from(y, m, d, calendar);

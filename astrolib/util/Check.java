@@ -1,7 +1,8 @@
 package astrolib.util;
 
+import static astrolib.when.BigDecimalHelper.*;
+
 import java.math.BigDecimal;
-import static astrolib.when.big.BigDecimalHelper.*;
 
 public final class Check {
 

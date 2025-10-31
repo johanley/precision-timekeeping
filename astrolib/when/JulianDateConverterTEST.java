@@ -3,9 +3,9 @@ package astrolib.when;
 import static astrolib.when.Calendar.*;
 import static org.junit.Assert.*;
 
-import org.junit.Test;
+import java.math.BigDecimal;
 
-import astrolib.util.Consts;
+import org.junit.Test;
 
 /** JUnit 4 tests.*/
 public class JulianDateConverterTEST {
@@ -53,7 +53,7 @@ public class JulianDateConverterTEST {
     testDate(-1001, 8, 17.9, 1355671.4, cal); 
     testDate(-4712, 1, 1.5, 0.0, cal);
     //by extension:
-    testDate(-4712, 1, 1.0, -0.5, cal);
+    testDate(-4712, 1, 1.0, -0.5, cal); //1461 * -1178, exact cycle
     testDate(-4713, 12, 31.0, -1.5, cal);
     testDate(-4713, 12, 30.0, -2.5, cal);
     
@@ -106,7 +106,7 @@ public class JulianDateConverterTEST {
     testDate(100,2,28.5, 1757584.0 + 31.0 + 28.0, cal); //100 is not a leap year
     testDate(100,3,1.5, 1757584.0 + 31.0 + 28.0 + 1.0, cal);
     testDate(3000, 1, 1.5, 2816788, cal);
-    testDate(30000, 1, 1.5, 12678335, cal);
+    testDate(30000, 1, 1.5, 12678335.0, cal);
         
     testDate(100,1,1.5, 1757585.0, cal);
     testDate(101,1,1.5, 1757950.0, cal); 
@@ -124,11 +124,20 @@ public class JulianDateConverterTEST {
     testYear(1990, 2447892 - 0.5, cal);
   }
   
-  private static final Timescale TIMESCALE = Timescale.TT;
+  private static final TimescaleCommon TIMESCALE = TimescaleCommon.TT;
   
-  /** It's easy to compute the JD manually. */
+  // It's easy to compute the JD manually.
   private void testSmallYears(Calendar calendar) {
-    double base = calendar.julianDateJan0Year0();
+    double base = calendar.julianDateJan0Year0().doubleValue();
+    testYear(-9, base - 2*366 - 7*365, calendar);
+    testYear(-8, base - 2*366 - 6*365, calendar);
+    testYear(-7, base - 1*366 - 6*365, calendar);
+    testYear(-6, base - 1*366 - 5*365, calendar);
+    testYear(-5, base - 1*366 - 4*365, calendar);
+    testYear(-4, base - 1*366 - 3*365, calendar);
+    testYear(-3, base - 0*366 - 3*365, calendar);
+    testYear(-2, base - 0*366 - 2*365, calendar);
+    testYear(-1, base - 0*366 - 1*365, calendar);
     testYear(0, base + 0*366 + 0*365, calendar);
     testYear(1, base + 1*366 + 0*365, calendar);
     testYear(2, base + 1*366 + 1*365, calendar);
@@ -144,17 +153,17 @@ public class JulianDateConverterTEST {
     testYear(12, base + 3*366 + 9*365, calendar);
   }
   
-  private void testYear(int year, double jan_0_in_given_year, Calendar calendar) {
+  private void testYear(long year, double jan_0_in_given_year, Calendar calendar) {
     testDateToJdForYear(year, jan_0_in_given_year, calendar);
     testJdToDateForYear(year, jan_0_in_given_year, calendar);
   }
   
-  private void testDate(int year, int month, double day, double jd, Calendar calendar) {
+  private void testDate(long year, int month, double day, double jd, Calendar calendar) {
     testDateToJd(year, month, day, jd, calendar);
     testJdToDate(year,  month,  day, jd, calendar);
   }
 
-  private void testDateToJdForYear(int year, double jan_0_given_year, Calendar calendar) {
+  private void testDateToJdForYear(long year, double jan_0_given_year, Calendar calendar) {
     Date day = Date.from(year, 1,  1, calendar);
     for(int i = 0; i < calendar.numDaysIn(year); ++i) {
       testDateToJd(year, day.month(), day.day(), jan_0_given_year + 1 + i, calendar);
@@ -162,7 +171,7 @@ public class JulianDateConverterTEST {
     }
   }
 
-  private void testJdToDateForYear(int year, double jan_0_in_given_year, Calendar calendar) {
+  private void testJdToDateForYear(long year, double jan_0_in_given_year, Calendar calendar) {
     Date day = Date.from(year, 1, 1, calendar); //Jan 1 of the given year
     for(int i = 1; i <= calendar.numDaysIn(year); ++i) {
       testJdToDate(day.year(), day.month(), day.day(), jan_0_in_given_year + i, calendar);
@@ -170,17 +179,17 @@ public class JulianDateConverterTEST {
     }
   }
   
-  private void testDateToJd(int year, int month, double day, double jd_expected, Calendar calendar) {
+  private void testDateToJd(long year, int month, double day, double jd_expected, Calendar calendar) {
     JulianDateConverter convert = JulianDateConverter.using(calendar);
-    JulianDate jd = convert.toJulianDate(year, month, day, TIMESCALE);
-    assertEquals(jd_expected, jd.jd(), Consts.EPSILON);
+    JulianDate jd = convert.toJulianDate(year, month, BigDecimal.valueOf(day), TIMESCALE);
+    assertTrue(BigDecimal.valueOf(jd_expected).compareTo(jd.jd()) == 0);
   }
   
-  private void testJdToDate(int y_expected, int m_expected, double d_expected, double jd, Calendar calendar) {
+  private void testJdToDate(long y_expected, int m_expected, double d_expected, double jd, Calendar calendar) {
     JulianDateConverter convert = JulianDateConverter.using(calendar);
-    DateTime dt = convert.toDateTime(JulianDate.from(jd, TIMESCALE));
+    DateTime dt = convert.toDateTime(JulianDate.from(BigDecimal.valueOf(jd), TIMESCALE));
     assertEquals(dt.year(), y_expected);
     assertEquals(dt.month(), m_expected);
-    assertEquals(dt.fractionalDay(), d_expected, Consts.EPSILON);
+    assertEquals(dt.fractionalDay(), BigDecimal.valueOf(d_expected));
   }
 }

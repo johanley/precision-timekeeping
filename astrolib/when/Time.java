@@ -1,57 +1,52 @@
 package astrolib.when;
 
+import static astrolib.util.Consts.*;
+import static astrolib.util.LogUtil.*;
+import static astrolib.when.BigDecimalHelper.*;
+
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import astrolib.util.Check;
-import astrolib.util.Mathy;
-import static astrolib.util.LogUtil.zeroPad;
 
-/** 
- Data-carrier for time information.
- This class is meant for input and output, not for core calculations.
-*/
+/** Data-carrier for time information. */
 public final class Time implements Comparable<Time> {
   
   /**
    Factory method.
-    
    @param hour range [0,23]
    @param minute range [0,59]
-   @param seconds range [0,61.0) for the UTC timescale, and [0,60.0) for all other timescales. The extra second exists because of leap seconds. 
+   @param seconds range [0,60.0). Leap seconds are not supported in this library. 
   */
-  public static Time from(int hour, int minute, double seconds, Timescale timescale) {
+  public static Time from(int hour, int minute, BigDecimal seconds, Timescale timescale) {
     return new Time(hour, minute, seconds, timescale);
   }
   
   /**
    Factory method.
-   
    @param fraction of a day [0.0,1.0)
-   @param numSecondsInDay the number of seconds in a given day. 86400 for most timescales, 
-   but the UT1 timescale can be in a range plus-minus 1 second from this value.
   */
-  public static Time from(double fraction, int numSecondsInDay, Timescale timescale) {
-    return new Time(fraction, numSecondsInDay, timescale);
+  public static Time from(BigDecimal fraction, Timescale timescale) {
+    return new Time(fraction, timescale);
   }
   
   /** Midnight 00:00:00 in the given timescale. */
   public static Time zero(Timescale timescale) {
-    return new Time(0, 0, 0.0, timescale);
+    return new Time(0, 0, BigDecimal.ZERO, timescale);
   }
   
   public int hour() { return hour; }
   public int minute() { return minute; }
-  public double seconds() { return seconds; }
+  public BigDecimal seconds() { return seconds; }
   public Timescale timescale() { return timescale; }
   
-  /** 
-   Return a value in the range [0.0 to 1.0).
-   <P>Because of leap seconds, the number of seconds in a day can vary.  
-  */
-  public double fraction(int numSecondsInDay) {
+  /**  This time as a fraction of a full 24 hour day. Return a value in the range [0.0 to 1.0). */
+  public BigDecimal fraction() {
     if (fraction == null) {
-      double totalSeconds = hour * SECONDS_PER_HOUR + minute * SECONDS_PER_MINUTE + seconds;
-      fraction = totalSeconds / numSecondsInDay; //never int div
+      BigDecimal hr = big(hour * SECONDS_PER_HOUR);
+      BigDecimal min = big(minute * SECONDS_PER_MINUTE);
+      BigDecimal totalSeconds = hr.add(min).add(seconds);
+      fraction = divide(totalSeconds, big(SECONDS_PER_DAY));
     }
     return fraction;
   }
@@ -59,7 +54,8 @@ public final class Time implements Comparable<Time> {
   /** Intended for logging only. Example: <em>01:09:02.0 TT</em> */
   @Override public String toString() {
     String colon = ":";
-    return zeroPad(hour) + colon + zeroPad(minute) + colon + zeroPad(seconds) + " " + timescale;  
+    String padding = seconds.doubleValue() < 10 ? "0" : "";
+    return zeroPad(hour) + colon + zeroPad(minute) + colon + padding + seconds.toString() + " " + timescale;  
   }
   
   @Override public boolean equals(Object aThat) {
@@ -79,10 +75,9 @@ public final class Time implements Comparable<Time> {
   }
   
   @Override public int compareTo(Time that) {
-    final int EQUAL = 0;
     if (this == that) return EQUAL;
 
-    int comparison = this.timescale.compareTo(that.timescale);
+    int comparison = this.timescale.id().compareTo(that.timescale.id());
     if (comparison != EQUAL) return comparison;
     
     comparison = this.hour.compareTo(that.hour);
@@ -100,42 +95,38 @@ public final class Time implements Comparable<Time> {
   private Timescale timescale; 
   private Integer hour; 
   private Integer minute; 
-  private Double seconds; 
-  private Double fraction;
-  private static final int SECONDS_PER_HOUR = 60 * 60;
-  private static final int SECONDS_PER_MINUTE = 60;
-  private static final int SECONDS_REGULAR_DAY = 24 * SECONDS_PER_HOUR;
+  private BigDecimal seconds;
+  private BigDecimal fraction;
   
-  private Time(int hour, int minute, double seconds, Timescale timescale) {
+  private static final int SECONDS_PER_MINUTE = 60;
+  private static final int SECONDS_PER_HOUR = 60 * SECONDS_PER_MINUTE;
+  private static final int SECONDS_PER_DAY = 24 * SECONDS_PER_HOUR;
+  
+  private Time(int hour, int minute, BigDecimal seconds, Timescale timescale) {
     init(hour, minute, seconds, timescale);
   }
   
-  private Time(double fraction, int numSecondsInDay, Timescale timescale) {
+  private Time(BigDecimal fraction, Timescale timescale) {
     Check.range(fraction, 0.0, 1.0);
-    if (Timescale.UT1 == timescale) {
-      Check.range(numSecondsInDay, SECONDS_REGULAR_DAY - 1 , SECONDS_REGULAR_DAY + 1);
-    }
-    else {
-      if (numSecondsInDay != SECONDS_REGULAR_DAY) {
-        throw new IllegalArgumentException("Should be " + SECONDS_REGULAR_DAY + " :" + numSecondsInDay);
-      }
-    }
-    double manySeconds = fraction * numSecondsInDay;
-    //THE NUMBER OF SECONDS FLOW REGULARLY, EXCEPT POSSIBLY FOR THE LAST MINUTE OF THE DAY
-    int hours = Mathy.truncate(manySeconds / SECONDS_PER_HOUR );
-    double remainder = manySeconds - hours * SECONDS_PER_HOUR;
-    int minutes = (int)Mathy.truncate(remainder / SECONDS_PER_MINUTE);
-    //the last minute of the day can have oddball seconds
-    remainder = remainder - minutes * SECONDS_PER_MINUTE;
+    BigDecimal totalSeconds = fraction.multiply(big(SECONDS_PER_DAY));
+    
+    BigDecimal[] hourAndRemainder = divideAndRemainder(totalSeconds, big(SECONDS_PER_HOUR));
+    int hours = hourAndRemainder[INT_DIV].intValue();
+    
+    BigDecimal remainder = hourAndRemainder[REMAINDER]; //seconds
+    BigDecimal[] minutesAndRemainder = divideAndRemainder(remainder, big(SECONDS_PER_MINUTE));
+    int minutes = minutesAndRemainder[INT_DIV].intValue();
+    
+    remainder = minutesAndRemainder[REMAINDER]; //seconds
+    
     init(hours, minutes, remainder, timescale);
     this.fraction = fraction; //preserve the given value; we don't want to recalculate it later
   }
   
-  private void init(int hour, int minute, double seconds, Timescale timescale) {
+  private void init(int hour, int minute, BigDecimal seconds, Timescale timescale) {
     Check.range(hour, 0, 23);
     Check.range(minute, 0, 59); 
-    double max = Timescale.UTC == timescale ? 61.0 : 60.0;  //because of leap seconds
-    Check.range(seconds, 0.0, max); //max is excluded here
+    Check.range(seconds, 0.0, 60.0);
     this.timescale = timescale;
     this.hour = hour;
     this.minute = minute;
@@ -143,7 +134,7 @@ public final class Time implements Comparable<Time> {
   }
   
   private Object[] getSigFields() {
-    Object[] res = {timescale, hour, minute, seconds};
+    Object[] res = {timescale.id(), hour, minute, seconds};
     return res;
   }
 }

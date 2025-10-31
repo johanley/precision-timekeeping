@@ -1,4 +1,4 @@
-package astrolib.when.big;
+package astrolib.when;
 
 import static org.junit.Assert.*;
 

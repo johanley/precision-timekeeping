@@ -1,42 +1,26 @@
 package astrolib.when;
 
+import static astrolib.util.Consts.*;
+import static astrolib.util.LogUtil.*;
+import static astrolib.when.BigDecimalHelper.*;
+
+import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.Month;
 import java.util.Objects;
 
 import astrolib.util.Check;
-import astrolib.util.Mathy;
-import static astrolib.util.LogUtil.zeroPad;
 
 /** 
  Immutable data-carrier for date information.
- This class is meant for input and output, not for core calculations.
  
  <P>The astronomer's convention is used here: the year A.D. 1 is preceded by the year 0, not 1 B.C. 
  The year 2 B.C. is the year -1 in this convention, and so on.
+ 
+ <P>Here, comparison and equality operations treat the underlying {@link Calendar} as the most significant item.
+ If you wish to compare dates from different calendars, you can do so using {@link #jd(Timescale)}.
 */
 public final class Date implements Comparable<Date> {
-  
-  /**
-   Factory method for a date in the Gregorian calendar.
-   
-   @param year has no minimum or maximum value here, but the caller may choose to limit its range 
-   @param month range [1,12]
-   @param day range [1,31], with an extra check according to the month-year, which accounts for leap years
-  */
-  public static Date gregorian(int year, int month, int day) {
-    return new Date(year, month, day, Calendar.GREGORIAN);
-  }
-
-  /**
-   Factory method for a date in the Julian calendar.
-  
-   @param year has no minimum or maximum value here, but the caller may choose to limit its range 
-   @param month range [1,12]
-   @param day range [1,31], with an extra check according to the month-year, which accounts for leap years
-  */
-  public static Date julian(int year, int month, int day) {
-    return new Date(year, month, day, Calendar.JULIAN);
-  }
   
   /**
    Factory method for a date in the given calendar.
@@ -45,38 +29,56 @@ public final class Date implements Comparable<Date> {
    @param month range [1,12]
    @param day range [1,31], with an extra check according to the month-year, which accounts for leap years
   */
-  public static Date from(int year, int month, int day, Calendar calendar) {
+  public static Date from(long year, int month, int day, Calendar calendar) {
     return new Date(year, month, day, calendar);
   }
   
-  public int year() { return year; }
+  /** As in the full factory method, but specifically for a date in the Gregorian calendar.  */
+  public static Date gregorian(long year, int month, int day) {
+    return new Date(year, month, day, Calendar.GREGORIAN);
+  }
+
+  /** As in the full factory method, but specifically for a date in the Julian calendar.  */
+  public static Date julian(long year, int month, int day) {
+    return new Date(year, month, day, Calendar.JULIAN);
+  }
+  
+  public long year() { return year; }
   public int month() { return month; }
   public int day() { return day; }
   public Calendar calendar() { return calendar; }
-
-  /** Less-than comparison. */
-  public boolean lt(Date that) {
-    return this.compareTo(that) < EQUAL;
-  }
   
-  /** Less-than-or-equal-to comparison. */
-  public boolean lteq(Date that) {
-    return compareTo(that) < EQUAL || equals(that);
-  }
-  
-  /** Greater-than comparison. */
-  public boolean gt(Date that) {
-    return compareTo(that) > EQUAL;
+  /** The day of the week corresponding to this date. */
+  public DayOfWeek weekday() {
+    //Meeus 1991, page 65
+    DateTime dt = DateTime.from(this, Time.zero(TimescaleCommon.TAI));
+    BigDecimal jd = dt.toJulianDate().jd().add(big(1.5));
+    BigDecimal[] div = divideAndRemainder(jd, big(7));
+    int index = div[REMAINDER].intValue(); //0..6 = Sunday to Monday
+    return DayOfWeek.of(index + 1).minus(1); //Monday..Sunday = 1..7
   }
 
-  /** Greater-than-or-equal-to comparison. */
-  public boolean gteq(Date that) {
-    return compareTo(that) > EQUAL || equals(that);
+  /** 
+   Convert this date to a Julian date, using the given timescale.
+   <p>This class doesn't do the reverse operation, to create a date from a {@link JulianDate}, because that conversion usually loses 
+   information about the time. For that operation, please use {@link DateTime} instead.
+  */  
+  public JulianDate jd(Timescale timescale) {
+    JulianDateConverter converter = JulianDateConverter.using(this.calendar);
+    return converter.toJulianDate(DateTime.from(this, Time.zero(timescale)));
   }
-  
-  /** A convenient synonym for the <em>equals</em> method. */
-  public boolean eq(Date that) {
-    return equals(that);
+
+  /** Convert this date to a date in a different calendar. */
+  public Date convertTo(Calendar toCalendar) {
+    if (this.calendar == toCalendar) {
+      throw new IllegalArgumentException("Calendar conversion aborted. Trying to convert to the same calendar: " + toCalendar);
+    }
+    //to avoid possible hard-to-spot rounding differences near 0h, temporarily add a bit of time to this date:
+    Time weeTime = Time.from(0, 5, BigDecimal.ZERO, TimescaleCommon.TT);
+    DateTime nonce = DateTime.from(this, weeTime);
+    JulianDate jd = JulianDateConverter.using(this.calendar).toJulianDate(nonce);
+    DateTime converted = JulianDateConverter.using(toCalendar).toDateTime(jd);
+    return converted.date();
   }
 
   /*** The first day of the month corresponding to this date and calendar. */
@@ -102,32 +104,57 @@ public final class Date implements Comparable<Date> {
   
   /** With January 1 being day 1, and so on. */
   public int dayOfYear() {
-    return Mathy.truncate(calendar.daysFromJan0(year, month, day));
+    return integer(calendar.daysFromJan0(year, month, big(day))).intValue();
   }
   
-  /*
-  These need the Julian day number for both calendars.
-    
-  public int weekday() { }
+  /** Less-than comparison. */
+  public boolean lt(Date that) {
+    return this.compareTo(that) < EQUAL;
+  }
   
+  /** Less-than-or-equal-to comparison. */
+  public boolean lteq(Date that) {
+    return compareTo(that) < EQUAL || equals(that);
+  }
+  
+  /** Greater-than comparison. */
+  public boolean gt(Date that) {
+    return compareTo(that) > EQUAL;
+  }
+
+  /** Greater-than-or-equal-to comparison. */
+  public boolean gteq(Date that) {
+    return compareTo(that) > EQUAL || equals(that);
+  }
+  
+  /** A convenient synonym for the <em>equals</em> method. */
+  public boolean eq(Date that) {
+    return equals(that);
+  }
+
+  
+  /*
+  This needs the Julian day number for both calendars.
+  This could even work across calendars.
   public int daysFrom(Date that) () {}
   */
 
-  /** Convenient synonym for <em>plusDays(1)</em>. */
+
+  /** Synonym for <em>plusDays(1)</em>. */
   public Date next() {
     return plusDays(1);
   }
   
-  /** Convenient synonym for <em>minusDays(1)</em>. */
+  /** Synonym for <em>minusDays(1)</em>. */
   public Date previous() {
     return minusDays(1);
   }
 
   /**
    Add or subtract the given number of days from this date.
-   This implementation uses a simple <em>odometer</em> model; the caller may find  it too slow if the number of days is VERY large.
-   If days is non-negative, then return a later date. 
-   If days is negative, then return an earlier date. 
+   
+   @param days can be either sign. If non-negative, then returns a later date. 
+   If negative, then returns an earlier date. 
   */
   public Date plusOrMinusDays(int days) {
     return days >= 0 ? plusDays(days) : minusDays(-days);
@@ -135,7 +162,6 @@ public final class Date implements Comparable<Date> {
   
   /**
    Add the given number of days to this date.
-   This implementation uses a simple <em>odometer</em> model; the caller may find  it too slow if the number of days is VERY large. 
    @param days is non-negative. 
   */
   public Date plusDays(int days) {
@@ -144,32 +170,18 @@ public final class Date implements Comparable<Date> {
   
   /**
    Subtract the given number of days from this date.
-   This implementation uses a simple <em>odometer</em> model; the caller may find  it too slow if the number of days is VERY large. 
    @param days is non-negative. 
   */
   public Date minusDays(int days) {
     return minusDaysImpl(days); 
   }
-
-  /** Convert this date to a date in a different calendar. */
-  public Date convertTo(Calendar toCalendar) {
-    if (this.calendar == toCalendar) {
-      throw new IllegalArgumentException("Calendar conversion aborted. Trying to convert to the same calendar: " + toCalendar);
-    }
-    //to avoid possible hard-to-spot rounding differences near 0h, temporarily add some time to this date:
-    Time oneHour = Time.from(1, 0, 0.0, Timescale.TT);
-    DateTime nonce = DateTime.from(this, oneHour);
-    JulianDate jd = JulianDateConverter.using(this.calendar).toJulianDate(nonce);
-    DateTime converted = JulianDateConverter.using(toCalendar).toDateTime(jd);
-    return converted.date();
-  }
-
   /** Intended for logging only. Example: <em>2025-01-01 GR</em> */
   @Override public String toString() {
     String sep = "-";
     return year + sep + zeroPad(month) + sep + zeroPad(day) + " " + calendar.toString().substring(0, 2);  
   }
-  
+
+  /** Two dates must share the same calendar in order to be equal. */
   @Override public boolean equals(Object aThat) {
     if (this == aThat) return true;
     if (!(aThat instanceof Date)) return false;
@@ -185,11 +197,15 @@ public final class Date implements Comparable<Date> {
   @Override public int hashCode() {
     return Objects.hash(getSigFields());
   }
-  
+
+  /** This implementation treats the calendar as being the most significant item in the comparison. */
   @Override public int compareTo(Date that) {
     if (this == that) return EQUAL;
 
-    int comparison = this.year.compareTo(that.year);
+    int comparison = this.calendar.compareTo(that.calendar);
+    if (comparison != EQUAL) return comparison;
+
+    comparison = this.year.compareTo(that.year);
     if (comparison != EQUAL) return comparison;
     
     comparison = this.month.compareTo(that.month);
@@ -202,10 +218,10 @@ public final class Date implements Comparable<Date> {
   }
   
   private Calendar calendar;
-  private Integer year, month, day;
-  private static final int EQUAL = 0;
+  private Long year;
+  private Integer month, day;
   
-  private Date(int year, int month, int day, Calendar calendar) {
+  private Date(long year, int month, int day, Calendar calendar) {
     Check.range(month, 1, 12);
     Check.range(day, 1, Month.of(month).length(calendar.isLeap(year)));
     this.year = year;
@@ -221,7 +237,7 @@ public final class Date implements Comparable<Date> {
   
   /** For behind-the-scenes calculations, and avoiding object creation. */
   private class Struct {
-    Struct(int y, int m, int d){
+    Struct(long y, int m, int d){
       this.y = y; 
       this.m = m; 
       this.d = d;
@@ -231,7 +247,8 @@ public final class Date implements Comparable<Date> {
       m = that.m;
       d = that.d;
     }
-    int y, m, d;
+    long y;
+    int m, d;
   }
   
   private Date plusDaysImpl(int days) {

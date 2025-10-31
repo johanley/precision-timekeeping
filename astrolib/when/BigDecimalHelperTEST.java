@@ -1,6 +1,6 @@
-package astrolib.when.big;
+package astrolib.when;
 
-import static astrolib.when.big.BigDecimalHelper.*;
+import static astrolib.when.BigDecimalHelper.*;
 import static org.junit.Assert.*;
 
 import java.math.BigDecimal;

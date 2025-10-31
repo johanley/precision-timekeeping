@@ -1,9 +1,11 @@
 package astrolib.when;
 
+import static astrolib.when.BigDecimalHelper.*;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.Month;
 import java.util.Arrays;
-
-import astrolib.util.Mathy;
 
 /** 
  Convert a date-time in a given Calendar into a {@link JulianDate}, and vice versa.
@@ -32,18 +34,18 @@ final class JulianDateConverter {
    Return the Julian date corresponding to the given moment in the calendar.
    @param d is a fractional day. The value '15.5' corresponds to 12h, for example.  
   */
-  JulianDate toJulianDate(int y, int m, double d, Timescale timescale) {
-    double jd = y >= 0 ? nonNegYears(y, m, d) : negYears(y, m, d);
+  JulianDate toJulianDate(long y, int m, BigDecimal d, Timescale timescale) {
+    BigDecimal jd =  (y >= 0)  ?   nonNegYears(y, m, d)  :   negYears(y, m, d);
     return JulianDate.from(jd, timescale);
   }
   
   /** Return the corresponding date-time in the given calendar, with the same timescale as the given Julian date. */
   public DateTime toDateTime(JulianDate jd) {
-    double jan_1_year_0 = jan_0_year_0 + 1; 
-    return jd.jd() >= jan_1_year_0 ? nonNegYears(jd) : negYears(jd);
+    BigDecimal jan_1_year_0 = jan_0_year_0.add(BigDecimal.ONE); 
+    return jd.jd().compareTo(jan_1_year_0) >= 0 ? nonNegYears(jd) : negYears(jd);
   }
   
-  private double jan_0_year_0;
+  private BigDecimal jan_0_year_0;
   private Calendar calendar;
 
   /** A converter for the given calendar. */
@@ -52,54 +54,56 @@ final class JulianDateConverter {
     this.calendar = calendar;
   }
   
-  private double nonNegYears(int year, int month, double day) {
+  private BigDecimal nonNegYears(long year, int month, BigDecimal day) {
     //1. full cycles in the calendar  
-    int numCycles = year / calendar.cycleYears();
-    int fullCycles = numCycles * calendar.cycleDays();
+    long numCycles = year / calendar.fullCycleYears();
+    long fullCycles = numCycles * calendar.fullCycleDays();
     
     //2. remainder-years: whole years left after the full cycles
-    int remainderYears = calendar.daysInCompleteYears(numCycles * calendar.cycleYears(), year); 
+    int remainderYears = calendar.daysInCompleteYears(numCycles * calendar.fullCycleYears(), year); 
     
     //3. remainder-days in the final year
-    double remainderDays = calendar.daysFromJan0(year, month, day);
-    return jan_0_year_0 + fullCycles + remainderYears + remainderDays; 
+    BigDecimal remainderDays = calendar.daysFromJan0(year, month, day);
+    return jan_0_year_0.add(big(fullCycles).add(big(remainderYears)).add(remainderDays)); 
   }
   
-  private double negYears(int year, int month, double day) {
+  private BigDecimal negYears(long year, int month, BigDecimal day) {
     //In the negative years, it's convenient to use (year + 1) as the base from which to track cycles.
     //This is because we're counting backwards through the calendar
-    int y_biased = year + 1;
+    long y_biased = year + 1;
 
     //1. full cycles in the calendar  
-    int numCycles = y_biased / calendar.cycleYears(); 
-    int fullCycles = Math.abs(numCycles * calendar.cycleDays());
+    long numCycles = y_biased / calendar.fullCycleYears(); 
+    long fullCycles = Math.abs(numCycles * calendar.fullCycleDays());
     
     //2. remainder years: whole years left after the full cycles
-    int remainderYears = calendar.daysInCompleteYears(y_biased, numCycles * calendar.cycleYears()); 
+    int remainderYears = calendar.daysInCompleteYears(y_biased, numCycles * calendar.fullCycleYears()); 
     
     //3. remainder days in the final year
-    double remainderDays = calendar.daysFromDec32(year, month, day);
-    int OVERHANG = 1; // Jan 0.0 is already impinging onto the negative years, by 1 day
-    return jan_0_year_0 + OVERHANG - (fullCycles +  remainderYears + remainderDays);
+    BigDecimal remainderDays = calendar.daysFromDec32(year, month, day);
+    BigDecimal OVERHANG = BigDecimal.ONE; // Jan 0.0 is already impinging onto the negative years, by 1 day
+    BigDecimal total = big(fullCycles).add(big(remainderYears)).add(remainderDays);
+    return jan_0_year_0.add(OVERHANG).subtract(total);
   }
   
   private DateTime nonNegYears(JulianDate jd) {
-    double BASE = jan_0_year_0 + 1; 
+    BigDecimal BASE = jan_0_year_0.add(BigDecimal.ONE); 
     
     //1. full cycles in the calendar  
-    double target = jd.jd() - BASE; //the target value we'll match below
-    int numCycles = Mathy.truncate(target / calendar.cycleDays()); 
-    int year = numCycles * calendar.cycleYears(); //starting value for the year; can increase below
+    BigDecimal target = jd.jd().subtract(BASE); //the target value we'll match below
+    BigDecimal fullCycleDays = big(calendar.fullCycleDays());
+    long numFullCycles = floor(divide(target, fullCycleDays)).longValue();
+    long year = numFullCycles * calendar.fullCycleYears(); //starting value for the year; can increase below
     
     //this temp value is less than the target value, and approaches it from below
-    int temp_target = numCycles * calendar.cycleDays(); 
+    BigDecimal temp_target = big(numFullCycles * calendar.fullCycleDays()); 
     
     //2. remainder years: whole years left after the full cycles (not including the final year)
-    int year_full_cycles = year; //simply to remember this value in the loop below 
-    for(int remainderYearIdx = 0; remainderYearIdx < calendar.cycleYears(); ++remainderYearIdx ) {
-      int oneMoreYear = calendar.numDaysIn(year_full_cycles + remainderYearIdx);
-      if (temp_target + oneMoreYear <= target) {
-        temp_target = temp_target + oneMoreYear;
+    long year_full_cycles = year; //simply to remember this value in the loop below 
+    for(int remainderYearIdx = 0; remainderYearIdx < calendar.fullCycleYears(); ++remainderYearIdx ) {
+      BigDecimal oneMoreYear = big(calendar.numDaysIn(year_full_cycles + remainderYearIdx));
+      if (temp_target.add(oneMoreYear).compareTo(target) <= 0) {
+        temp_target = temp_target.add(oneMoreYear);
         ++year;
       } else { break; }
     }
@@ -107,34 +111,35 @@ final class JulianDateConverter {
     //3. months and days in the final year
     int month = Month.JANUARY.getValue(); //starting point; can increase below
     for(Month m : Month.values()) {
-      int oneMoreMonth = m.length(calendar.isLeap(year));
-      if (temp_target + oneMoreMonth <= target) {
-        temp_target = temp_target + oneMoreMonth;
+      BigDecimal oneMoreMonth = big(m.length(calendar.isLeap(year)));
+      if (temp_target.add(oneMoreMonth).compareTo(target) <= 0) {
+        temp_target = temp_target.add(oneMoreMonth);
         ++month;
       } else { break; }
     }
-    double fractionalDays = target - temp_target + 1; //+1 since the base is Jan 1 0h, not Dec 31 0h
+    BigDecimal fractionalDays = target.subtract(temp_target).add(BigDecimal.ONE); //+1 since the base is Jan 1 0h, not Dec 31 0h
     return buildDateTimeFrom(year, month, fractionalDays, jd);
   }
   
   private DateTime negYears(JulianDate jd) {
-    double BASE = jan_0_year_0 + 1; 
+    BigDecimal BASE = jan_0_year_0.add(BigDecimal.ONE); 
 
     //1. full cycles in the calendar  
-    double target = jd.jd() - BASE; //the target value we'll match below
-    int numFullCycles = Mathy.truncate(target / calendar.cycleDays()); 
-    int year = numFullCycles * calendar.cycleYears(); //starting value for the year; can decrease below
+    BigDecimal target = jd.jd().subtract(BASE); //the target value we'll match below
+    BigDecimal fullCycleDays = big(calendar.fullCycleDays());
+    long numFullCycles = floor(divide(target, fullCycleDays)).longValue() + 1 ;
+    long year = numFullCycles * calendar.fullCycleYears(); //starting value for the year; can decrease below
     --year; //because going backwards through the calendar
     
     //this temp value is more than the target value, and approaches it from above
-    int temp_target = numFullCycles * calendar.cycleDays(); 
+    BigDecimal temp_target = big(numFullCycles * calendar.fullCycleDays()); 
 
     //2. remainder years: whole years left after the full cycles (not including the final year)
-    int year_full_cycles = year; //simply to remember this value in the loop below 
-    for(int remainderYearIdx = 0; remainderYearIdx < calendar.cycleYears(); ++remainderYearIdx ) {
-      int oneLessYear = calendar.numDaysIn(year_full_cycles - remainderYearIdx);
-      if (temp_target - oneLessYear > target) {
-        temp_target = temp_target - oneLessYear;
+    long year_full_cycles = year; //simply to remember this value in the loop below 
+    for(int remainderYearIdx = 0; remainderYearIdx < calendar.fullCycleYears(); ++remainderYearIdx ) {
+      BigDecimal oneLessYear = big(calendar.numDaysIn(year_full_cycles - remainderYearIdx));
+      if (temp_target.subtract(oneLessYear).compareTo(target) > 0) {
+        temp_target = temp_target.subtract(oneLessYear);
         --year;
       } else { break; }
     }
@@ -142,27 +147,24 @@ final class JulianDateConverter {
     //3. months and days in the final year
     int month = Month.DECEMBER.getValue(); //starting point; can decrease below
     for(Month m : Arrays.asList(Month.values()).reversed()) { //go backwards, Dec to Jan!
-      int oneLessMonth = m.length(calendar.isLeap(year));
-      if (temp_target - oneLessMonth > target) {
-        temp_target = temp_target - oneLessMonth;
+      BigDecimal oneLessMonth = big(m.length(calendar.isLeap(year)));
+      if (temp_target.subtract(oneLessMonth).compareTo(target) > 0) {
+        temp_target = temp_target.subtract(oneLessMonth);
         --month;
       } else { break; }
     }
     //count backwards from the end of the month
     int monthLen = Month.of(month).length(calendar.isLeap(year));
-    double fractionalDays = (monthLen + 1) + (target - temp_target);  //32 + (-0.5) = 31.5 for a time on Dec 31, for example 
+    //double fractionalDays = (monthLen + 1) + (target - temp_target);  //32 + (-0.5) = 31.5 for a time on Dec 31, for example 
+    BigDecimal fractionalDays = big(monthLen + 1).add(target.subtract(temp_target));  //32 + (-0.5) = 31.5 for a time on Dec 31, for example 
     return buildDateTimeFrom(year, month, fractionalDays, jd);
   }
   
-  private DateTime buildDateTimeFrom(int year, int month, double fractionalDays, JulianDate jd) {
-    int day = Mathy.truncate(fractionalDays);
-    Date date = Date.from(year, month, day, calendar);
-    Time midnightTime = Time.from(0,0,0.0, jd.timescale());
-    DateTime midnight = DateTime.from(date, midnightTime);
-    //TODO DO I REALLY WANT TO DEAL WITH LEAPSECONDS??
-    int numSecondsInDay = midnight.secondsInDay(); //this lets us interpret the fractional day in the case of UTC
-    double frac = fractionalDays - Mathy.truncate(fractionalDays);
-    Time time = Time.from(frac, numSecondsInDay, jd.timescale());
+  private DateTime buildDateTimeFrom(long year, int month, BigDecimal fractionalDays, JulianDate jd) {
+    BigInteger day = integer(fractionalDays);
+    Date date = Date.from(year, month, day.intValue(), calendar);
+    BigDecimal frac = divideAndRemainder(fractionalDays, BigDecimal.ONE)[1];
+    Time time = Time.from(frac, jd.timescale());
     return DateTime.from(date, time);
   }
 }

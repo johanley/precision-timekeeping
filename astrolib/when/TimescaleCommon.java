@@ -1,6 +1,6 @@
-package astrolib.when.big;
+package astrolib.when;
 
-import static astrolib.when.big.BigDecimalHelper.*;
+import static astrolib.when.BigDecimalHelper.*;
 
 import java.math.BigDecimal;
 
@@ -9,11 +9,11 @@ import astrolib.util.Check;
 /**
  Commonly used timescales.
  
- <P>If a timescale is not listed here, you'll need to create a class that implements the {@link BigTimescale} interface. 
+ <P>If a timescale is not listed here, you'll need to create a class that implements the {@link Timescale} interface. 
  
  <P>Reference: <a href='https://static1.squarespace.com/static/68caa251ae552a6213e8764b/t/68d3e216e1cf0121bd4273a6/1758716438331/sofa_ts_c.pdf'>SOFA Cookbook</a> on timescales.
  
- <P>The supported timescales are currently related as follows:
+ <P>Timescales are related as follows:
  <pre>
     UT1     UTC   leap seconds   TAI                TT
  ----+-------+--------------------+------------------+-----&gt;
@@ -36,24 +36,14 @@ import astrolib.util.Check;
    <li>ΔUT1 ?
    <li>ΔT ?
  </ul>  
-
- 
- <P>The <em>coordinate</em> timescales based on General Relativity are not supported.
- Thhey are of interest only to professional astronomers and physicists:
- <ul>
-  <li>TCG, Geocentric Coordinate Time. Used for calculations centered on the Earth in space.
-  <li>TCB, Barycentric Coordinate Time. Used for calculations beyond Earth orbit.
-  <li>TDB, Barycentric Dynamical Time. A scaled form of TCB that keeps in step with TT on the average.
- </ul>
- 
 */
-public enum BigTimescaleCommon implements BigTimescale {
+public enum TimescaleCommon implements Timescale {
   
   /** 
    Terrestrial Time. Used for solar system ephemeris lookup.
     
    <P>Strictly speaking, the inputs to a solar system ephemeris should be TDB, but the difference is less than 2 milliseconds.
-   For most users this is small enough to ignore. 
+   This is small enough to ignore in most cases. 
    For the Moon, the error from using TT instead of TDB is less than 1 milliarcsecond.
    
    <P>TT is a successor to Ephemeris Time (ET).
@@ -62,7 +52,7 @@ public enum BigTimescaleCommon implements BigTimescale {
   */
   TT {
     /** A fixed offset of -32.184s. */
-    @Override public BigDecimal TAIminusThis(BigDate date) {
+    @Override public BigDecimal TAIminusThis(Date date) {
       return big(TAI_MINUS_TT);
     }
   },
@@ -74,16 +64,15 @@ public enum BigTimescaleCommon implements BigTimescale {
   /** 
    Coordinated Universal Time, the basis of civil time. 
    
-   <P>This library has modest support for UTC.
-   <b>It models UTC as a simple fixed offset from TAI.</b> 
+   <P>This library has modest support for UTC. Here, <b>UTC is modeled as a simple fixed offset from TAI.</b> 
    The offset has a default value, hard-coded here; that value can be overridden 
    by setting a System property named <em>TAI-minus-UTC</em> to the desired value:
    
-   <P>Example: <pre>-DTAI-minus-UTC=42</pre> 
+   <P>Example: <pre>-DTAI-minus-UTC=38</pre> 
   */
   UTC {
     /** TAI - UTC. Default is +37s. */
-    @Override public BigDecimal TAIminusThis(BigDate date) {
+    @Override public BigDecimal TAIminusThis(Date date) {
       String delta = "37";
       String propName = "TAI-minus-UTC";
       String override = System.getProperty(propName);
@@ -104,7 +93,7 @@ public enum BigTimescaleCommon implements BigTimescale {
   /** Universal Time. Within +/- 0.9 seconds of UTC. Also referred to as 'UT', in some contexts. */
   UT1 {
     /** TAI - UT1. */
-    @Override public BigDecimal TAIminusThis(BigDate date) {
+    @Override public BigDecimal TAIminusThis(Date date) {
       //INCORRECT. This needs to use a table of values. See IERS.
       /* read in a text file, for past values only. */
       return big("37");
@@ -113,13 +102,14 @@ public enum BigTimescaleCommon implements BigTimescale {
   
   GPS {
     /** TAI - GPS. Fixed value of +19s. */
-    @Override public BigDecimal TAIminusThis(BigDate date) {
+    @Override public BigDecimal TAIminusThis(Date date) {
       return big("19");
     }
   },
-  
+
+  /** Geocentric Coordinate Time. Used for calculations centered on the Earth in space. */
   TCG {
-    @Override public BigDecimal TAIminusThis(BigDate date) {
+    @Override public BigDecimal TAIminusThis(Date date) {
       /*
        * TCG = TAI + 32.184s + Lg * (Tai - T0)
        * Lg = 6.969290134×10−10  (dimensionless)
@@ -128,6 +118,12 @@ public enum BigTimescaleCommon implements BigTimescale {
       return super.TAIminusThis(date);
     }
   };
+  
+  /*
+  TCG, TCB and TDB are called coordinate timescales.
+  TCB, Barycentric Coordinate Time. Used for calculations beyond Earth orbit.
+  TDB, Barycentric Dynamical Time. A scaled form of TCB that keeps in step with TT on the average.
+   */
   
   /** {@value} seconds. */
   private static final Double TAI_MINUS_TT = -32.184;
