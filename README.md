@@ -14,10 +14,11 @@
 - in astronomy, the terms Julian date and Julian calendar are confusing. They refer to separate ideas. A Julian date can be related to different calendars.
 - most astronomical libraries that create a Julian date from a given date have restrictions in the range of accepted years. This seems increasingly problematic. 
 For example, modern theories of long-term precession can be used over timescales of tens of thousands of years. In this library, I avoid such restrictions on the year.
-- the amount of precision in an IEEE 754 double is not quite enough to model a Julian date precisely. Could a BigDecimal be used in Java, to address that?
+- the amount of precision in an IEEE 754 double is not quite enough to model a Julian date precisely. Using BigDecimal in Java can solve that.
 - cursory look: SOFA's tests don't seem to be very extensive
 - NOVAS: its julian_date function doesn't document any conditions on the input year, but I think there is one
 - I think the idea of 'tagging' every date with a calendar, and every time with a timescale, is a sound one.
+- Network Time Protocal (NTP) is based on UTC within a few msecs. Precision Time Protocal (PTP) is based on TAI within a few nanoseconds (?). 
 
 
 # Sketchy Notes
