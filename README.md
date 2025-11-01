@@ -21,11 +21,21 @@ For example, modern theories of long-term precession can be used over timescales
 - Network Time Protocal (NTP) is based on UTC within a few msecs. Precision Time Protocal (PTP) is based on TAI within a few nanoseconds (?).
 - Global Navigation Satellite System GNSS = (GPS | Galileo | GLONASS | ...) All have atomic clocks. Precision ~2ns. Receivers are ~20ns, but can combine signals to get better results.
 - GNSS clocks and relativity: 7,000ns/day for speed (slower), but 45,000ns/day for gravity well (faster) [link](https://www.gpsworld.com/inside-the-box-gps-and-relativity/)
+- GNSS clocks are much slower than the world's best clocks.
 - Clocks on the geoid run all at the same rate! [link](https://www.gpsworld.com/inside-the-box-gps-and-relativity/)  
 - The second [might be re-defined](https://www.scientificamerican.com/article/worlds-most-accurate-clocks-could-redefine-time/) in the future. Newer, more precise clocks are obsoleting the old definition of the second. The new clocks have optical frequencies (~4*10^14 Hz, ~0.000002ns), not microwave frequencies (~10^10 Hz, ~0.1ns).
 - The world's most accurate clocks can measure the GR time-dilation for differences in altitude on the order a 1mm!
-- Cell phone networks: [5G needs 130ns precision](https://www.gpsworld.com/gnss-clocks-prove-to-be-invisible-and-indispensable/), while 6G needs 5ns (2030s release?).
-- Financial markets: [100,000 ns](https://www.gpsworld.com/gnss-clocks-prove-to-be-invisible-and-indispensable/)
+- Cell phone networks often use GNSS as the time-source.
+
+|Precision|Description|
+|---------|-----------|
+|100,000 ns|Financial markets, NTP on a LAN|
+|~130 ns|5G cell towers|
+|~20 ns|GPS receiver|
+|~2 ns|GPS satellite|
+|~0.001 ns|ALMA telescope master clock|
+|~0.000 002 ns|World's best clocks|
+
 
 
 # Sketchy Notes
