@@ -5,14 +5,15 @@ import java.math.BigDecimal;
 public interface Timescale {
   
   /** 
-   The difference TAI - this timescale, in seconds.
-   Here, TAI is taken as the base from which one can derive other timescales.
+   The difference between this timescale and TAI, in seconds.
+   Positive if this timescale is ahead of TAI, negative otherwise.
+   TAI is taken as the base timescale.
    
    <P>In general, this difference changes at a slow rate. 
    @param when the moment for which the difference is required, using the Gregorian Calendar, and this timescale.
    @return default is 0.
   */
-  default BigDecimal TAIminusThis(DateTime when) {
+  default BigDecimal secondsFromTAI(DateTime when) {
     return BigDecimal.ZERO;
   } 
   

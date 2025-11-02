@@ -39,8 +39,16 @@ import astrolib.util.Check;
    <li>ΔT ?
  </ul>
  
- <P>It's useful to know that the sequence is 
- <pre>TT -&gt; TCG -&gt; TCB</pre>
+ <P>Here's the order in 2025:
+ <pre>
+    UTx      GPS       TAI               TT TCG          TCB
+ ----+--------+---------+-----------------++-------------+-----&gt;
+     |  ~18s  |   19s   |      32.184s    ||     ~32s    |  
+ </pre>
+ 
+ 
+ <P>TT, TCG, and TCB coincided in value on 1977 January 1, 00:00:00. 
+ At that moment, they were all exactly 32.184s ahead of TAI.
  
    <P>See <a href='https://articles.adsabs.harvard.edu//full/1992A%26A...265..833S/0000835.000.html'>link</a>, especially Table 1, and Figure 1.
    
@@ -110,9 +118,9 @@ public enum TimescaleCommon implements Timescale {
    For the Moon, the error from using TT instead of TDB is less than 1 milliarcsecond.
   */
   TT {
-    /** A fixed offset of -32.184s. */
-    @Override public BigDecimal TAIminusThis(DateTime when) {
-      return big(TAI_MINUS_TT);
+    /** A fixed offset of +32.184s. */
+    @Override public BigDecimal secondsFromTAI(DateTime when) {
+      return big(TT_MINUS_TAI);
     }
     @Override public Boolean isDynamicalTimescale() { return Boolean.TRUE; }
   },
@@ -125,16 +133,15 @@ public enum TimescaleCommon implements Timescale {
    
    <P>This library has modest support for UTC. Here, <b>UTC is modeled as a simple fixed offset from TAI.</b> 
    The offset has a default value, hard-coded here; that value can be overridden 
-   by setting a System property named <em>TAI-minus-UTC</em> to the desired value:
+   by setting a System property named <em>UTC-minus-TAI</em> to the desired value:
    
-   <P>Example: <pre>-DTAI-minus-UTC=38</pre> 
+   <P>Example: <pre>-DUTC-minus-TAI=-38</pre> 
   */
   UTC {
-    /**  TAI - UTC. Default is +37s.  */
-    @Override public BigDecimal TAIminusThis(DateTime when) {
-      String delta = "37";
-      String propName = "TAI-minus-UTC";
-      String override = System.getProperty(propName);
+    /**  UTC - TAI. Default is -37s.  */
+    @Override public BigDecimal secondsFromTAI(DateTime when) {
+      String delta = "-37";
+      String override = System.getProperty(TimescaleCommon.UTC_SYS_PROPERTY);
       if (Check.textHasContent(override)) {
         try {
           @SuppressWarnings("unused")
@@ -142,7 +149,7 @@ public enum TimescaleCommon implements Timescale {
           delta = override;
         }
         catch(NumberFormatException ex) {
-          throw new IllegalArgumentException("System property " + propName + " should be an integer, but isn't: " + override);
+          throw new IllegalArgumentException("System property " + UTC_SYS_PROPERTY + " should be an integer, but isn't: " + override);
         }
       }
       return big(delta);
@@ -151,19 +158,19 @@ public enum TimescaleCommon implements Timescale {
   
   /** The timescale used by the Global Positioning System. */
   GPS {
-    /** TAI - GPS. Fixed value of +19s. */
-    @Override public BigDecimal TAIminusThis(DateTime when) {
-      return big("19");
+    /** GPS - TAI. Fixed value of -19s. */
+    @Override public BigDecimal secondsFromTAI(DateTime when) {
+      return big("-19");
     }
   },
 
   /** Universal Time. Within +/- 0.9 seconds of UTC. Also referred to as 'UT', in some contexts. */
   UT1 {
-    /** TAI - UT1. */
-    @Override public BigDecimal TAIminusThis(DateTime when) {
+    /** UT1 - TAI. */
+    @Override public BigDecimal secondsFromTAI(DateTime when) {
       //INCORRECT. This needs to use a table of values. See IERS.
       /* read in a text file, for past values only. */
-      return big("37");
+      return big("-37");
     }
   }, 
   
@@ -171,10 +178,12 @@ public enum TimescaleCommon implements Timescale {
    Geocentric Coordinate Time. Used for calculations centered on the Earth in space.
    "The Geocentric Coordinate Time (TCG) is a time-like coordinate to go with space coordinates centered at the 
    geocenter of the Earth as determined by the relativistic conversions from the geoid to the geocenter." 
-   No rotation. Adopted in 1991 by the IAU.
+   No rotation.
+   Not influenced by the gravitational field of the Earth. 
+   Adopted in 1991 by the IAU.
   */
   TCG {
-    @Override public BigDecimal TAIminusThis(DateTime when) {
+    @Override public BigDecimal secondsFromTAI(DateTime when) {
       /*
        TCG - TT = 6.969291×10−10 * (JD - 2443144.5) * 86400 seconds - Explanatory Supplement 2006, page 47
        TCG - TT + 32.184  
@@ -182,7 +191,7 @@ public enum TimescaleCommon implements Timescale {
       JulianDate jd0 = JulianDate.from(big("2443144.5"), when.time().timescale());
       JulianDate jd = when.toJulianDate();
       BigDecimal tcg_minus_tt = jd.jd().subtract(jd0.jd()).multiply(big(86400)).multiply(big("6.969291E-10")); //a small positive amount after 1977
-      return tcg_minus_tt.add(big(-TAI_MINUS_TT)).negate();
+      return tcg_minus_tt.add(big(TT_MINUS_TAI));
     }
   };
   
@@ -192,7 +201,10 @@ public enum TimescaleCommon implements Timescale {
   
   TDB, Barycentric Dynamical Time. A scaled form of TCB that keeps in step with TT on the average.
    */
+
+  /** Used to set a System property, and override a default value for UTC - TAI: {@value}. */
+  public static final String UTC_SYS_PROPERTY = "UTC-minus-TAI";
   
   /** {@value} seconds. */
-  private static final Double TAI_MINUS_TT = -32.184;
+  private static final Double TT_MINUS_TAI = 32.184;
 }
