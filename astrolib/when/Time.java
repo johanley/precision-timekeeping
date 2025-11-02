@@ -30,7 +30,7 @@ public final class Time implements Comparable<Time> {
     return new Time(fraction, timescale);
   }
   
-  /** Midnight 00:00:00 in the given timescale. */
+  /** 00:00:00 in the given timescale. */
   public static Time zero(Timescale timescale) {
     return new Time(0, 0, BigDecimal.ZERO, timescale);
   }

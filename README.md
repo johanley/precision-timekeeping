@@ -21,9 +21,8 @@ For example, modern theories of long-term precession can be used over timescales
 - Network Time Protocal (NTP) is based on UTC within a few msecs. Precision Time Protocal (PTP) is based on TAI within a few nanoseconds (?).
 - Global Navigation Satellite System GNSS = (GPS | Galileo | GLONASS | ...) All have atomic clocks. Precision ~2ns. Receivers are ~20ns, but can combine signals to get better results.
 - GNSS clocks and relativity: 7,000ns/day for speed (slower), but 45,000ns/day for gravity well (faster) [link](https://www.gpsworld.com/inside-the-box-gps-and-relativity/)
-- GNSS clocks are much slower than the world's best clocks.
 - Clocks on the geoid run all at the same rate! [link](https://www.gpsworld.com/inside-the-box-gps-and-relativity/)  
-- The second [might be re-defined](https://www.scientificamerican.com/article/worlds-most-accurate-clocks-could-redefine-time/) in the future. Newer, more precise clocks are obsoleting the old definition of the second. The new clocks have optical frequencies (~4*10^14 Hz, ~0.000002ns), not microwave frequencies (~10^10 Hz, ~0.1ns).
+- The second [might be re-defined](https://www.scientificamerican.com/article/worlds-most-accurate-clocks-could-redefine-time/) in the future. Newer, more precise clocks are obsoleting the old definition of the second. The new clocks have optical frequencies (~4*10^14 Hz, ~0.000 002ns), not microwave frequencies (~10^10 Hz, ~0.1ns).
 - The world's most accurate clocks can measure the GR time-dilation for differences in altitude on the order a 1mm!
 - Cell phone networks often use GNSS as the time-source.
 
@@ -105,4 +104,8 @@ For example, modern theories of long-term precession can be used over timescales
       https://www.bipm.org/en/cgpm-2022/resolution-4
       https://en.wikipedia.org/wiki/Leap_second#Problems
       
-   DAY 0.0 - I need a policy for this!      
+   DAY 0.0 - I need a policy for this!
+   
+   [CASA Timescales](https://casadocs.readthedocs.io/en/stable/notebooks/memo-series.html#Time-Reference-Frames)
+   
+          

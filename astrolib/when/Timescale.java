@@ -6,13 +6,26 @@ public interface Timescale {
   
   /** 
    The difference TAI - this timescale, in seconds.
+   Here, TAI is taken as the base from which one can derive other timescales.
    
    <P>In general, this difference changes at a slow rate. 
-   @param date the date for which the difference is required.
+   @param when the moment for which the difference is required, using the Gregorian Calendar, and this timescale.
+   @return default is 0.
   */
-  default BigDecimal TAIminusThis(Date date) { return BigDecimal.ZERO; } 
+  default BigDecimal TAIminusThis(DateTime when) {
+    return BigDecimal.ZERO;
+  } 
   
-  /** A convenient identifier for this timescale. Usually an abbreviation. Must have content. */
+  /** A convenient identifier for this timescale. Usually an abbreviation. */
   default String id() { return this.toString(); }
+
+  /** 
+   A <em>dynamical</em> timescale represents the independent time variable in theories of the motion of solar system objects.
+   According to the theory of relativity, this independent variable depends on the coordinate system being used as the system of reference.
+   
+   <P>A non-dynamical timescale is referred to as a <em>coordinate</em> timescale.
+   <P>Default is false.
+  */
+  default Boolean isDynamicalTimescale() { return Boolean.FALSE; }
 
 }
