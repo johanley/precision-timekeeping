@@ -208,4 +208,35 @@ public class BigDecimalTEST {
     BigDecimal b = a.setScale(0, RoundingMode.FLOOR);
     System.out.println(b.toPlainString());
   }
+  
+  /** 
+   When rounding seconds, then you pass 'precision' to the method, not the number of decimal places.
+   Precision = num digits in the unscaled value.
+   0.123  precision=3   seconds < 1
+   1.123  precision=4   seconds < 10
+   10.123 precision=5   else
+   Rounding seconds can change the minute-hour-day-year! Be careful of overflow issues!
+  */
+  @Test public void round() {
+    round("0.123456", 3, "0.123");  //the leading 0 is not part of the unscaled value!
+    round("0.123456", 4, "0.1235");
+    round("1.123456", 4, "1.123");
+    round("10.123456", 5, "10.123"); //the precision != the number of decimal places
+
+    round("0.123456", 2, "0.12"); 
+    round("0.123456", 1, "0.1"); 
+    //round("0.123456", 0, "0"); 
+  }
+  
+  private void round(String input, int precision, String expect) {
+    BigDecimal a = new BigDecimal(input);
+    BigDecimal result = a.round(new MathContext(precision, RoundingMode.HALF_EVEN));
+    BigDecimal expected = new BigDecimal(expect);
+    assertEquals(expected, result);
+  }
+  
+  private void roundBySettingScale() {
+    
+  }
+  
 }
