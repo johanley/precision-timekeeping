@@ -7,7 +7,7 @@ import java.math.RoundingMode;
 
 import astrolib.util.Check;
 
-/** Convenience operations with BigDecimal objects, to make them more curt. */
+/** Helper methods for {@link BigDecimal} objects. */
 public final class BigDecimalHelper {
   
   public static final int INT_DIV = 0;
@@ -88,12 +88,15 @@ public final class BigDecimalHelper {
    
    @param places can be positive, 0, or negative.  
   */
-  public static BigDecimal round(int places, BigDecimal val, RoundingMode roundingMode) {
+  public static BigDecimal round(BigDecimal val, int places, RoundingMode roundingMode) {
     return val.setScale(places, roundingMode);
   }
   
-  
-  /** {@value}. To override the value returned by {@link #infiniteCutoffPrecision()}, set a System property using this name. */
+  /**
+   {@value}. 
+   To override the value returned by {@link #infiniteCutoffPrecision()}, set a System property using this name.
+   Use a positive integer. 
+  */
   public static final String OVERRIDE_INFINITE_CUTOFF = "big-decimal-division-precision";
   
 }

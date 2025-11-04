@@ -109,7 +109,25 @@ public final class DateTime implements Comparable<DateTime> {
     BigDecimal days = divide(seconds, big(SECONDS_PER_DAY));
     return plusMinusDays(days, numPlaces, roundingMode);
   }
+
+  /**
+   Return the number of (fractional) days between this {@link DateTime} and the given {@link DateTime}.
+   @param that can use a different calendar than the one used by this {@link DateTime}!
+   @param numPlaces used for rounding the result to the given number of decimal places.
+   @return a positive result if this date is after <em>that</em> date, negative if this date is before <em>that</em> date. 
+  */
+  public BigDecimal daysFrom(DateTime that, int numPlaces, RoundingMode roundingMode) {
+    BigDecimal res = daysFromUnrounded(that);
+    return round(res, numPlaces, roundingMode);
+  }
   
+  /** As in {@link #daysFrom(DateTime, int, RoundingMode)}, but return fractional seconds. */
+  public BigDecimal secondsFrom(DateTime that, int numPlaces, RoundingMode roundingMode) {
+    BigDecimal daysFrom = daysFromUnrounded(that);
+    BigDecimal res = daysFrom.multiply(big(SECONDS_PER_DAY));
+    return round(res, numPlaces, roundingMode);
+  }
+
   /** Intended for logging only. 2025-01-01 01:01:01 */
   @Override public String toString() {
     return date.toString() + " " + time.toString(); 
@@ -157,4 +175,9 @@ public final class DateTime implements Comparable<DateTime> {
     return res;
   }
   
+  private BigDecimal daysFromUnrounded(DateTime that) {
+    JulianDate jdThis = JulianDateConverter.using(this.date().calendar()).toJulianDate(this);
+    JulianDate jdThat = JulianDateConverter.using(that.date().calendar()).toJulianDate(that);
+    return jdThis.jd().subtract(jdThat.jd());
+  }
 }

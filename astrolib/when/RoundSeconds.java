@@ -44,7 +44,7 @@ final class RoundSeconds {
     if (seconds.abs().compareTo(SIXTY) >= 0) {
       throw new IllegalArgumentException("Can't round a seconds value whose absolute value is 60.0 or more: " + seconds);
     }
-    BigDecimal res = BigDecimalHelper.round(numPlaces, seconds, roundingMode);
+    BigDecimal res = BigDecimalHelper.round(seconds, numPlaces, roundingMode);
     return new Result(res);
   }
   

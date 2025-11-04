@@ -137,7 +137,10 @@ public final class Date implements Comparable<Date> {
   /*
     This needs the Julian day number for both calendars.
     This could even work across calendars.
-    public int daysFrom(Date that) () {}
+    public long daysFrom(Date that) () {}
+    
+    change both this, that to jd
+    do the math: the diff in jd
   */
 
   /**
