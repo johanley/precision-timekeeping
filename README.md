@@ -16,6 +16,9 @@
 For example, modern theories of long-term precession can be used over timescales of tens of thousands of years. In this library, I avoid such restrictions on the year.
 - the amount of precision in an IEEE 754 double is not quite enough to model a Julian date precisely. Using BigDecimal in Java can solve that.
 - cursory look: SOFA's tests don't seem to be very extensive
+- calculations with dates and times are much simplified when you have robust conversions from/to Julian dates. Adding days or seconds no longer needs 
+to deal with calendar logic, because that's done by the robust conversion logic. This only works well when you have the arbitrary precision of 
+something like BigDecimal at your disposal.
 - NOVAS: its julian_date function doesn't document any conditions on the input year, but I think there is one
 - I think the idea of 'tagging' every date with a calendar, and every time with a timescale, is a sound one.
 - Network Time Protocal (NTP) is based on UTC within a few msecs. Precision Time Protocal (PTP) is based on TAI within a few nanoseconds (?).

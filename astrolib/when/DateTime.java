@@ -1,8 +1,10 @@
 package astrolib.when;
 
+import static astrolib.util.Consts.*;
 import static astrolib.when.BigDecimalHelper.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Objects;
 
 /** 
@@ -12,12 +14,12 @@ import java.util.Objects;
 public final class DateTime implements Comparable<DateTime> {
   
   /** As in the general factory method, but for a date-time in the Gregorian calendar. */
-  public static DateTime gregorianCalendar(int year, int month, int day, int hour, int minute, BigDecimal seconds, Timescale timescale) {
+  public static DateTime gregorianCalendar(long year, int month, int day, int hour, int minute, BigDecimal seconds, Timescale timescale) {
     return new DateTime(Date.gregorian(year, month, day), Time.from(hour, minute, seconds, timescale));
   }
   
   /** As in the general factory method, but for a date-time in the Julian calendar. */
-  public static DateTime julianCalendar(int year, int month, int day, int hour, int minute, BigDecimal seconds, Timescale timescale) {
+  public static DateTime julianCalendar(long year, int month, int day, int hour, int minute, BigDecimal seconds, Timescale timescale) {
     return new DateTime(Date.julian(year, month, day), Time.from(hour, minute, seconds, timescale));
   }
 
@@ -31,7 +33,7 @@ public final class DateTime implements Comparable<DateTime> {
    @param minute range [0,59]
    @param seconds range [0,60.0) for all timescales. Leap seconds are not implemented here. 
   */
-  public static DateTime from(int year, int month, int day, int hour, int minute, BigDecimal seconds, Calendar calendar, Timescale timescale) {
+  public static DateTime from(long year, int month, int day, int hour, int minute, BigDecimal seconds, Calendar calendar, Timescale timescale) {
     return new DateTime(Date.from(year, month, day, calendar), Time.from(hour, minute, seconds, timescale));
   }
 
@@ -44,7 +46,7 @@ public final class DateTime implements Comparable<DateTime> {
     return new DateTime(date, Time.from(fraction, timescale));
   }
 
-  /** Build a DateTime in the given calendar, using a Julian date. */
+  /** Build a {@link DateTime} in the given {@link Calendar}, using a {@link JulianDate}. */
   public static DateTime from(JulianDate julianDate, Calendar calendar) {
     return JulianDateConverter.using(calendar).toDateTime(julianDate);
   }
@@ -60,14 +62,52 @@ public final class DateTime implements Comparable<DateTime> {
   public int minute() { return time.minute(); }
   public BigDecimal seconds() { return time.seconds(); }
   
-  /**  The day of the month, plus the time represented as a decimal value in the range [0.0,1.0).  */
+  /**  The day of the month, plus the time-of-day represented as a decimal value in the range [0.0,1.0).  */
   public BigDecimal fractionalDay() {
     return big(date.day()).add(time.fraction());
   }
   
-  /** Convert this DateTime to a JulianDate. */
+  /** Convert this {@link DateTime} to a {@link JulianDate}. */
   public JulianDate toJulianDate() {
     return JulianDateConverter.using(date.calendar()).toJulianDate(this);
+  }
+
+  /** 
+   Round the seconds to the given number of places, and return a new {@link DateTime}.
+   Retains the {@link Calendar} and {@link Timescale} attached to {@link #date()} and {@link #time()}, respectively. 
+  */
+  public DateTime roundSeconds(int numPlaces, RoundingMode roundingMode) {
+    DateTime res = null;
+    RoundSeconds rounder = RoundSeconds.to(numPlaces);
+    RoundSeconds.Result rounded = rounder.apply(seconds());
+    if (rounded.overflows()) {
+      res = Odometer.rollover(this);
+    }
+    else {
+      res = new DateTime(date(), Time.from(time.hour(), time.minute(), rounded.val(), time.timescale()));
+    }
+    return res;
+  }
+
+  /** 
+   Return a new {@link DateTime} which is a given number of days from this {@link DateTime}.
+   Retains the {@link Calendar} and {@link Timescale} attached to {@link #date()} and {@link #time()}, respectively. 
+   @param numPlaces number of decimal places to which the seconds field is to be rounded.
+   @param roundingMode used when rounding the seconds field. 
+  */
+  public DateTime plusMinusDays(BigDecimal days, int numPlaces, RoundingMode roundingMode) {
+    JulianDate jd = JulianDateConverter.using(this.date().calendar()).toJulianDate(this);
+    JulianDate jdNew = JulianDate.from(jd.jd().add(days), this.time().timescale());
+    return JulianDateConverter.using(this.date().calendar()).toDateTime(jdNew).roundSeconds(numPlaces, roundingMode);
+  }
+  
+  /** 
+   Return a new {@link DateTime} which is a given number of seconds from this {@link DateTime}.
+   Similar to {@link #plusMinusDays(BigDecimal)}.
+  */
+  public DateTime plusMinusSeconds(BigDecimal seconds, int numPlaces, RoundingMode roundingMode) {
+    BigDecimal days = divide(seconds, big(SECONDS_PER_DAY));
+    return plusMinusDays(days, numPlaces, roundingMode);
   }
   
   /** Intended for logging only. 2025-01-01 01:01:01 */
@@ -116,4 +156,5 @@ public final class DateTime implements Comparable<DateTime> {
     Object[] res = {date, time};
     return res;
   }
+  
 }

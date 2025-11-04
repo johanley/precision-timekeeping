@@ -14,12 +14,14 @@ import org.junit.Test;
  <a href='https://docs.oracle.com/en/java/javase/20/docs/api/java.base/java/math/BigDecimal.html'>BigDecimal</a>.
  
  <P>The intent here is not to test the class in the normal way, but to demonstrate its behavior and lingo.
- 
- <P><b>The most important thing to know about BigDecimal is that you shouldn't use the constructor that takes a double value.</b>
-  Instead, use the constructor that accepts a String, or perhaps the <em>valueOf(double)</em> factory method.
-  
- <P>The second most important thing is to be careful with division. If you don't handle it correctly, it blow up
- when there's a non-terminating decimal - 1/3, for example. 
+
+ <P>Important things to know about BigDecimal:
+ <ul>
+  <li><b>The most important thing to know about BigDecimal is that you shouldn't use the constructor that takes a double value.</b>
+   Instead, use the constructor that accepts a String, or perhaps the <em>valueOf(double)</em> factory method.
+  <li>Be careful with division. If you don't handle it correctly, it blow up when there's a non-terminating decimal - 1/3, for example. 
+  <li>The <em>setScale</em> method is better for rounding than the <em>round</em> method.
+ </ul>
   
  <P>Here's a good description of 
  <a href='https://blogs.oracle.com/javamagazine/post/four-common-pitfalls-of-the-bigdecimal-class-and-how-to-avoid-them'>pitfalls to avoid</a>. 
@@ -70,7 +72,7 @@ import org.junit.Test;
  
   <P>Other lingo: 
  <ul>
-  <li><em>cohort</em>: 12.345 = (12345 + scale 3 | 123450 + scale 4). Different representations of the same number.
+  <li><em>cohort</em>: 120 = (120 + scale 0 | 12 + scale -1). Different representations of the same number.
  </ul>
  The <em>equals</em> method distinguishes at the finest level (unscaled value and scale), while the <em>compareTo</em> method does not.
 */
@@ -209,6 +211,32 @@ public class BigDecimalTEST {
     System.out.println(b.toPlainString());
   }
   
+  /** Setting scale seems to be the preferred way of rounding a BigDecimal. */
+  @Test public void roundBySettingScale() {
+    roundBySettingScale("0.123456", 3, "0.123");
+    roundBySettingScale("0.123456", 4, "0.1235");
+    roundBySettingScale("1.123456", 4, "1.1235");
+    roundBySettingScale("10.123456", 5, "10.12346");
+    
+    roundBySettingScale("0.123456", 2, "0.12");
+    roundBySettingScale("0.123456", 1, "0.1");
+    roundBySettingScale("0.123456", 0, "0");
+    
+    roundBySettingScale("1.123456", 6, "1.123456");
+    roundBySettingScale("1.123456", 5, "1.12346");
+    roundBySettingScale("1.123456", 4, "1.1235");
+    roundBySettingScale("1.123456", 3, "1.123");
+    roundBySettingScale("1.123456", 2, "1.12");
+    roundBySettingScale("1.123456", 1, "1.1");
+    roundBySettingScale("1.123456", 0, "1");
+    
+    roundBySettingScale("123", 0, "123");
+    roundBySettingScale("123", 1, "123.0");
+    roundBySettingScale("123", -1, "120");
+    
+    roundBySettingScale("1.123", 6, "1.123");
+  }
+
   /** 
    When rounding seconds, then you pass 'precision' to the method, not the number of decimal places.
    Precision = num digits in the unscaled value.
@@ -217,26 +245,42 @@ public class BigDecimalTEST {
    10.123 precision=5   else
    Rounding seconds can change the minute-hour-day-year! Be careful of overflow issues!
   */
-  @Test public void round() {
-    round("0.123456", 3, "0.123");  //the leading 0 is not part of the unscaled value!
-    round("0.123456", 4, "0.1235");
-    round("1.123456", 4, "1.123");
-    round("10.123456", 5, "10.123"); //the precision != the number of decimal places
+  @Test public void roundWithRoundMethod() {
+    roundWithRoundMethod("0.123456", 3, "0.123");  //the leading 0 is not part of the unscaled value!
+    roundWithRoundMethod("0.123456", 4, "0.1235");
+    roundWithRoundMethod("1.123456", 4, "1.123");
+    roundWithRoundMethod("10.123456", 5, "10.123"); //the precision != the number of decimal places
 
-    round("0.123456", 2, "0.12"); 
-    round("0.123456", 1, "0.1"); 
-    //round("0.123456", 0, "0"); 
+    roundWithRoundMethod("0.123456", 2, "0.12"); 
+    roundWithRoundMethod("0.123456", 1, "0.1"); 
+    //round("0.123456", 0, "0"); //this doesn't work 
+  }
+
+  /** This is likely the preferred method of rounding. */
+  private void roundBySettingScale(String val, int places, String expect) {
+    BigDecimal a = new BigDecimal(val);
+    BigDecimal result = a.setScale(places, RoundingMode.HALF_EVEN);
+    BigDecimal expected = new BigDecimal(expect);
+    //assertEquals(expected, result);
+    assertTrue(expected.compareTo(result) == 0);  //same 'cohort'!
+    
+    //do the same, but with negative versions of the args
+    a = new BigDecimal("-" + val);
+    result = a.setScale(places, RoundingMode.HALF_EVEN);
+    expected = new BigDecimal("-" + expect);
+    //assertEquals(expected, result);
+    assertTrue(expected.compareTo(result) == 0);
   }
   
-  private void round(String input, int precision, String expect) {
+  /** 
+   Weird: the 'round' method isn't as good at rounding as the setScale method.
+    - 0 precision has a magic value that has nothing to do with rounding.
+    - the precision is always non-negative, whereas setScale can take an int of either sign. 
+  */
+  private void roundWithRoundMethod(String input, int precision, String expect) {
     BigDecimal a = new BigDecimal(input);
     BigDecimal result = a.round(new MathContext(precision, RoundingMode.HALF_EVEN));
     BigDecimal expected = new BigDecimal(expect);
     assertEquals(expected, result);
   }
-  
-  private void roundBySettingScale() {
-    
-  }
-  
 }

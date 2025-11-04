@@ -5,6 +5,7 @@ import static astrolib.util.LogUtil.*;
 import static astrolib.when.BigDecimalHelper.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.Month;
 import java.util.Objects;
@@ -48,7 +49,7 @@ public final class Date implements Comparable<Date> {
   public int day() { return day; }
   public Calendar calendar() { return calendar; }
   
-  /** The day of the week corresponding to this date. */
+  /** The day of the week corresponding to this {@link Date}, in its given {@link Calendar}. */
   public DayOfWeek weekday() {
     //Meeus 1991, page 65
     DateTime dt = DateTime.from(this, Time.zero(TimescaleCommon.TAI));
@@ -59,16 +60,17 @@ public final class Date implements Comparable<Date> {
   }
 
   /** 
-   Convert this date to a Julian date, using the given timescale.
-   <p>This class doesn't do the reverse operation, to create a date from a {@link JulianDate}, because that conversion usually loses 
-   information about the time. For that operation, please use {@link DateTime} instead.
+   Convert this {@link Date} to a {@link JulianDate}, using the given {@link Timescale}.
+   <p>This class doesn't do the reverse operation, to create a {@link Date} from a {@link JulianDate}, 
+   because that conversion can lose information about the time. For that operation, 
+   please use {@link DateTime} instead.
   */  
   public JulianDate jd(Timescale timescale) {
     JulianDateConverter converter = JulianDateConverter.using(this.calendar);
     return converter.toJulianDate(DateTime.from(this, Time.zero(timescale)));
   }
 
-  /** Convert this date to a date in a different calendar. */
+  /** Convert this {@link Date} to a {@link Date} in a different {@link Calendar}. */
   public Date convertTo(Calendar toCalendar) {
     if (this.calendar == toCalendar) {
       throw new IllegalArgumentException("Calendar conversion aborted. Trying to convert to the same calendar: " + toCalendar);
@@ -81,23 +83,23 @@ public final class Date implements Comparable<Date> {
     return converted.date();
   }
 
-  /*** The first day of the month corresponding to this date and calendar. */
+  /*** The first day of the month corresponding to this {@link Date} and {@link Calendar}. */
   public Date startOfMonth() {
     return new Date(year, month, 1, calendar);
   }
   
-  /*** The last day of the month corresponding to this date and calendar. */
+  /*** The last day of the month corresponding to this {@link Date} and {@link Calendar}. */
   public Date endOfMonth() {
     int lastDay = Month.of(month).length(calendar.isLeap(year));
     return new Date(year, month, lastDay, calendar);
   }
   
-  /** The first day of the year corresponding to this date and calendar. */
+  /** The first day of the year corresponding to this {@link Date} and {@link Calendar}. */
   public Date startOfYear() {
     return new Date(year, 1, 1, calendar);
   }
   
-  /** The last day of the year corresponding to this date and calendar. */
+  /** The last day of the year corresponding to this {@link Date} and {@link Calendar}. */
   public Date endOfYear() {
     return new Date(year, 12, 31, calendar);
   }
@@ -132,56 +134,40 @@ public final class Date implements Comparable<Date> {
     return equals(that);
   }
 
-  
   /*
-  This needs the Julian day number for both calendars.
-  This could even work across calendars.
-  public int daysFrom(Date that) () {}
+    This needs the Julian day number for both calendars.
+    This could even work across calendars.
+    public int daysFrom(Date that) () {}
   */
 
-
-  /** Synonym for <em>plusDays(1)</em>. */
+  /**
+   Add the given number of days to this {@link Date}.
+   If days is negative, then a subtraction occurs.
+  */
+  public Date plusMinusDays(int days) {
+    //just borrow the full implementation of this, in {@link DateTime}
+    DateTime dt = DateTime.from(this, Time.zero(TimescaleCommon.TT));
+    DateTime dtNew = dt.plusMinusDays(big(days), 0, RoundingMode.HALF_EVEN);
+    return dtNew.date();
+  }
+  
+  /** Synonym for <em>plusMinusDays(1)</em>. */
   public Date next() {
-    return plusDays(1);
+    return plusMinusDays(1);
   }
   
-  /** Synonym for <em>minusDays(1)</em>. */
+  /** Synonym for <em>plusMinusDays(-1)</em>. */
   public Date previous() {
-    return minusDays(1);
-  }
-
-  /**
-   Add or subtract the given number of days from this date.
-   
-   @param days can be either sign. If non-negative, then returns a later date. 
-   If negative, then returns an earlier date. 
-  */
-  public Date plusOrMinusDays(int days) {
-    return days >= 0 ? plusDays(days) : minusDays(-days);
+    return plusMinusDays(-1);
   }
   
-  /**
-   Add the given number of days to this date.
-   @param days is non-negative. 
-  */
-  public Date plusDays(int days) {
-    return plusDaysImpl(days); 
-  }
-  
-  /**
-   Subtract the given number of days from this date.
-   @param days is non-negative. 
-  */
-  public Date minusDays(int days) {
-    return minusDaysImpl(days); 
-  }
   /** Intended for logging only. Example: <em>2025-01-01 GR</em> */
   @Override public String toString() {
     String sep = "-";
     return year + sep + zeroPad(month) + sep + zeroPad(day) + " " + calendar.toString().substring(0, 2);  
   }
 
-  /** Two dates must share the same calendar in order to be equal. */
+  /** Here, two {@link Date}s must share the same {@link Calendar} in order to be equal. */
   @Override public boolean equals(Object aThat) {
     if (this == aThat) return true;
     if (!(aThat instanceof Date)) return false;
@@ -198,7 +184,7 @@ public final class Date implements Comparable<Date> {
     return Objects.hash(getSigFields());
   }
 
-  /** This implementation treats the calendar as being the most significant item in the comparison. */
+  /** This implementation treats the {@link Calendar} as being the most significant item in the comparison. */
   @Override public int compareTo(Date that) {
     if (this == that) return EQUAL;
 
@@ -233,60 +219,5 @@ public final class Date implements Comparable<Date> {
   private Object[] getSigFields() {
     Object[] res = {calendar, year, month, day};
     return res;
-  }
-  
-  /** For behind-the-scenes calculations, and avoiding object creation. */
-  private class Struct {
-    Struct(long y, int m, int d){
-      this.y = y; 
-      this.m = m; 
-      this.d = d;
-    }
-    void setTo(Struct that) {
-      y = that.y; 
-      m = that.m;
-      d = that.d;
-    }
-    long y;
-    int m, d;
-  }
-  
-  private Date plusDaysImpl(int days) {
-    Check.nonNegative(days);
-    Struct temp = new Struct(year, month, day);
-    for(int i=1; i<=days; ++i) {
-      //model as an odometer, incrementing one day at a time
-      Struct overFlowDay = new Struct(year, month + 1, 1);
-      if (overFlowDay.m > Month.DECEMBER.getValue()) {
-        overFlowDay.m = Month.JANUARY.getValue();
-        overFlowDay.y = overFlowDay.y + 1;
-      }
-      int lastDayOfMonth = Month.of(temp.m).length(calendar.isLeap(temp.y));
-      temp.d = temp.d + 1;
-      if (temp.d > lastDayOfMonth) {
-        temp.setTo(overFlowDay);
-      }
-    }
-    return new Date(temp.y, temp.m, temp.d, this.calendar);
-  }
-
-  private Date minusDaysImpl(int days) {
-    Check.nonNegative(days);
-    Struct temp = new Struct(year, month, day);
-    for(int i=1; i<=days; ++i) {
-      //model as an odometer, decrementing one day at a time
-      Struct underFlowDay = new Struct(year, month - 1, 1);
-      if (underFlowDay.m < Month.JANUARY.getValue()) {
-        underFlowDay.m = Month.DECEMBER.getValue();
-        underFlowDay.y = underFlowDay.y - 1;
-      }
-      //finally, we can set it to the last day of the month
-      underFlowDay.d = Month.of(underFlowDay.m).length(calendar.isLeap(underFlowDay.y)); 
-      temp.d = temp.d - 1;
-      if (temp.d < 1) {
-        temp.setTo(underFlowDay);
-      }
-    }
-    return new Date(temp.y, temp.m, temp.d, this.calendar);
   }
 }

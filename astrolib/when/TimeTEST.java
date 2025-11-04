@@ -4,7 +4,6 @@ import static astrolib.when.BigDecimalHelper.*;
 import static org.junit.Assert.*;
 
 import java.math.BigDecimal;
-import java.util.stream.Stream;
 
 import org.junit.Test;
 
@@ -49,9 +48,8 @@ public class TimeTEST {
     assertEquals(big("0.5"), t.fraction()); 
 
     t = Time.from(12, 30, BigDecimal.ZERO, TimescaleCommon.TAI);
-
-   // non-terminating decimals are tricky; you need to provide a MathContext
-    assertEquals(big("0.5208333333333333"), t.fraction()); 
+    // non-terminating decimals are tricky
+    assertEquals(big("0.5208333333333333333333333333333333"), t.fraction()); 
   }
   
   @Test public void fractionFails() {
@@ -67,10 +65,9 @@ public class TimeTEST {
   private void fractionFails(BigDecimal fraction) {
     assertThrows(IllegalArgumentException.class, () -> {Time.from(fraction, TimescaleCommon.TAI);} );
   }
-  
 
+  @SuppressWarnings("unused")
   private void ctorSucceeds(int hour, int minute, BigDecimal seconds) {
     Time t = Time.from(hour, minute, seconds, TimescaleCommon.TAI);
   }
-  
 }

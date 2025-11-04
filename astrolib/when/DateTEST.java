@@ -73,6 +73,11 @@ public class DateTEST {
     nextPrevTest();
   }
   
+  @Test public void next365NonLeap() {
+    next365NonLeap(2021);
+    prev365NonLeap(2022);
+  }
+  
   private void sanityTest(int y, int m, int d) {
     for (Calendar calendar : Calendar.values()) {
       Date dt = Date.from(y, m, d, calendar);
@@ -94,7 +99,7 @@ public class DateTEST {
     Date x = Date.from(notLeapYear, 1, 1, calendar);
     assertEquals(1, x.dayOfYear());
     for(int i=2; i<=365; ++i) {
-      x = x.plusDays(1);
+      x = x.plusMinusDays(1);
       assertEquals(x.dayOfYear(), i);
     }
     assertEquals(365, x.dayOfYear());
@@ -106,14 +111,14 @@ public class DateTEST {
     Date x = Date.from(leapYear, 1, 1, calendar);
     assertEquals(x.dayOfYear(), 1);
     for(int i=2; i<=(31+28); ++i) {
-      x = x.plusDays(1);
+      x = x.plusMinusDays(1);
       assertEquals(i, x.dayOfYear());
     }
-    x = x.plusDays(1); //Feb 29
+    x = x.plusMinusDays(1); //Feb 29
     assertEquals(x.dayOfYear(), 60);
     //March 1 .. December 31
     for(int i=61; i<=366; ++i) {
-      x = x.plusDays(1);
+      x = x.plusMinusDays(1);
       assertEquals(i, x.dayOfYear());
     }
   }
@@ -121,41 +126,41 @@ public class DateTEST {
   private void plusMinusSanity(Calendar calendar) {
     //near a leap day, and across month-end
     Date x = Date.from(1960, 2, 27, calendar);
-    Date y = x.plusOrMinusDays(1);
+    Date y = x.plusMinusDays(1);
     assertEquals(28, y.day());
     assertEquals(2, y.month());
     assertEquals(1960, y.year());
     
-    y = x.plusOrMinusDays(2);
+    y = x.plusMinusDays(2);
     assertEquals(29, y.day());
     assertEquals(2, y.month());
     assertEquals(1960, y.year());
 
-    y = x.plusOrMinusDays(-1);
+    y = x.plusMinusDays(-1);
     assertEquals(26, y.day());
     assertEquals(2, y.month());
     assertEquals(1960, y.year());
 
-    y = x.plusOrMinusDays(-2);
+    y = x.plusMinusDays(-2);
     assertEquals(25, y.day());
     assertEquals(2, y.month());
     assertEquals(1960, y.year());
     
     x = Date.from(1960, 3, 1, calendar);
-    y = x.plusOrMinusDays(-1);
+    y = x.plusMinusDays(-1);
     assertEquals(29, y.day());
     assertEquals(2, y.month());
     assertEquals(1960, y.year());
     
     //across a year-end
     x = Date.from(1960, 12, 31, calendar);
-    y = x.plusOrMinusDays(1);
+    y = x.plusMinusDays(1);
     assertEquals(1, y.day());
     assertEquals(1, y.month());
     assertEquals(1961, y.year());
     
     x = Date.from(1961, 1, 1, calendar);
-    y = x.plusOrMinusDays(-1);
+    y = x.plusMinusDays(-1);
     assertEquals(31, y.day());
     assertEquals(12, y.month());
     assertEquals(1960, y.year());
@@ -228,6 +233,26 @@ public class DateTEST {
     Date aMinus1 = Date.from(y, 12, 30, calendar); 
     assertTrue(a.next().eq(aPlus1));
     assertTrue(a.previous().eq(aMinus1));
+  }
+
+  /** Two consecutive non-leap years in all calendars. */
+  private void next365NonLeap(int y) {
+    for(Calendar calendar : Calendar.values()) {
+      Date jan1 = Date.from(y, 1, 1, calendar);
+      Date expected = Date.from(y + 1, 1, 1, calendar);
+      Date result = jan1.plusMinusDays(365);
+      assertEquals(expected, result);
+    }
+  }
+  
+  /** Two consecutive non-leap years in all calendars. */
+  private void prev365NonLeap(int y) {
+    for(Calendar calendar : Calendar.values()) {
+      Date jan1 = Date.from(y, 1, 1, calendar);
+      Date expected = Date.from(y - 1, 1, 1, calendar);
+      Date result = jan1.plusMinusDays(-365);
+      assertEquals(expected, result);
+    }
   }
   
   private void orderingTest(int y, int m, int d) {

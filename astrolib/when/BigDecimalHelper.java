@@ -80,6 +80,18 @@ public final class BigDecimalHelper {
     String override = System.getProperty(OVERRIDE_INFINITE_CUTOFF);
     return Check.textHasContent(override) ? Integer.valueOf(override) : MathContext.DECIMAL128.getPrecision();
   }
+
+  /** 
+   Round the given BigDecimal to the given number of decimal places.
+   To round '123' to '120', for example, pass '-1' as the value for the number of places.
+   This implementation uses the HALF_EVEN rounding mode.
+   
+   @param places can be positive, 0, or negative.  
+  */
+  public static BigDecimal round(int places, BigDecimal val, RoundingMode roundingMode) {
+    return val.setScale(places, roundingMode);
+  }
+  
   
   /** {@value}. To override the value returned by {@link #infiniteCutoffPrecision()}, set a System property using this name. */
   public static final String OVERRIDE_INFINITE_CUTOFF = "big-decimal-division-precision";

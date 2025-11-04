@@ -1,11 +1,9 @@
 package astrolib.when;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
-
-import static astrolib.when.BigDecimalHelper.*;
 import static astrolib.util.Consts.*;
+import static astrolib.when.BigDecimalHelper.*;
+
+import java.math.BigDecimal;
 
 public interface Timescale {
   

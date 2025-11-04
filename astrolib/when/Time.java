@@ -98,9 +98,7 @@ public final class Time implements Comparable<Time> {
   private BigDecimal seconds;
   private BigDecimal fraction;
   
-  private static final int SECONDS_PER_MINUTE = 60;
-  private static final int SECONDS_PER_HOUR = 60 * SECONDS_PER_MINUTE;
-  private static final int SECONDS_PER_DAY = 24 * SECONDS_PER_HOUR;
+  private static final int SECONDS_PER_HOUR = MINUTES_PER_HOUR * SECONDS_PER_MINUTE;
   
   private Time(int hour, int minute, BigDecimal seconds, Timescale timescale) {
     init(hour, minute, seconds, timescale);
@@ -124,9 +122,9 @@ public final class Time implements Comparable<Time> {
   }
   
   private void init(int hour, int minute, BigDecimal seconds, Timescale timescale) {
-    Check.range(hour, 0, 23);
-    Check.range(minute, 0, 59); 
-    Check.range(seconds, 0.0, 60.0);
+    Check.range(hour, 0, HOURS_PER_DAY - 1);
+    Check.range(minute, 0, MINUTES_PER_HOUR - 1); 
+    Check.range(seconds, 0.0, Double.valueOf(1.0 * SECONDS_PER_MINUTE));
     this.timescale = timescale;
     this.hour = hour;
     this.minute = minute;
