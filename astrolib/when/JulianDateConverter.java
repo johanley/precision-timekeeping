@@ -8,20 +8,22 @@ import java.time.Month;
 import java.util.Arrays;
 
 /** 
- Convert a date-time in a given Calendar into a {@link JulianDate}, and vice versa.
+ Convert a {@link DateTime} with a given {@link Calendar} into a {@link JulianDate}, and vice versa.
 
- <P>Here, there is no restriction on the input/output year.
- (Most astronomical libraries implement this conversion by restricting the range of the year in some way.) 
+ <P>Here, there's no restriction on the input/output year.
+ Most astronomical libraries implement this conversion by restricting the range of the year (and the Julian date) in some way.
+ Usually, they restrict the date such that the Julian date is greater than or equal to 0. 
 */
 final class JulianDateConverter {
 
+  /** Factory method for a convert for the given {@link Calendar}. */
   static JulianDateConverter using(Calendar calendar) {
     return new JulianDateConverter(calendar);
   }
   
   /** 
-   Return the Julian date corresponding to the given date-time in the calendar.
-   @param dt must be attached to the given calendar.
+   Return the Julian date corresponding to the given {@link DateTime} in the calendar.
+   @param dt must be attached to the {@link Calendar} passed to the factory method.
   */
   JulianDate toJulianDate(DateTime dt) {
     if (calendar != dt.date().calendar() ) {
@@ -31,15 +33,18 @@ final class JulianDateConverter {
   }
   
   /** 
-   Return the Julian date corresponding to the given moment in the calendar.
-   @param d is a fractional day. The value '15.5' corresponds to 12h, for example.  
+   Return the {@JulianDate} corresponding to the given moment in the {@link Calendar} passed to the factory method..
+   @param d is a fractional day. The value '15.5' corresponds to 12h on the 15th of the month, for example.  
   */
   JulianDate toJulianDate(long y, int m, BigDecimal d, Timescale timescale) {
     BigDecimal jd =  (y >= 0)  ?   nonNegYears(y, m, d)  :   negYears(y, m, d);
     return JulianDate.from(jd, timescale);
   }
   
-  /** Return the corresponding date-time in the given calendar, with the same timescale as the given Julian date. */
+  /** 
+   Return the corresponding {@link DateTime} in {@link Calendar} passed to the factory method, 
+   with the same {@link Timescale} as the given {@link JulianDate}. 
+  */
   public DateTime toDateTime(JulianDate jd) {
     BigDecimal jan_1_year_0 = jan_0_year_0.add(BigDecimal.ONE); 
     return jd.jd().compareTo(jan_1_year_0) >= 0 ? nonNegYears(jd) : negYears(jd);

@@ -2,13 +2,14 @@ package astrolib.when;
 
 import static org.junit.Assert.*;
 
+import java.time.DayOfWeek;
 import java.time.Month;
 import java.util.stream.Stream;
 
 import org.junit.Test;
 
-/** JUnit 4 tests.*/
-public class DateTEST {
+/** Unit tests.*/
+public final class DateTEST {
 
   @Test public void sanity() {
     sanityTest(0,1,1);
@@ -76,6 +77,24 @@ public class DateTEST {
   @Test public void next365NonLeap() {
     next365NonLeap(2021);
     prev365NonLeap(2022);
+  }
+  
+  @Test public void dayOfWeek() {
+    dayOfWeek(2000, 1, 1, DayOfWeek.SATURDAY); //Explanatory Supplement 2006, p604
+    dayOfWeek(1954, 6, 30, DayOfWeek.WEDNESDAY); //Meeus 1991
+    dayOfWeek(2025, 11, 9, DayOfWeek.SUNDAY);
+    dayOfWeek(2025, 11, 10, DayOfWeek.MONDAY);
+    dayOfWeek(2025, 11, 11, DayOfWeek.TUESDAY);
+    dayOfWeek(2025, 11, 12, DayOfWeek.WEDNESDAY);
+    dayOfWeek(2025, 11, 13, DayOfWeek.THURSDAY);
+    dayOfWeek(2025, 11, 14, DayOfWeek.FRIDAY);
+    dayOfWeek(2025, 11, 15, DayOfWeek.SATURDAY);
+    dayOfWeek(2025, 11, 16, DayOfWeek.SUNDAY);
+  }
+  
+  private void dayOfWeek(long y, int m, int d, DayOfWeek dayOfWeek) {
+    Date date = Date.from(y,  m,  d, Calendar.GREGORIAN);
+    assertEquals(dayOfWeek, date.weekday());
   }
   
   private void sanityTest(int y, int m, int d) {

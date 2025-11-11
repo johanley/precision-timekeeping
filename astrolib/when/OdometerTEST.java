@@ -9,10 +9,11 @@ import java.math.RoundingMode;
 import static astrolib.when.BigDecimalHelper.*;
 
 /**
+ Unit tests.
  These tests are indirect.
  They test the method in {@link DateTime} that uses an {@link Odometer}.
 */
-public class OdometerTEST {
+public final class OdometerTEST {
   
   @Test public void rollover() {
     Calendar cal = Calendar.GREGORIAN;

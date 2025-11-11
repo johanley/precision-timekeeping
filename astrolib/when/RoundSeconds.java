@@ -14,7 +14,7 @@ import java.math.RoundingMode;
  
  <P>It's important to note that <b>such rounding operations can result in a value that's greater than 59.</b>
  For example, rounding 59.99 to 1 decimal place gives 60.
- This case needs usually needs special handling by the caller.
+ This case needs usually needs special handling by the caller. See {@link Odometer}.
 */
 final class RoundSeconds {
   
@@ -33,7 +33,7 @@ final class RoundSeconds {
   }
   
   /** 
-   Apply a rounding to the given BigDecimal value representing seconds in the range [0, 60).
+   Apply a rounding to the given {@link BigDecimal} value representing seconds in the range [0, 60).
    
    @param seconds is less than 60.
    @return a result that can be 60 (after rounding 59.99999, for example). 
@@ -49,9 +49,9 @@ final class RoundSeconds {
   }
   
   /**
-   The result of a rounding operation.
-   The overflow method returns true only if the absolute value of the result is 60.
-   The overflow method should almost always be interrogated by the caller. 
+   The result of an operation that rounds seconds.
+   The {@link #overflows} method returns true only if the absolute value of the result is 60.
+   The {@link #overflows} method should almost always be interrogated by the caller. 
   */
   static final class Result {
     private Result(BigDecimal val) {

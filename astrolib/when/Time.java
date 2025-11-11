@@ -9,7 +9,7 @@ import java.util.Objects;
 
 import astrolib.util.Check;
 
-/** Data-carrier for time information. */
+/** Immutable data-carrier for time information. */
 public final class Time implements Comparable<Time> {
   
   /**
@@ -30,7 +30,7 @@ public final class Time implements Comparable<Time> {
     return new Time(fraction, timescale);
   }
   
-  /** 00:00:00 in the given timescale. */
+  /** 00:00:00.0 in the given timescale. */
   public static Time zero(Timescale timescale) {
     return new Time(0, 0, BigDecimal.ZERO, timescale);
   }
@@ -40,7 +40,7 @@ public final class Time implements Comparable<Time> {
   public BigDecimal seconds() { return seconds; }
   public Timescale timescale() { return timescale; }
   
-  /**  This time as a fraction of a full 24 hour day. Return a value in the range [0.0 to 1.0). */
+  /** This {@link Time} as a fraction of a full 24 hour day. Return a value in the range [0.0 to 1.0). */
   public BigDecimal fraction() {
     if (fraction == null) {
       BigDecimal hr = big(hour * SECONDS_PER_HOUR);
@@ -73,7 +73,8 @@ public final class Time implements Comparable<Time> {
   @Override public int hashCode() {
     return Objects.hash(getSigFields());
   }
-  
+
+  /** This implementation considers the {@link Timescale} to be the most significant item. */
   @Override public int compareTo(Time that) {
     if (this == that) return EQUAL;
 
@@ -109,11 +110,11 @@ public final class Time implements Comparable<Time> {
     BigDecimal totalSeconds = fraction.multiply(big(SECONDS_PER_DAY));
     
     BigDecimal[] hourAndRemainder = divideAndRemainder(totalSeconds, big(SECONDS_PER_HOUR));
-    int hours = hourAndRemainder[INT_DIV].intValue();
+    int hours = hourAndRemainder[INTEGER_PART].intValue();
     
     BigDecimal remainder = hourAndRemainder[REMAINDER]; //seconds
     BigDecimal[] minutesAndRemainder = divideAndRemainder(remainder, big(SECONDS_PER_MINUTE));
-    int minutes = minutesAndRemainder[INT_DIV].intValue();
+    int minutes = minutesAndRemainder[INTEGER_PART].intValue();
     
     remainder = minutesAndRemainder[REMAINDER]; //seconds
     
@@ -125,10 +126,10 @@ public final class Time implements Comparable<Time> {
     Check.range(hour, 0, HOURS_PER_DAY - 1);
     Check.range(minute, 0, MINUTES_PER_HOUR - 1); 
     Check.range(seconds, 0.0, Double.valueOf(1.0 * SECONDS_PER_MINUTE));
-    this.timescale = timescale;
     this.hour = hour;
     this.minute = minute;
     this.seconds = seconds;
+    this.timescale = timescale;
   }
   
   private Object[] getSigFields() {

@@ -5,7 +5,8 @@ import static astrolib.when.TimescaleCommon.*;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-public class TimescaleCommonTEST {
+/** Unit test. */
+public final class TimescaleCommonTEST {
   
   @Test public void secondsFromTAI() {
     test(TAI, "0", null);
@@ -44,6 +45,4 @@ public class TimescaleCommonTEST {
     test(UTC, val, null);
     System.clearProperty(key);
   }
-  
-  
 }

@@ -10,16 +10,16 @@ import java.math.RoundingMode;
 import org.junit.Test;
 
 /** 
- Explore the behaviour of 
+ Explore the behavior of 
  <a href='https://docs.oracle.com/en/java/javase/20/docs/api/java.base/java/math/BigDecimal.html'>BigDecimal</a>.
  
  <P>The intent here is not to test the class in the normal way, but to demonstrate its behavior and lingo.
 
  <P>Important things to know about BigDecimal:
  <ul>
-  <li><b>The most important thing to know about BigDecimal is that you shouldn't use the constructor that takes a double value.</b>
+  <li><b>You shouldn't use the constructor that takes a double value.</b>
    Instead, use the constructor that accepts a String, or perhaps the <em>valueOf(double)</em> factory method.
-  <li>Be careful with division. If you don't handle it correctly, it blow up when there's a non-terminating decimal - 1/3, for example. 
+  <li>Be careful with division. If you don't handle it correctly, it blows up when there's a non-terminating decimal - 1/3, for example. 
   <li>The <em>setScale</em> method is better for rounding than the <em>round</em> method.
  </ul>
   
@@ -36,7 +36,6 @@ import org.junit.Test;
  
  <P><b>The important point is that the underlying number represented by a BigDecimal is 
  <pre>(unscaled value) x Math.pow(10, -scale)</pre></b>
- 
  
  <P>Examples:
  <pre>
@@ -76,7 +75,7 @@ import org.junit.Test;
  </ul>
  The <em>equals</em> method distinguishes at the finest level (unscaled value and scale), while the <em>compareTo</em> method does not.
 */
-public class BigDecimalTEST {
+public final class BigDecimalTEST {
 
   @Test public void basics() {
     BigDecimal a = new BigDecimal("12.789");

@@ -7,7 +7,8 @@ import java.math.RoundingMode;
 
 import static astrolib.when.BigDecimalHelper.*;
 
-public class DateTimeTEST {
+/** Unit tests. */
+public final class DateTimeTEST {
   
   @Test public void plusMinusDays() {
     int year = 2026; //not a leap year, nor next to a leap year

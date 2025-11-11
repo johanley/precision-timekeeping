@@ -26,6 +26,12 @@ public class ExerciseDates {
     ex.doubleConversionJd(2025, 1, 1, 1, 30, big(0), Calendar.GREGORIAN);  
     ex.doubleConversionJd(2025, 1, 1, 17, 32, big(56.00000001), Calendar.GREGORIAN);  //repeating decimal; some rounding 
     ex.doubleConversionJd(1599, 10, 11, 19, 56, big(47.98123), Calendar.GREGORIAN);  //repeating decimal; some rounding
+    Date date = Date.from(-4799, 1, 1, Calendar.GREGORIAN);
+    System.out.println("-4799 Jan 1: " + date.jd(TimescaleCommon.TAI).jd());
+    
+    JulianDate jd = JulianDate.from(JulianDate.MODIFIED_JD_ORIGIN, TimescaleCommon.TAI);
+    DateTime dt = jd.toDateTime(Calendar.GREGORIAN);
+    System.out.println(dt);
   }
   
   private void doubleConversion(long year, int month, int day, Calendar fromCalendar, Calendar toCalendar) {

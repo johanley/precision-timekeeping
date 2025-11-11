@@ -7,8 +7,8 @@ import java.math.BigDecimal;
 
 import org.junit.Test;
 
-/** JUnit 4 tests.*/
-public class JulianDateConverterTEST {
+/** Unit tests.*/
+public final class JulianDateConverterTEST {
 
   @Test public void smallYears() {
     testSmallYears(JULIAN);

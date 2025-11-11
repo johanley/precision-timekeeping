@@ -8,10 +8,11 @@ import java.math.BigDecimal;
 import org.junit.Test;
 
 /** 
+ Unit tests.
  Each test for a year is done with both the positive and negative value for the year. 
  Tests on the JulianDate methods are done elsewhere, on the helper class that does the calculation.
 */
-public class TimeTEST {
+public final class TimeTEST {
 
   @Test public void ctor() {
     Time t = Time.from(1, 2, big(3.14), TimescaleCommon.TAI);

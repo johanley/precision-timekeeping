@@ -7,7 +7,8 @@ import java.math.RoundingMode;
 
 import org.junit.Test;
 
-public class RoundSecondsTEST {
+/** Unit tests. */
+public final class RoundSecondsTEST {
 
   @Test public void rounding() {
     roundingNoOverflow("0.123456", 3, "0.123");

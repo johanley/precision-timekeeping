@@ -13,5 +13,7 @@ public final class Consts {
   public static final int HOURS_PER_DAY = 24;
   public static final int SECONDS_PER_DAY = SECONDS_PER_MINUTE * MINUTES_PER_HOUR * HOURS_PER_DAY;
 
+  public static final int DAYS_IN_JULIAN_CENTURY = 36525;
+
 
 }

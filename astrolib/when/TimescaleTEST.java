@@ -7,7 +7,7 @@ import static astrolib.when.TimescaleCommon.*;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class TimescaleTEST {
+public final class TimescaleTEST {
   
   @Test public void convertOneMomentToManyTimescales() {
     int year = 2025;

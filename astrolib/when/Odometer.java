@@ -7,7 +7,8 @@ import static astrolib.util.Consts.*;
 /** 
  Helper class for rounding seconds, specifically for the fence-post case when the rounding results in a value of 60 seconds exactly.
  For example, rounding 59.999 to 2 decimals results in a value of 60.
- Such a value is for the seconds is 'disallowed' by this library. 
+ Such a value is for the seconds is 'disallowed' by this library, and requires a 'rollover' of other time units (minutes, and possibly even 
+ the hour, day, month, and year). 
  
  <P>The task of this class is to calculate a new date-time corresponding to a value of 60-seconds.
  <P>The caller uses this class after having already concluded that a rollover is indeed necessary.
@@ -16,12 +17,12 @@ final class Odometer {
   
   /**
    Rollover the given {@link DateTime} to the next minute, with its seconds value set to 0.
-   The returned object has the same calendar and timescale as the given date-time.
+   The returned object has the same {@link Calendar} and {@link Timescale} as the given {@link DateTime}.
    
    <P>A rollover can possibly change all higher units of time: minute-hour-day-month-year.
-   Rounding the date-time:
+   Rounding the {@link DateTime}:
      <pre>2025-12-31 23:59:59.999</pre> 
-   to 2 decimal places for the seconds results in the date-time:
+   to 2 decimal places for the seconds results in the {@link DateTime}:
      <pre>2026-01-01 00:00:0</pre> 
   */
   static DateTime rollover(DateTime orig) {
@@ -51,5 +52,4 @@ final class Odometer {
     }
     return DateTime.from(year, month, day, hour, minute, seconds, orig.date().calendar(), orig.time().timescale());
   }
-
 }

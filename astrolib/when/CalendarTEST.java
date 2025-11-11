@@ -7,11 +7,12 @@ import java.util.stream.Stream;
 
 import org.junit.Test;
 
-/** 
+/**
+ Unit test for {@link Calendar}s.
  Each test for a year is done with both the positive and negative value for the year. 
- Tests on the JulianDate methods are done elsewhere, on the helper class that does the calculation.
+ Tests on the {@link JulianDate} methods are done elsewhere, on the helper class that does the calculation.
 */
-public class CalendarTEST {
+public final class CalendarTEST {
 
   @Test public void isLeapYear() {
     testIsLeapInAllCalendars(LEAP_YEARS_IN_ALL_CALENDARS);

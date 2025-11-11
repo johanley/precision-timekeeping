@@ -7,12 +7,22 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
-/** 
- Data-carrier for date and time information.
- This class is meant for input and output, not for core calculations.
-*/
+/** Immutable data-carrier for date and time information. */
 public final class DateTime implements Comparable<DateTime> {
   
+  /**
+   Factory method for a date-time in the given calendar.
+   @param year has no minimum or maximum value here, but the caller may choose to limit its range 
+   @param month range [1,12]
+   @param day range [1,31], with an extra check according to the month-year
+   @param hour range [0,23]
+   @param minute range [0,59]
+   @param seconds range [0,60.0) for all timescales. Leap seconds, which take the value of 60.0+, are not implemented here. 
+  */
+  public static DateTime from(long year, int month, int day, int hour, int minute, BigDecimal seconds, Calendar calendar, Timescale timescale) {
+    return new DateTime(Date.from(year, month, day, calendar), Time.from(hour, minute, seconds, timescale));
+  }
+
   /** As in the general factory method, but for a date-time in the Gregorian calendar. */
   public static DateTime gregorianCalendar(long year, int month, int day, int hour, int minute, BigDecimal seconds, Timescale timescale) {
     return new DateTime(Date.gregorian(year, month, day), Time.from(hour, minute, seconds, timescale));
@@ -23,25 +33,15 @@ public final class DateTime implements Comparable<DateTime> {
     return new DateTime(Date.julian(year, month, day), Time.from(hour, minute, seconds, timescale));
   }
 
-  /**
-   Factory method for a date-time in the given calendar.
-  
-   @param year has no minimum or maximum value here, but the caller may choose to limit its range 
-   @param month range [1,12]
-   @param day range [1,31], with an extra check according to the month-year
-   @param hour range [0,23]
-   @param minute range [0,59]
-   @param seconds range [0,60.0) for all timescales. Leap seconds are not implemented here. 
-  */
-  public static DateTime from(long year, int month, int day, int hour, int minute, BigDecimal seconds, Calendar calendar, Timescale timescale) {
-    return new DateTime(Date.from(year, month, day, calendar), Time.from(hour, minute, seconds, timescale));
-  }
-
+  /** Build a {@DateTime} from a {@link Date} and a {@link Time}. */
   public static DateTime from(Date date, Time time) {
     return new DateTime(date, time);
   }
   
-  /**  @param fraction of a day [0.0,1.0) */
+  /**
+   Build a {@link DateTime} using a fractional day. 
+   @param fraction of a day [0.0,1.0) 
+  */
   public static DateTime from(Date date, BigDecimal fraction, Timescale timescale) {
     return new DateTime(date, Time.from(fraction, timescale));
   }
@@ -62,7 +62,7 @@ public final class DateTime implements Comparable<DateTime> {
   public int minute() { return time.minute(); }
   public BigDecimal seconds() { return time.seconds(); }
   
-  /**  The day of the month, plus the time-of-day represented as a decimal value in the range [0.0,1.0).  */
+  /** The day of the month, plus the time-of-day represented as a decimal value in the range [0.0,1.0).  */
   public BigDecimal fractionalDay() {
     return big(date.day()).add(time.fraction());
   }
@@ -74,6 +74,8 @@ public final class DateTime implements Comparable<DateTime> {
 
   /** 
    Round the seconds to the given number of places, and return a new {@link DateTime}.
+   In border cases, such as rounding 59.999 seconds to 1 decimal, this rounding operation will  
+   force a 'rollover' onto other units of time.
    Retains the {@link Calendar} and {@link Timescale} attached to {@link #date()} and {@link #time()}, respectively. 
   */
   public DateTime roundSeconds(int numPlaces, RoundingMode roundingMode) {

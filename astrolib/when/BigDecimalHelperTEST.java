@@ -9,8 +9,8 @@ import java.math.MathContext;
 
 import org.junit.Test;
 
+/** Unit test.*/
 public final class BigDecimalHelperTEST {
-  
   
   @Test public void build() {
     BigDecimal a = big(2);
@@ -117,6 +117,4 @@ public final class BigDecimalHelperTEST {
       System.clearProperty(BigDecimalHelper.OVERRIDE_INFINITE_CUTOFF);
     }
   }
-  
-
 }

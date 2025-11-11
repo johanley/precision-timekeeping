@@ -10,17 +10,22 @@ import astrolib.util.Check;
 /** Helper methods for {@link BigDecimal} objects. */
 public final class BigDecimalHelper {
   
-  public static final int INT_DIV = 0;
+  /** The integer part of a {@link BigDecimal#divideAndRemainder(BigDecimal)} operation. */
+  public static final int INTEGER_PART = 0;
+  /** The remainder part of a {@link BigDecimal#divideAndRemainder(BigDecimal)} operation. */
   public static final int REMAINDER = 1;
 
+  /** Make a {@link BigDecimal} from a String. */
   public static BigDecimal big(String val) {
     return new BigDecimal(val);
   }
   
+  /** Make a {@link BigDecimal} from a long. */
   public static BigDecimal big(long val) {
     return BigDecimal.valueOf(val);
   }
 
+  /** Make a {@link BigDecimal} from a double. */
   public static BigDecimal big(double val) {
     return BigDecimal.valueOf(val);
   }
@@ -42,7 +47,7 @@ public final class BigDecimalHelper {
   }
 
   /** 
-   Wrapper for the <em>divide</em> method.
+   Wrapper for the {@link BigDecimal#divide(BigDecimal)} method.
    <P>In the case of a non-terminating decimal, the return value's precision is {@link #infiniteCutoffPrecision()}. 
   */
   public static BigDecimal divide(BigDecimal a, BigDecimal b) {
@@ -57,7 +62,7 @@ public final class BigDecimalHelper {
   }
 
   /**
-   Wrapper for the <em>divideAndRemainder</em> method.
+   Wrapper for the {@link BigDecimal#divideAndRemainder(BigDecimal)} method.
    <P>In the case of a non-terminating decimal, the return value's precision is {@link #infiniteCutoffPrecision()}. 
   */
   public static BigDecimal[] divideAndRemainder(BigDecimal a, BigDecimal b) {
@@ -73,7 +78,7 @@ public final class BigDecimalHelper {
 
   /** 
    The number of digits to use when 'cutting off' infinite decimals.
-   By default, returns the same precision as in MathContext.DECIMAL128. 
+   By default, returns the same precision as in {@link MathContext#DECIMAL128}. 
    This can be overridden, by setting a System property named <em>big-decimal-division-precision</em> to a positive integer.  
   */
   public static int infiniteCutoffPrecision() {
@@ -82,9 +87,9 @@ public final class BigDecimalHelper {
   }
 
   /** 
-   Round the given BigDecimal to the given number of decimal places.
+   Round the given {@link BigDecimal} to the given number of decimal places.
    To round '123' to '120', for example, pass '-1' as the value for the number of places.
-   This implementation uses the HALF_EVEN rounding mode.
+   This implementation uses {@link RoundingMode#HALF_EVEN}.
    
    @param places can be positive, 0, or negative.  
   */

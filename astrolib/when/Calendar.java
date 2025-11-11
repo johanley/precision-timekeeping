@@ -8,11 +8,16 @@ import java.time.Month;
 /** 
  Supported calendars.
   
- <P>(It's very likely that this set of implemented calendars will never change.) 
+ <P><b>This set of supported calendars will never change in this library.</b> 
 */
-public enum Calendar implements CalendarOps {
+public enum Calendar implements CalendarLeapYear {
 
-  /** Leap years are divisble by 4. */
+  /** 
+   The Julian calendar. 
+   Leap years are evenly divisble by 4.
+   Note the confusing language adopted by astronomers: the Julian date is not specifically attached to the Julian calendar.
+   (They were simply named after two different Julians!) 
+  */
   JULIAN (4, 3*365 + 366, big(1_721_056.5)){ 
     @Override public boolean isLeap(long year) {
       return year % 4 == 0;
@@ -20,9 +25,10 @@ public enum Calendar implements CalendarOps {
   }, 
   
   /** 
-   The most commonly used calendar, and the basis of civil timekeeping.
-   Leap years are divisible by 4; however, if the year is a 
-   century-year (1900, 2000, 2100, etc.) then it must also be divisible by 400.  
+   The Gregorian calendar.
+   The worldwide basis of civil timekeeping.
+   Century-years are leap years only if they are evenly divisible by 400; otherwise, leap years are evenly divisible by 4. 
+   For example, 1900 is not a leap year, but 2000 is a leap year.
   */
   GREGORIAN (400, (3*365 + 366) * 25 * 4 /*centuries*/ - 3 /*oddball century-years with no leap day*/, big(1_721_058.5)){ 
     @Override public boolean isLeap(long year) {
@@ -45,10 +51,10 @@ public enum Calendar implements CalendarOps {
     return isLeap(year) ? LEAP_YEAR_NUM_DAYS : NORMAL_YEAR_NUM_DAYS;
   }
 
-  /** Number of years in a complete cycle of this calendar. */
+  /** Number of years in one complete cycle of this calendar. */
   public int fullCycleYears() { return fullCycleYears; }
   
-  /** Number of days in a complete cycle of this calendar. */
+  /** Number of days in one complete cycle of this calendar. */
   public int fullCycleDays() { return fullCycleDays; }
 
   /** 
@@ -60,7 +66,8 @@ public enum Calendar implements CalendarOps {
   /** 
    For the given (fractional) date, return the (fractional) number of days since Jan 0.0.
    Jan 0.0 is just an alias for December 31 of the previous year.
-   Jan 1 is day 1.0, Jan 2 is day 2.0, etc. 
+   Jan 1 is day 1.0, Jan 2 is day 2.0, etc.
+   @param day can be a fractional day, as in <em>5.27</em>. 
   */
   public BigDecimal daysFromJan0(long year, int month, BigDecimal day) {
     int daysInCompletedMonths = 0;
@@ -70,7 +77,10 @@ public enum Calendar implements CalendarOps {
     return day.add(big(daysInCompletedMonths));
   }
   
-  /** Return the number of days until Dec 32.0 in this calendar, for the given year and month. */
+  /** 
+   Return the number of days until Dec 32.0 in this calendar, for the given year and month.
+   Dec 32.0 is an alias for January 1.0 of the following year. 
+  */
   public BigDecimal daysFromDec32(long year, int month, BigDecimal day) {
     int monthAccumulator = 0;
     //count backwards in time
@@ -82,7 +92,7 @@ public enum Calendar implements CalendarOps {
   }
 
   /** 
-   Number of days in a full set of complete years.
+   Number of days in one full set of complete years.
    Includes the start-year, but excludes the end-year.
    Returns 0 if the start and end are the same year. 
   */
@@ -107,7 +117,6 @@ public enum Calendar implements CalendarOps {
   }
   private int fullCycleYears;
   private int fullCycleDays;
-  
   private BigDecimal julianDateJan0Year0; //with no timescale
   
   /** The number of days remaining in the given month, from the given day. */

@@ -28,6 +28,16 @@ something like BigDecimal at your disposal.
 - The second [might be re-defined](https://www.scientificamerican.com/article/worlds-most-accurate-clocks-could-redefine-time/) in the future. Newer, more precise clocks are obsoleting the old definition of the second. The new clocks have optical frequencies (~4*10^14 Hz, ~0.000 002ns), not microwave frequencies (~10^10 Hz, ~0.1ns).
 - The world's most accurate clocks can measure the GR time-dilation for differences in altitude on the order a 1mm!
 - Cell phone networks often use GNSS as the time-source.
+- The idea of using delta-this and delta-that for timescales seems to be less effective. Stating the difference of each timescale with respect to the base TAI is all you need. With that in place, all possible conversions are easy to implement.
+
+Astropy seems to mirror lower level (?) implementations like SOFA, ERFA. 
+ - they implement JDs as a pair of doubles. 
+ - they limit seconds to nanoseconds (at least in one place). 
+ - "The Time object maintains an internal representation of time as a pair of double precision numbers expressing Julian days. The sum of the two numbers is the Julian Date for that time relative to the given time scale. Users requiring no better than microsecond precision over human time scales (~100 years) can safely ignore the internal representation details and skip this section. This representation is driven by the underlying ERFA C-library implementation."
+ - "Note that the limit of 9 digits [decimal seconds] is driven by the way that ERFA handles fractional seconds. In practice this should should not be an issue."
+
+ 
+
 
 |Precision|Description|
 |---------|-----------|
@@ -111,4 +121,21 @@ something like BigDecimal at your disposal.
    
    [CASA Timescales](https://casadocs.readthedocs.io/en/stable/notebooks/memo-series.html#Time-Reference-Frames)
    
-          
+   Referenced in the SOFA cookbook, IERS Conventions (2003) - about IERS reference systems, tides
+   https://iers-conventions.obspm.fr/archive/2003/tn32.pdf
+   
+   Java port of SOFA, relatively up to date, by an astronomer in the UK
+   https://github.com/Javastro/jsofa?tab=readme-ov-file
+   
+   C99 nicer than C89; the big jump was this transition; there's also  C11, C23
+      C Struct init with 'field' names
+      <stdint.h> pushes types to be of fixed size
+      //comments like this
+      -std=c99 -Wall -Werror   -fsanitize=address
+      unity build, single translation unit: main.c just includes everything (in the correct order); no header files.
+   https://www.youtube.com/watch?v=9UIIMBqq1D4
+   
+   NASA no use heap!
+   They also aren't crazy about directives. And function pointers.
+   And they like: gcc   -Wall -Werror -Wpedantic
+   https://www.youtube.com/watch?v=GWYhtksrmhE          
