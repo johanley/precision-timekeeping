@@ -41,6 +41,10 @@ public final class JulianDate implements Comparable<JulianDate> {
   /** {@value} corresponds to 1858 November 17 at 0h. */
   public static final BigDecimal MODIFIED_JD_ORIGIN = BigDecimal.valueOf(2400000.5);
   
+  /** {@value} The Julian epoch J2000.0 corresponds to 2000 January 1 at 12h. */
+  public static final BigDecimal J2000 = BigDecimal.valueOf(2451545.0);
+
+  
   /** Factory method. */
   public static JulianDate from(BigDecimal jd, Timescale timescale) {
     return new JulianDate(jd, timescale);

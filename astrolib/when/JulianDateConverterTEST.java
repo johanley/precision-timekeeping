@@ -124,6 +124,50 @@ public final class JulianDateConverterTEST {
     testYear(1990, 2447892 - 0.5, cal);
   }
   
+  @Test public void deepPastGregorian() {
+    Calendar cal = Calendar.GREGORIAN;
+    testDate(-4712, 1, 1.5, 38.0, cal);
+    testDate(-4713, 12, 31.5, 37.0, cal);
+    testDate(-4713, 12, 1.5, 7.0, cal);
+    testDate(-4713, 11, 30.5, 6.0, cal);
+    testDate(-4713, 11, 24.5, 0.0, cal); //the JD=0 date
+    testDate(-4713, 11, 24.0, -0.5, cal);
+    testDate(-4713, 11, 23.0, -1.5, cal);
+    testDate(-4713, 1, 1.5, -327.0, cal);
+    testDate(-4714, 1, 1.5, -327.0 - 365 * 1.0, cal);
+    testDate(-4715, 1, 1.5, -327.0 - 365 * 2.0, cal);
+    testDate(-4716, 1, 1.5, -327.0 - 365 * 2.0 - 366 * 1.0, cal);
+    testDate(-4717, 1, 1.5, -327.0 - 365 * 3.0 - 366 * 1.0, cal);
+    testDate(-4718, 1, 1.5, -327.0 - 365 * 4.0 - 366 * 1.0, cal);
+    testDate(-4719, 1, 1.5, -327.0 - 365 * 5.0 - 366 * 1.0, cal);
+    testDate(-4720, 1, 1.5, -327.0 - 365 * 5.0 - 366 * 2.0, cal);
+    testDate(-4721, 1, 1.5, -327.0 - 365 * 6.0 - 366 * 2.0, cal);
+    
+    testDate(-4800, 1, 1.5, -327.0 - 365 * 65.0 - 366 * 22.0, cal); //leap century year
+    testDate(-4801, 1, 1.5, -327.0 - 365 * 66.0 - 366 * 22.0, cal);
+    
+    testDate(-4900, 1, 1.5, -327.0 - 365 * (75.0 + 66.0) - 366 * (24.0 + 22.0), cal); //not a leap year
+  }
+  
+  @Test public void deepPastJulian() {
+    Calendar cal = Calendar.JULIAN;
+    testDate(-4711, 1, 1.5, 366 * 1.0, cal); 
+    testDate(-4712, 1, 1.5, 0.0, cal); //the JD=0 date; a leap year
+    testDate(-4712, 1, 31.5, 30.0, cal); 
+    testDate(-4713, 1, 1.5, -365 * 1.0, cal); 
+    testDate(-4714, 1, 1.5, -365 * 2.0, cal); 
+    testDate(-4715, 1, 1.5, -365 * 3.0, cal); 
+    testDate(-4716, 1, 1.5, -365 * 3.0 - 366 * 1.0, cal); 
+    testDate(-4717, 1, 1.5, -365 * 4.0 - 366 * 1.0, cal);
+    testDate(-4718, 1, 1.5, -365 * 5.0 - 366 * 1.0, cal); 
+    testDate(-4719, 1, 1.5, -365 * 6.0 - 366 * 1.0, cal); 
+    testDate(-4720, 1, 1.5, -365 * 6.0 - 366 * 2.0, cal);
+    
+    testDate(-4800, 1, 1.5, -365 * 66.0 - 366 * 22.0, cal); 
+    testDate(-4900, 1, 1.5, -365 * (75.0 + 66.0) - 366 * (25.0 + 22.0), cal); 
+  }
+  
+  
   private static final TimescaleCommon TIMESCALE = TimescaleCommon.TT;
   
   // It's easy to compute the JD manually.
