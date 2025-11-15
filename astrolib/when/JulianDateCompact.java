@@ -2,8 +2,6 @@ package astrolib.when;
 
 import static astrolib.when.BigDecimalHelper.*;
 
-import astrolib.util.Mathy;
-
 public final class JulianDateCompact {
 
   static double convertOleary(long y, int m, double d) {
@@ -27,7 +25,7 @@ public final class JulianDateCompact {
   }
 
   /**
-   Inspired by Robin O'Leary's algorithm.
+   With help from Robin O'Leary's algorithm: https://pdc.ro.nu/jd-code.html
    
    I base the calculation on counting days from January 0, year 0.
    Then I simply re-base the result at the end, to reflect the usual origin-day for Julian dates.
@@ -63,6 +61,8 @@ public final class JulianDateCompact {
   private static final int SHORT_YR = 365;
   private static final int LONG_YR = 366;
   private static final int CYCLE_YEARS = 400;
+  private static final int CYCLE_DAYS = SHORT_YR*CYCLE_YEARS + CYCLE_YEARS/4 - CYCLE_YEARS/100 + CYCLE_YEARS/CYCLE_YEARS; //146_097 days
+  private static final int[] MONTH_LEN = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
   
   private static boolean isLeap(long y) {
     return (y % 100 == 0) ? (y % 400 == 0) : (y % 4 == 0);
@@ -79,7 +79,7 @@ public final class JulianDateCompact {
     double d;
   }
   
-  static CalendarDate julianDateToGregorian(double jd) {
+  static CalendarDate julianDateToGregorianOBSOLETE(double jd) {
     double BASE = JAN_0_YEAR_0 + 1.0;  
     double target = jd - BASE;
     int CYCLE_DAYS = SHORT_YR*CYCLE_YEARS + CYCLE_YEARS/4 - CYCLE_YEARS/100 + CYCLE_YEARS/CYCLE_YEARS;
@@ -114,61 +114,53 @@ public final class JulianDateCompact {
     double fractionalDays = target - cursor + 1.0; 
     return new CalendarDate(year, month, fractionalDays);
   }
-  
+
+  /**
+    Idea; use a 'base', a point in time occurring once every 400 years, at which the calendar cycle starts.
+    Counting forward in time from such any such base exploits the symmetry of the calendar's cycle.
+    Let's take a base as always falling on a N*400 years from January 1.0, year 0:
+      JD of a base = 1_721_059.5 + N * 146_097  N = ...-2,-1,0,1,2,...
+    There are 2 loops here, with a max number of 14 loop iterations (not much).
+   */
   static CalendarDate julianDateToGregorian2(double jd) {
-    //idea; use a 'base', a point in time once every 400 years, at which the cycle starts
-    //let's take bases as always falling on a N*400 years from January 1.0, year 0.
-    // JD of a base = 1_721_059.5 + N * 146_097
-    //counting forward in time from such any such base exploits the symmetry of the calendar's cycle
-    
-    //1. establish a convenient base using full cycles of the calendar
-    int CYCLE_DAYS = SHORT_YR*CYCLE_YEARS + CYCLE_YEARS/4 - CYCLE_YEARS/100 + CYCLE_YEARS/CYCLE_YEARS; //146_097 days
-    long num_cycles = (long)Math.floor((jd - JAN_1_YEAR_0)/CYCLE_DAYS); //rounds towards negative infinity
+    //1. find the closest base that PRECEDES the given moment
+    long num_cycles = (long)Math.floor((jd - JAN_1_YEAR_0)/CYCLE_DAYS); //rounds towards negative infinity: good!
     double base_jd = JAN_1_YEAR_0 + num_cycles * CYCLE_DAYS; //a January 1.0 in the years  ..., -800, -400, 0, 400, 800, ... 
-    long year = num_cycles * CYCLE_YEARS; // ..., -800, -400, 0, 400, 800, ... (the starting value)
-    //work with the difference from the base_jd
-    double jd_minus_base = jd - base_jd; //never negative
-    //let's use a temp 'cursor' idea, to approach the jd_minus_base target from below
-    //the cursor always points to the 1st of the month
-    double cursor = 0.0;
+    long year = num_cycles * CYCLE_YEARS; // ...,-400, 0, 400,... (the starting value)
+    double jd_minus_base = jd - base_jd; //never neg
+    double cursor = 0.0; //points to a Jan 1.0 initially; approaches jd_minus_base from below!
     
-    //2. remainder-years: whole years after the full calendar cycles 
-    //first approx: calculate a minimum number of full remainder-years,
-    //to reduce looping across a large number of years
+    //2. remainder-years: whole, completed years after the base 
+    //one big chunk of years: calculate a MINIMUM number of full remainder-years, to reduce loop iterations later
     int approx_days = (int)Math.floor(jd_minus_base);
-    int more_years = (approx_days / LONG_YR) - 1; //there's at least this many remainder-years
+    int more_years = (approx_days / LONG_YR) - 1; // at least this many
     if (more_years > 0) {
-      //this only works because we've selected a 'base' as the end of a calendar cycle
       int m_p = more_years - 1;
       int more_days = more_years * SHORT_YR + (m_p/4) - (m_p/100) + (m_p/400) + 1;
-      cursor += more_days; //still on a Jan 1.0
+      cursor += more_days; //still on a Jan 1.0!
       year += more_years;
     }
-    //second part: SHORT loop (for at most several years) to get any more remainder-years
-    long year_so_far = year; //to remember this value in the loop below 
-    for(int yr = 0; yr < CYCLE_YEARS; ++yr ) {
-      int year_length = isLeap(year_so_far + yr) ? LONG_YR : SHORT_YR;
+    //loop to find the rest of the remaining-years: at most 2 iterations here!
+    long year_so_far = year; //for use in the loop 
+    for(int more = 0; more < CYCLE_YEARS; ++more ) { 
+      int year_length = isLeap(year_so_far + more) ? LONG_YR : SHORT_YR;
       if (cursor + year_length <= jd_minus_base) {
-        cursor += year_length; //the next Jan 1.0
+        cursor += year_length; // Jan 1.0 of the next year
         ++year;
       } else { break; }
     }
     
-    //jd_minus_base is now between Jan 1.0 and the Jan 1.0 of the following year
-    
-    //3. months and days in the final year
-    int month = 0; //a loop index AND used outside the loop
+    //3. months and days
+    int month = 0; //both a loop index AND a result-value
     double fractionalDays = 0.0;
-    int[] MONTH_LEN = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     for(month = 1; month <= 12; ++month) {
       int month_length = MONTH_LEN[month - 1];
       if (isLeap(year) && month == 2) ++month_length;
       if (cursor + month_length <= jd_minus_base) {
-        cursor += month_length; //1st of the next month
+        cursor += month_length; //1st day of the next month
       }
       else {
-        fractionalDays = jd_minus_base - cursor + 1.0;
-        break;
+        fractionalDays = jd_minus_base - cursor + 1.0; break;
       }
     }
     return new CalendarDate(year, month, fractionalDays);
