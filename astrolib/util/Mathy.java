@@ -20,12 +20,15 @@ public final class Mathy {
     return val * val;
   }
   
-  /** Chop off the non-integral part of a number. For negative numbers, not the same as floor.*/
-  public static int truncate(double value) {
+  /** 
+   Chop off the non-integral part of a number. For negative numbers, not the same as floor.
+   Rounds towards 0, not negative infinity.
+  */
+  public static long truncate(double value) {
     double result = Math.floor(value);
     if (value < 0) {
       result = result + 1;
     }
-    return (int)result;
+    return (long)result;
   }
 }

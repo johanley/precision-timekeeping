@@ -246,7 +246,7 @@ public final class JulianDateConverterTEST {
     assertEquals(jd_expected, jd);
   }
   private void testJdToDateCompact(long year, int month, double day, Double jd) {
-    JulianDateCompact.CalendarDate date = JulianDateCompact.julianDateToGregorian(jd);
+    JulianDateCompact.CalendarDate date = JulianDateCompact.julianDateToGregorian2(jd);
     assertEquals(year, date.y);
     assertEquals(month, date.m);
     assertEquals(day, date.d, 0.000000001);

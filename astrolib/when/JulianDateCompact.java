@@ -2,8 +2,7 @@ package astrolib.when;
 
 import static astrolib.when.BigDecimalHelper.*;
 
-import java.math.BigDecimal;
-import java.time.Month;
+import astrolib.util.Mathy;
 
 public final class JulianDateCompact {
 
@@ -39,12 +38,12 @@ public final class JulianDateCompact {
   static double gregorianToJulianDate(long y, int m, double d) {
     //completed years: small asymmetry between positive and negative years
     long y_p = (y >= 0) ? (y - 1) : y;  //y_p = y-prime
-    long num_366yrs = (y_p/4) - (y_p/100) + (y_p/400); //Robin's clever trick
+    long num_366yrs = (y_p/4) - (y_p/100) + (y_p/CYCLE_YEARS); //Robin's clever trick
     if (y > 0) {
       num_366yrs += 1; //since year 0 is a leap year
     }
     long num_365yrs = y - num_366yrs;
-    double res = num_365yrs * 365 + num_366yrs * 366;    
+    double res = num_365yrs * SHORT_YR + num_366yrs * LONG_YR;    
     
     //completed months
     //Explanatory Supplement 1961, page 434: 
@@ -60,8 +59,10 @@ public final class JulianDateCompact {
   }
   
   private static final double JAN_0_YEAR_0 = 1_721_058.5;
+  private static final double JAN_1_YEAR_0 = JAN_0_YEAR_0 + 1.0;
   private static final int SHORT_YR = 365;
   private static final int LONG_YR = 366;
+  private static final int CYCLE_YEARS = 400;
   
   private static boolean isLeap(long y) {
     return (y % 100 == 0) ? (y % 400 == 0) : (y % 4 == 0);
@@ -81,14 +82,13 @@ public final class JulianDateCompact {
   static CalendarDate julianDateToGregorian(double jd) {
     double BASE = JAN_0_YEAR_0 + 1.0;  
     double target = jd - BASE;
-    int CYCLE_YEARS = 400;
     int CYCLE_DAYS = SHORT_YR*CYCLE_YEARS + CYCLE_YEARS/4 - CYCLE_YEARS/100 + CYCLE_YEARS/CYCLE_YEARS;
-    long num_cycles = (long)Math.floor(target /CYCLE_DAYS);
+    long num_cycles = (long)Math.floor(target/CYCLE_DAYS); //this gives the desired behaviour for neg years
     long year = num_cycles * CYCLE_YEARS; //start value; usually changes 
 
     //the idea is to approach the given target from below, using this temp value 
     double cursor = num_cycles * CYCLE_DAYS;
-    
+
     //2. remainder years: whole years left after the full cycles (not including the final year)
     long year_full_cycles = year; //to remember this value in the loop below 
     for(int yr = 0; yr < CYCLE_YEARS; ++yr ) {
@@ -98,7 +98,7 @@ public final class JulianDateCompact {
         ++year;
       } else { break; }
     }
-    
+
     //3. months and days in the final year
     int[] MONTH_LEN = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     int month = 1; //starting point; can increase below
@@ -115,10 +115,70 @@ public final class JulianDateCompact {
     return new CalendarDate(year, month, fractionalDays);
   }
   
+  static CalendarDate julianDateToGregorian2(double jd) {
+    //idea; use a 'base', a point in time once every 400 years, at which the cycle starts
+    //let's take bases as always falling on a N*400 years from January 1.0, year 0.
+    // JD of a base = 1_721_059.5 + N * 146_097
+    //counting forward in time from such any such base exploits the symmetry of the calendar's cycle
+    
+    //1. establish a convenient base using full cycles of the calendar
+    int CYCLE_DAYS = SHORT_YR*CYCLE_YEARS + CYCLE_YEARS/4 - CYCLE_YEARS/100 + CYCLE_YEARS/CYCLE_YEARS; //146_097 days
+    long num_cycles = (long)Math.floor((jd - JAN_1_YEAR_0)/CYCLE_DAYS); //rounds towards negative infinity
+    double base_jd = JAN_1_YEAR_0 + num_cycles * CYCLE_DAYS; //a January 1.0 in the years  ..., -800, -400, 0, 400, 800, ... 
+    long year = num_cycles * CYCLE_YEARS; // ..., -800, -400, 0, 400, 800, ... (the starting value)
+    //work with the difference from the base_jd
+    double jd_minus_base = jd - base_jd; //never negative
+    //let's use a temp 'cursor' idea, to approach the jd_minus_base target from below
+    //the cursor always points to the 1st of the month
+    double cursor = 0.0;
+    
+    //2. remainder-years: whole years after the full calendar cycles 
+    //first approx: calculate a minimum number of full remainder-years,
+    //to reduce looping across a large number of years
+    int approx_days = (int)Math.floor(jd_minus_base);
+    int more_years = (approx_days / LONG_YR) - 1; //there's at least this many remainder-years
+    if (more_years > 0) {
+      //this only works because we've selected a 'base' as the end of a calendar cycle
+      int m_p = more_years - 1;
+      int more_days = more_years * SHORT_YR + (m_p/4) - (m_p/100) + (m_p/400) + 1;
+      cursor += more_days; //still on a Jan 1.0
+      year += more_years;
+    }
+    //second part: SHORT loop (for at most several years) to get any more remainder-years
+    long year_so_far = year; //to remember this value in the loop below 
+    for(int yr = 0; yr < CYCLE_YEARS; ++yr ) {
+      int year_length = isLeap(year_so_far + yr) ? LONG_YR : SHORT_YR;
+      if (cursor + year_length <= jd_minus_base) {
+        cursor += year_length; //the next Jan 1.0
+        ++year;
+      } else { break; }
+    }
+    
+    //jd_minus_base is now between Jan 1.0 and the Jan 1.0 of the following year
+    
+    //3. months and days in the final year
+    int month = 0; //a loop index AND used outside the loop
+    double fractionalDays = 0.0;
+    int[] MONTH_LEN = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    for(month = 1; month <= 12; ++month) {
+      int month_length = MONTH_LEN[month - 1];
+      if (isLeap(year) && month == 2) ++month_length;
+      if (cursor + month_length <= jd_minus_base) {
+        cursor += month_length; //1st of the next month
+      }
+      else {
+        fractionalDays = jd_minus_base - cursor + 1.0;
+        break;
+      }
+    }
+    return new CalendarDate(year, month, fractionalDays);
+  }
+    
   
   public static void main(String[] args) {
     // testDate(1957, 10, 4.81, 2436116.31, cal);
 
+    /*
     double jd = convertOleary(1957, 10, 4.81);
     System.out.println(jd);
     jd = gregorianToJulianDate(1957, 10, 4.81);
@@ -150,6 +210,7 @@ public final class JulianDateCompact {
     System.out.println(jd);
     jd = gregorianToJulianDate(0, 3, 1.0);
     System.out.println(jd);
+    */
     
     testNonNegYears();
     testNegYears();
@@ -190,12 +251,17 @@ public final class JulianDateCompact {
   
   private static void testNegYears() {
     double JAN_0_YEAR_0 = 1_721_058.5; 
-    testNegYear(-1, 12, 31, JAN_0_YEAR_0);
     testNegYear(-1, 1, 1, JAN_0_YEAR_0 - 364);
+    testNegYear(-1, 12, 31, JAN_0_YEAR_0);
     testNegYear(-2, 12, 31, JAN_0_YEAR_0 - 365);
+    testNegYear(-2, 12, 31.3, JAN_0_YEAR_0 - 365 + 0.3);
     testNegYear(-3, 12, 31, JAN_0_YEAR_0 - 365 * 2);
     testNegYear(-4, 12, 31, JAN_0_YEAR_0 - 365 * 3);
     testNegYear(-5, 12, 31, JAN_0_YEAR_0 - 365 * 3 - 366 * 1);
+    testNegYear(-6, 12, 31, JAN_0_YEAR_0 - 365 * 4 - 366 * 1);
+    testNegYear(-7, 12, 31, JAN_0_YEAR_0 - 365 * 5 - 366 * 1);
+    testNegYear(-8, 12, 31, JAN_0_YEAR_0 - 365 * 6 - 366 * 1);
+    testNegYear(-9, 12, 31, JAN_0_YEAR_0 - 365 * 6 - 366 * 2);
   }
   
   
@@ -205,6 +271,12 @@ public final class JulianDateCompact {
     if (!success) {
       System.out.println("Error. Expected: " + expected + " result:" + jd + " Input " +  y+ "-" + m + "-" + d );
     }
+    
+    CalendarDate dt = julianDateToGregorian2(expected);
+    success = (dt.y == y) && (dt.m == m) && (dt.d == d);
+    if (!success) {
+      System.out.println("Error. Expected: " +  y+"-"+m+"-"+d + " result:" + dt.y+"-"+dt.m+"-"+dt.d + " Input " + jd);
+    }
   }
   
   private static void testNegYear(long y, int m, double d, double expected) {
@@ -212,6 +284,11 @@ public final class JulianDateCompact {
     boolean success = (jd == expected);
     if (!success) {
       System.out.println("Error. Expected: " + expected + " result:" + jd + " Input " +  y+ "-" + m + "-" + d );
+    }
+    CalendarDate dt = julianDateToGregorian2(expected);
+    success = (dt.y == y) && (dt.m == m) && (Math.abs(dt.d - d) < 0.0000001);
+    if (!success) {
+      System.out.println("Error. Expected: " +  y+"-"+m+"-"+d + " result:" + dt.y+"-"+dt.m+"-"+dt.d + " Input " + jd);
     }
   }
 }
