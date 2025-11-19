@@ -57,17 +57,17 @@ public final class JulianDateConverterTEST {
     testDate(-4713, 12, 31.0, -1.5, cal);
     testDate(-4713, 12, 30.0, -2.5, cal);
     
-    testDate(-98, 1, 1.5, 1684532.0 + 1.0 + LEAP_YEAR_NUM_DAYS + NORMAL_YEAR_NUM_DAYS, cal); 
-    testDate(-99, 1, 1.5, 1684532.0 + 1.0 + LEAP_YEAR_NUM_DAYS, cal); 
+    testDate(-98, 1, 1.5, 1684532.0 + 1.0 + LONG_YEAR + SHORT_YEAR, cal); 
+    testDate(-99, 1, 1.5, 1684532.0 + 1.0 + LONG_YEAR, cal); 
     testDate(-100, 1, 1.5, 1684532.0 + 1.0, cal); 
-    testDate(-101, 1, 1.5, 1684532.0 + 1.0 - NORMAL_YEAR_NUM_DAYS, cal);
-    testDate(-102, 1, 1.5, 1684532.0 + 1.0 - 2*NORMAL_YEAR_NUM_DAYS, cal);
+    testDate(-101, 1, 1.5, 1684532.0 + 1.0 - SHORT_YEAR, cal);
+    testDate(-102, 1, 1.5, 1684532.0 + 1.0 - 2*SHORT_YEAR, cal);
     
     testDate(-600, 1, 1.5, 1501907.0 + 1.0, cal); 
     testDate(-2000, 1, 1.5, 990557.0 + 1.0, cal);
     
     testDate(-1000, 1, 1.5, 1355807.0 + 1.0, cal);
-    testDate(-1001, 1, 1.5, 1355807.0 + 1.0 - NORMAL_YEAR_NUM_DAYS, cal);
+    testDate(-1001, 1, 1.5, 1355807.0 + 1.0 - SHORT_YEAR, cal);
     
     testDate(100, 1, 1.5, 1757582.0 + 1.0, cal);
     testDate(200, 1, 1.5, 1794107.0 + 1.0, cal);

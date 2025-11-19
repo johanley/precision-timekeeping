@@ -41,14 +41,14 @@ public enum Calendar implements CalendarLeapYear {
   };
 
   /** Number of days in a leap year: {@value} */
-  public static final int LEAP_YEAR_NUM_DAYS = 366;
+  public static final int LONG_YEAR = 366;
   
   /** Number of days in a non-leap year: {@value} */
-  public static final int NORMAL_YEAR_NUM_DAYS = 365;
+  public static final int SHORT_YEAR = 365;
 
   /** Return the number of days in the given year. */
   public int numDaysIn(long year) {
-    return isLeap(year) ? LEAP_YEAR_NUM_DAYS : NORMAL_YEAR_NUM_DAYS;
+    return isLeap(year) ? LONG_YEAR : SHORT_YEAR;
   }
 
   /** Number of years in one complete cycle of this calendar. */
@@ -61,7 +61,7 @@ public enum Calendar implements CalendarLeapYear {
    The Julian date for January 0.0, year 0, for this calendar.
    This corresponds to December 31 of the year -1. 
   */
-  public BigDecimal julianDateJan0Year0() {  return julianDateJan0Year0; }
+  public BigDecimal julianDateJan0Year0() {  return jdJan0Year0; }
   
   /** 
    For the given (fractional) date, return the (fractional) number of days since Jan 0.0.
@@ -91,33 +91,20 @@ public enum Calendar implements CalendarLeapYear {
     return big(monthAccumulator).add(daysRemainingInMonth(month, day, isLeap));
   }
 
-  /** 
-   Number of days in one full set of complete years.
-   Includes the start-year, but excludes the end-year.
-   Returns 0 if the start and end are the same year. 
-  */
-  public int daysInCompleteYears(long startYr, long endYr) {
-    int result = 0;
-    for(long year = startYr; year < endYr; ++year) {
-      result = result + numDaysIn(year);
-    }
-    return result;
-  }
-
   /**
    Constructor. 
    @param fullCycleYears the number of years in a complete cycle of the calendar 
    @param fullCycleDays the number of days in a complete cycle of the calendar
-   @param julianDateJan0Year0 the Julian date for January 0.0, year 0, for the calendar
+   @param jdJan0Year0 the Julian date for January 0.0, year 0, for the calendar
   */
-  private Calendar(int fullCycleYears, int fullCycleDays, BigDecimal julianDateJan0Year0) {
+  private Calendar(int fullCycleYears, int fullCycleDays, BigDecimal jdJan0Year0) {
     this.fullCycleYears = fullCycleYears;
     this.fullCycleDays = fullCycleDays;
-    this.julianDateJan0Year0 = julianDateJan0Year0;
+    this.jdJan0Year0 = jdJan0Year0;
   }
   private int fullCycleYears;
   private int fullCycleDays;
-  private BigDecimal julianDateJan0Year0; //with no timescale
+  private BigDecimal jdJan0Year0; //with no timescale
   
   /** The number of days remaining in the given month, from the given day. */
   private static BigDecimal daysRemainingInMonth(int month, BigDecimal day, boolean isLeap) {
