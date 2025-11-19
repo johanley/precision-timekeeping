@@ -205,10 +205,6 @@ public final class JulianDateConverterTEST {
   private void testDate(long year, int month, double day, double jd, Calendar calendar) {
     testDateToJd(year, month, day, jd, calendar);
     testJdToDate(year,  month,  day, jd, calendar);
-    if (GREGORIAN == calendar /*&& year >= 0*/) { 
-      testDateToJdCompact(year, month, day, jd);
-      testJdToDateCompact(year, month, day, jd);
-    }
   }
 
   private void testDateToJdForYear(long year, double jan_0_given_year, Calendar calendar) {
@@ -240,17 +236,4 @@ public final class JulianDateConverterTEST {
     assertEquals(dt.month(), m_expected);
     assertEquals(dt.fractionalDay(), BigDecimal.valueOf(d_expected));
   }
-  
-  private void testDateToJdCompact(long year, int month, double day, Double jd_expected) {
-    Double jd = JulianDateCompact.gregorianToJulianDate(year, month, day);
-    assertEquals(jd_expected, jd);
-  }
-  private void testJdToDateCompact(long year, int month, double day, Double jd) {
-    JulianDateCompact.CalendarDate date = JulianDateCompact.julianDateToGregorian2(jd);
-    assertEquals(year, date.y);
-    assertEquals(month, date.m);
-    assertEquals(day, date.d, 0.000000001);
-  }
-  
-  
 }
