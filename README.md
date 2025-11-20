@@ -47,7 +47,7 @@ It's true that *some* timescale conversions are defined by conventional relation
 - TT has a fixed offset from TAI
 - TDB, whose offset from TAI is a simple periodic function
 - GPS has a fixed offset from TAI
-- UT1, whose offset from TAI comes from data files from IERS
+- UT1, whose offset from TAI comes from data files from IERS, which you need to update manually
 - UTC, modeled here as a fixed offset from TAI, with a back-door to override the value
 
 
