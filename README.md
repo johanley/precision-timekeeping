@@ -1,6 +1,6 @@
 ## Precision Timekeeping in Java
 
-## References For Context
+References for context:
 - The *Explanatory Supplement to the Astronomical Almanac*, various editions
 - <a href='https://www.iausofa.org/'>SOFA</a> and its Cookbook called *SOFA Time Scale and Calendar Tools* 
 
