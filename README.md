@@ -64,7 +64,7 @@ It's true that *some* timescale conversions are defined precisely by conventiona
 
 ### Other Items
 - time zones are not part of this library
-- a `Date` always has `Calendar`, and a `Time` always has `Timescale`
+- a `Date` always has a `Calendar`, and a `Time` always has a `Timescale`
 
 
 ## What I Learned
