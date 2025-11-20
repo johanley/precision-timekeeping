@@ -33,16 +33,22 @@ So, for modern dates and times, UTC will have a *fixed* offset from TAI.
 
 Here, UTC is implemented as having a *constant offset from TAI*.
 That constant offset is hard-coded, but that setting can be easily overridden using a simple System property.
-This allows you to manually set a different offset, if desired. 
 
-## Conversions Between Timescales Are Supported To Sub-Millisecond Level
+## Conversions Between Timescales At Sub-Millisecond Level
 Time can be represented to arbitrary precision in this library. 
-But *conversions* between timescales are another story. 
-Here, the goal is to ensure they are accurate to sub-millisecond level.
+But *conversions* between timescales is another story. 
+Here, the goal is to ensure timescale conversions are accurate to sub-millisecond level.
 
-The distinction is needed because, in general, conversions between timescales simply aren't always known to arbitrary precision. 
-It's true that some conversions are defined by conventional relations, but that's not always true.
+The distinction is needed because, in general, conversions between timescales simply aren't *always* known to arbitrary precision. 
+It's true that *some* timescale conversions are defined by conventional relations, but that's not always true.
 
+## Supported Timescales
+- TAI is the core timescale. Other timescales are defined with respect to TAI.
+- TT has a fixed offset from TAI
+- TDB, whose offset from TAI is a simple periodic function
+- GPS has a fixed offset from TAI
+- UT1, whose offset from TAI comes from data files from IERS
+- UTC, modeled here as a fixed offset from TAI, with a back-door to override the value
 
 
 # What I Learned
