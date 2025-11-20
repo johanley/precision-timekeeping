@@ -92,6 +92,37 @@ public final class DateTEST {
     dayOfWeek(2025, 11, 16, DayOfWeek.SUNDAY);
   }
   
+  @Test public void daysFrom() {
+    Calendar cal = Calendar.GREGORIAN;
+    daysFrom(2025, 1, 15, cal, 2025, 1, 14, cal, 1);
+    daysFrom(2025, 12, 31, cal, 2025, 1, 1, cal, 365 - 1);
+    daysFrom(2026, 1, 1, cal, 2025, 1, 1, cal, 365);
+    
+    //Explanatory Supplement 1961, page 437
+    daysFrom(1900, 1, 1, cal, 1800, 1, 1, cal, (241_5020 - 237_8496));
+    daysFrom(1900, 1, 1, cal, 1500, 1, 1, cal, (241_5020 - 226_8923));
+    //Julian calendar
+    daysFrom(1900, 1, 1, Calendar.JULIAN, 1800, 1, 1, Calendar.JULIAN, (241_5032 - 237_8507));
+    daysFrom(1900, 1, 1, Calendar.JULIAN, 1500, 1, 1, Calendar.JULIAN, (241_5032 - 226_8932));
+    //across calendars
+    daysFrom(1900, 1, 1, Calendar.GREGORIAN, 1800, 1, 1, Calendar.JULIAN, (241_5020 - 237_8507));
+    
+    //Explanatory Supplement 1961, page 412
+    //the date on which the switch was made from Julian fries to Gregorian goodness 
+    daysFrom(1582, 10, 15, Calendar.GREGORIAN, 1582, 10, 5, Calendar.JULIAN, 0);
+  }
+
+  /** This tests in both directions. */
+  private void daysFrom(long y_a, int m_a, int d_a, Calendar cal_a, long y_b, int m_b, int d_b, Calendar cal_b, long expected) {
+    Date a = Date.from(y_a, m_a, d_a, cal_a);
+    Date b = Date.from(y_b, m_b, d_b, cal_b);
+    long res = a.daysFrom(b);
+    assertEquals(expected, res);
+    
+    res = b.daysFrom(a);
+    assertEquals(-expected, res);
+  }
+  
   private void dayOfWeek(long y, int m, int d, DayOfWeek dayOfWeek) {
     Date date = Date.from(y,  m,  d, Calendar.GREGORIAN);
     assertEquals(dayOfWeek, date.weekday());

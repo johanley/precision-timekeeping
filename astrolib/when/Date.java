@@ -145,14 +145,22 @@ public final class Date implements Comparable<Date> {
     return equals(that);
   }
 
-  /*
-    This needs the Julian day number for both calendars.
-    This could even work across calendars.
-    public long daysFrom(Date that) () {}
+  /**
+   Return the number of days between this date and another date.
+   Positive if this date is after the other date,
+   negative if this date is before the other date.
+   @param other can have any calendar
+   */
+  public long daysFrom(Date other) {
+    Time time = Time.from(12, 0, BigDecimal.ZERO, TimescaleCommon.TAI); //12h has integral Julian date
+    DateTime dt_a = DateTime.from(this, time);
+    JulianDate jd_a = JulianDateConverter.using(this.calendar).toJulianDate(dt_a);
     
-    change both this, that to jd
-    do the math: the diff in jd
-  */
+    DateTime dt_b = DateTime.from(other, time);
+    JulianDate jd_b = JulianDateConverter.using(other.calendar).toJulianDate(dt_b);
+    BigDecimal res = jd_a.jd().subtract(jd_b.jd()); 
+    return res.longValueExact(); //exception if any fractional part
+  }
 
   /**
    Add the given number of days to this {@link Date}.

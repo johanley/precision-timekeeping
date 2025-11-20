@@ -4,9 +4,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-/** Run all test classes in this package. */
+/** Run all tests in this package. */
 @RunWith(Suite.class)
 @SuiteClasses({
+  BigDecimalTEST.class, //not really a test; more a demo of its behaviour
   BigDecimalHelperTEST.class,
   CalendarTEST.class,
   DateTEST.class,
