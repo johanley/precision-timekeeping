@@ -12,7 +12,6 @@ If you disagree with any of the design decisions mentioned below, changing the c
 
 ### Gregorian and Julian Calendars
 The Gregorian calendar and the Julian calendar are implemented.
-No other calendars are supported. 
 
 ### *Proleptic* Behaviour
 Either calendar can be used for any date.
@@ -55,7 +54,7 @@ Here, the goal is to **ensure timescale conversions are accurate to sub-millisec
 The distinction is needed because, in general, conversions between timescales simply aren't *always* known to arbitrary precision. 
 It's true that *some* timescale conversions are defined precisely by conventional relations, but that's not always true.
 
-### Supported Timescales
+### Included Timescales
 - TAI is the core timescale. Other timescales are defined with respect to TAI.
 - TT has a fixed offset from TAI
 - TDB, whose offset from TAI is a simple periodic function
