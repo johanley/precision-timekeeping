@@ -17,19 +17,23 @@ This (bothersome) restriction is common in date-time libraries.
 ## Arbitrary Precision
 The date-time and Julian date can be defined to **arbitrary precision** for seconds and fractional days.
 This is implemented by using Java's `BigDecimal` class.
-This is unusual property. 
+This is an unusual property. 
 Most date-time libraries don't allow arbitrary precision for the time of day:
 - Java's `java.time` package stops at nanoseconds
 - <a href='https://www.iausofa.org/'>SOFA</a> implements fractional days with `double`. 
-That can represent the time of day to an accuracy of ~20,000 nanoseconds.
+That can represent the time of day to an accuracy of ~20 microseconds.
 
 ## UTC Is Minimally Supported
 The problem with UTC is leap-seconds.
-Leap seconds are a bit of a logical hornet's nest. 
+Leap seconds are a logical hornet's nest. 
 Superficially they seem simple, but this is misleading.
+Because of their complexity, it's likely that international standards bodies will add no new leap seconds in the future.
+So, for modern dates and times, UTC will have a *fixed* offset from TAI.
+(The last leap second was 2016-12-31 23:59:60.)
 
 Here, UTC is implemented as having a *constant offset from TAI*.
-That constant offset is hard-coded, but it can also be overridden using a simple System property.
+That constant offset is hard-coded, but that setting can be easily overridden using a simple System property.
+This allows you to manually set a different offset, if desired. 
 
 ## Conversions Between Timescales Are Supported To Sub-Millisecond Level
 Time can be represented to arbitrary precision in this library. 
