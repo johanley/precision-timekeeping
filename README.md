@@ -7,6 +7,9 @@
 
 ## Design Choices In This Library
 
+(The implementation of this library is not very complex. 
+Changing any of the design decisions mentioned below shouldn't be too difficult.)
+
 ### Gregorian and Julian Calendars
 The Gregorian calendar and the Julian calendar are implemented.
 No other calendars are supported. 
@@ -17,7 +20,7 @@ There's no restriction to the historical facts of when a calendar was adopted in
 
 ### Unrestricted Julian Dates 
 The Julian date is **not restricted** to dates having Julian date >= 0.
-This (bothersome) restriction is common in date-time libraries.
+This restriction is found in many date-time libraries.
 
 ### Arbitrary Precision
 The date-time and Julian date can be defined to **arbitrary precision** for seconds and fractional days.
@@ -36,7 +39,7 @@ The BIPM is <a href='https://www.bipm.org/en/cgpm-2022/resolution-4'>seeking to 
 <em>"the consequent introduction of leap seconds creates discontinuities that risk causing serious malfunctions in critical digital infrastructure"</em>.
 Here's an example of <a href='https://github.com/liberfa/erfa/issues/91'>a tricky leap second bug</a>.
 
-Because of their complexity, it's likely that international standards bodies will add no new leap seconds in the future.
+Because of their complexity, it's likely that international standards bodies will add **no new leap seconds** in the future.
 So, for modern dates and times, UTC will have a *fixed* offset from TAI.
 The most recent (and likely the last) leap second was [2016-12-31 23:59:60.0, 2017-01-01 00:00:00.0).
 
