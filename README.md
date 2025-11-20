@@ -7,8 +7,8 @@
 
 ## Design Choices In This Library
 
-(The implementation of this library is not very complex. 
-Changing any of the design decisions mentioned below shouldn't be too difficult.)
+This library is not very large or complex. 
+If you disagree with any of the design decisions mentioned below, changing the code isn't difficult. 
 
 ### Gregorian and Julian Calendars
 The Gregorian calendar and the Julian calendar are implemented.
