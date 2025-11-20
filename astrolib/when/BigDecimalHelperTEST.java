@@ -73,7 +73,7 @@ public final class BigDecimalHelperTEST {
     BigDecimal a = big(1);
     BigDecimal b = big(3);
     BigDecimal c = divide(a, b);
-    assertEquals(c.toPlainString(), "0.3333333333333333");
+    assertEquals("0.3333333333333333333333333333333333", c.toPlainString());
     
     try {
       System.setProperty(BigDecimalHelper.OVERRIDE_INFINITE_CUTOFF, "11");
@@ -106,7 +106,7 @@ public final class BigDecimalHelperTEST {
   
   @Test public void cutoff() {
     int cutoff = BigDecimalHelper.infiniteCutoffPrecision();
-    assertEquals(MathContext.DECIMAL64.getPrecision(), cutoff);
+    assertEquals(MathContext.DECIMAL128.getPrecision(), cutoff);
     
     try {
       System.setProperty(BigDecimalHelper.OVERRIDE_INFINITE_CUTOFF, "11");
