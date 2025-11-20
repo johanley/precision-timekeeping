@@ -16,8 +16,7 @@ This (bothersome) restriction is common in date-time libraries.
 
 ## Arbitrary Precision
 The date-time and Julian date can be defined to **arbitrary precision** for seconds and fractional days.
-This is implemented by using Java's  
-<a href='https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/class-use/BigDecimal.html'>BigDecimal</a> class.
+This is implemented by using Java's <a href='https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/class-use/BigDecimal.html'>BigDecimal</a> class.
 This is an unusual property. 
 Most date-time libraries don't allow arbitrary precision for the time of day:
 - Java's <a href='https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/package-summary.html'>java.time</a> package stops at nanoseconds.
@@ -29,7 +28,7 @@ UTC is the only timescale that uses leap seconds. **Leap seconds are problematic
  
 Superficially they seem simple, but this is misleading.
 The BIPM is <a href='https://www.bipm.org/en/cgpm-2022/resolution-4'>seeking to change things</a> because 
-<em>the consequent introduction of leap seconds creates discontinuities that risk causing serious malfunctions in critical digital infrastructure</em>.
+<em>"the consequent introduction of leap seconds creates discontinuities that risk causing serious malfunctions in critical digital infrastructure"</em>.
 Here's <a href='https://github.com/liberfa/erfa/issues/91'>an example of a tricky leap second bug</a>.
 
 Because of their complexity, it's likely that international standards bodies will add no new leap seconds in the future.
