@@ -62,8 +62,9 @@ It's true that *some* timescale conversions are defined precisely by conventiona
 - UT1, whose offset from TAI comes from data files from IERS, which you need to update manually
 - UTC, modeled here as a fixed offset from TAI, with a back-door to override the value
 
-### No Time Zones
-Time zones are not part of this library.
+### Other Items
+- time zones are not part of this library
+- a `Date` always has `Calendar`, and a `Time` always has `Timescale`
 
 
 ## What I Learned
