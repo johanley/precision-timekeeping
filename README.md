@@ -50,6 +50,10 @@ It's true that *some* timescale conversions are defined by conventional relation
 - UT1, whose offset from TAI comes from data files from IERS, which you need to update manually
 - UTC, modeled here as a fixed offset from TAI, with a back-door to override the value
 
+## No Time Zones
+Time zones are not part of this library.
+
+
 
 # What I Learned
 
