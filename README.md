@@ -16,28 +16,34 @@ This (bothersome) restriction is common in date-time libraries.
 
 ## Arbitrary Precision
 The date-time and Julian date can be defined to **arbitrary precision** for seconds and fractional days.
-This is implemented by using Java's `BigDecimal` class.
+This is implemented by using Java's  
+<a href='https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/class-use/BigDecimal.html'>BigDecimal</a> class.
 This is an unusual property. 
 Most date-time libraries don't allow arbitrary precision for the time of day:
-- Java's `java.time` package stops at nanoseconds
-- <a href='https://www.iausofa.org/'>SOFA</a> implements fractional days with `double`. 
-That can represent the time of day to an accuracy of ~20 microseconds.
+- Java's <a href='https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/package-summary.html'>java.time</a> package stops at nanoseconds.
+- <a href='https://www.iausofa.org/'>SOFA</a> implements Julian dates with a pair of `double`s. 
+That library can represent a moment in time to an accuracy of <a href='https://aa.usno.navy.mil/downloads/novas/USNOAA-TN2011-02.pdf'>~20 microseconds</a>.
 
 ## UTC Is Minimally Supported
-The problem with UTC is leap-seconds.
-Leap seconds are a logical hornet's nest. 
+UTC is the only timescale that uses leap seconds. **Leap seconds are problematic.**
+ 
 Superficially they seem simple, but this is misleading.
+The BIPM is <a href='https://www.bipm.org/en/cgpm-2022/resolution-4'>seeking to change things</a> because 
+<em>the consequent introduction of leap seconds creates discontinuities that risk causing serious malfunctions in critical digital infrastructure</em>.
+Here's <a href='https://github.com/liberfa/erfa/issues/91'>an example of a tricky leap second bug</a>.
+
 Because of their complexity, it's likely that international standards bodies will add no new leap seconds in the future.
 So, for modern dates and times, UTC will have a *fixed* offset from TAI.
-(The last leap second was 2016-12-31 23:59:60.)
+The most recent (and likely the last) leap second was [2016-12-31 23:59:60.0, 2017-01-01 00:00:00.0).
 
-Here, UTC is implemented as having a *constant offset from TAI*.
-That constant offset is hard-coded, but that setting can be easily overridden using a simple System property.
+In this library, UTC is implemented as having a *simple constant offset from TAI*, equal to its current value at time of writing.
+That constant offset is hard-coded.
+If needed, the offset can be easily overridden using a simple System property.
 
 ## Conversions Between Timescales At Sub-Millisecond Level
 Time can be represented to arbitrary precision in this library. 
 But *conversions* between timescales is another story. 
-Here, the goal is to ensure timescale conversions are accurate to sub-millisecond level.
+Here, the goal is to **ensure timescale conversions are accurate to sub-millisecond level**.
 
 The distinction is needed because, in general, conversions between timescales simply aren't *always* known to arbitrary precision. 
 It's true that *some* timescale conversions are defined by conventional relations, but that's not always true.
@@ -171,8 +177,6 @@ Astropy seems to mirror lower level (?) implementations like SOFA, ERFA.
       https://www.bipm.org/en/cgpm-2022/resolution-4
       https://en.wikipedia.org/wiki/Leap_second#Problems
       
-   DAY 0.0 - I need a policy for this!
-   
    [CASA Timescales](https://casadocs.readthedocs.io/en/stable/notebooks/memo-series.html#Time-Reference-Frames)
    
    Referenced in the SOFA cookbook, IERS Conventions (2003) - about IERS reference systems, tides
