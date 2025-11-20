@@ -1,4 +1,4 @@
-## precision-timekeeping
+## Precision Timekeeping in Java
 
 ## References For Context
 - The *Explanatory Supplement to the Astronomical Almanac*, various editions
