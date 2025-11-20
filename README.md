@@ -19,7 +19,7 @@ There's no restriction to the historical facts of when a calendar was adopted in
 
 ### Unrestricted Julian Dates 
 The Julian date is **not restricted** to dates having Julian date >= 0.
-This restriction is found in many date-time libraries.
+This restriction is unfortunately found in many date-time libraries.
 
 ### Arbitrary Precision
 The date-time and Julian date can be defined to **arbitrary precision** for seconds and fractional days.
