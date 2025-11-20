@@ -1,5 +1,10 @@
 ## astrolib
 
+## References
+- The *Explanatory Supplement to the Astronomical Almanac*, various editions
+- <a href='https://www.iausofa.org/'>SOFA</a> and its Cookbook called *SOFA Time Scale and Calendar Tools* 
+
+
 ## Design Choices In This Library
 
 ### Gregorian and Julian Calendars
@@ -57,10 +62,6 @@ It's true that *some* timescale conversions are defined precisely by conventiona
 
 ### No Time Zones
 Time zones are not part of this library.
-
-## References
-- The *Explanatory Supplement to the Astronomical Almanac*, various editions
-- <a href='https://www.iausofa.org/'>SOFA</a> and its Cookbook called *SOFA Time Scale and Calendar Tools* 
 
 
 ## What I Learned
