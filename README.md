@@ -1,35 +1,35 @@
 ## astrolib
 
-# Design Choices In This Library
+## Design Choices In This Library
 
-## Gregorian and Julian Calendars
+### Gregorian and Julian Calendars
 The Gregorian calendar and the Julian calendar are implemented.
 No other calendars are supported. 
 
-## *Proleptic* Behaviour
+### *Proleptic* Behaviour
 Either calendar can be used for any date.
 There's no restriction to the historical facts of when a calendar was adopted in any jurisdiction.
 
-## Unrestricted Julian Dates 
+### Unrestricted Julian Dates 
 The Julian date is **not restricted** to dates having Julian date >= 0.
 This (bothersome) restriction is common in date-time libraries.
 
-## Arbitrary Precision
+### Arbitrary Precision
 The date-time and Julian date can be defined to **arbitrary precision** for seconds and fractional days.
-This is implemented by using Java's <a href='https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/class-use/BigDecimal.html'>BigDecimal</a> class.
+This is implemented by using Java's <a href='https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html'>BigDecimal</a> class.
 This is an unusual property. 
 Most date-time libraries don't allow arbitrary precision for the time of day:
 - Java's <a href='https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/package-summary.html'>java.time</a> package stops at nanoseconds.
 - <a href='https://www.iausofa.org/'>SOFA</a> implements Julian dates with a pair of `double`s. 
 That library can represent a moment in time to an accuracy of <a href='https://aa.usno.navy.mil/downloads/novas/USNOAA-TN2011-02.pdf'>~20 microseconds</a>.
 
-## UTC Is Minimally Supported
+### UTC Is Minimally Supported
 UTC is the only timescale that uses leap seconds. **Leap seconds are problematic.**
  
 Superficially they seem simple, but this is misleading.
 The BIPM is <a href='https://www.bipm.org/en/cgpm-2022/resolution-4'>seeking to change things</a> because 
 <em>"the consequent introduction of leap seconds creates discontinuities that risk causing serious malfunctions in critical digital infrastructure"</em>.
-Here's <a href='https://github.com/liberfa/erfa/issues/91'>an example of a tricky leap second bug</a>.
+Here's an example of <a href='https://github.com/liberfa/erfa/issues/91'>a tricky leap second bug</a>.
 
 Because of their complexity, it's likely that international standards bodies will add no new leap seconds in the future.
 So, for modern dates and times, UTC will have a *fixed* offset from TAI.
@@ -39,15 +39,15 @@ In this library, UTC is implemented as having a *simple constant offset from TAI
 That constant offset is hard-coded.
 If needed, the offset can be easily overridden using a simple System property.
 
-## Conversions Between Timescales At Sub-Millisecond Level
+### Conversions Between Timescales At Sub-Millisecond Level
 Time can be represented to arbitrary precision in this library. 
 But *conversions* between timescales is another story. 
 Here, the goal is to **ensure timescale conversions are accurate to sub-millisecond level**.
 
 The distinction is needed because, in general, conversions between timescales simply aren't *always* known to arbitrary precision. 
-It's true that *some* timescale conversions are defined by conventional relations, but that's not always true.
+It's true that *some* timescale conversions are defined precisely by conventional relations, but that's not always true.
 
-## Supported Timescales
+### Supported Timescales
 - TAI is the core timescale. Other timescales are defined with respect to TAI.
 - TT has a fixed offset from TAI
 - TDB, whose offset from TAI is a simple periodic function
@@ -55,12 +55,12 @@ It's true that *some* timescale conversions are defined by conventional relation
 - UT1, whose offset from TAI comes from data files from IERS, which you need to update manually
 - UTC, modeled here as a fixed offset from TAI, with a back-door to override the value
 
-## No Time Zones
+### No Time Zones
 Time zones are not part of this library.
 
 
 
-# What I Learned
+## What I Learned
 
 - the IAU seems to be leaning towards not establishing any more leap seconds.
 - UTC and leaps seconds are the most problematic aspect of timekeeping.
@@ -109,7 +109,7 @@ Astropy seems to mirror lower level (?) implementations like SOFA, ERFA.
 
 
 
-# Sketchy Notes
+## Sketchy Notes
 
    Support TT, UT1, UTC. The last two need data files for best results. 1960..present? When UTC began. 1970, when leap seconds began?
    data files for leap seconds, TT-UT1
