@@ -1,5 +1,45 @@
 ## astrolib
 
+# Design Choices In This Library
+
+## Gregorian and Julian Calendars
+The Gregorian calendar and the Julian calendar are implemented.
+No other calendars are supported. 
+
+## *Proleptic* Behaviour
+Either calendar can be used for any date.
+There's no restriction to the historical facts of when a calendar was adopted in any jurisdiction.
+
+## Unrestricted Julian Dates 
+The Julian date is **not restricted** to dates having Julian date >= 0.
+This (bothersome) restriction is common in date-time libraries.
+
+## Arbitrary Precision
+The date-time and Julian date can be defined to **arbitrary precision** for seconds and fractional days.
+This is implemented by using Java's `BigDecimal` class.
+This is unusual property. 
+Most date-time libraries don't allow arbitrary precision for the time of day:
+- Java's `java.time` package stops at nanoseconds
+- <a href='https://www.iausofa.org/'>SOFA</a> implements fractional days with `double`. 
+That can represent the time of day to an accuracy of ~20,000 nanoseconds.
+
+## UTC Is Minimally Supported
+The problem with UTC is leap-seconds.
+Leap seconds are a bit of a logical hornet's nest. 
+Superficially they seem simple, but this is misleading.
+
+Here, UTC is implemented as having a *constant offset from TAI*.
+That constant offset is hard-coded, but it can also be overridden using a simple System property.
+
+## Conversions Between Timescales Are Supported To Sub-Millisecond Level
+Time can be represented to arbitrary precision in this library. 
+But *conversions* between timescales are another story. 
+Here, the goal is to ensure they are accurate to sub-millisecond level.
+
+The distinction is needed because, in general, conversions between timescales simply aren't always known to arbitrary precision. 
+It's true that some conversions are defined by conventional relations, but that's not always true.
+
+
 
 # What I Learned
 
@@ -138,4 +178,10 @@ Astropy seems to mirror lower level (?) implementations like SOFA, ERFA.
    NASA no use heap!
    They also aren't crazy about directives. And function pointers.
    And they like: gcc   -Wall -Werror -Wpedantic
-   https://www.youtube.com/watch?v=GWYhtksrmhE          
+   https://www.youtube.com/watch?v=GWYhtksrmhE
+   
+   Scientists are stuck on doubles, instead of BigDecimal and friends.
+   They use tricks like using pairs of doubles - 'integer' + fraction.
+   There are tools in C for arbitrary precision values: https://gmplib.org/
+   https://hea-www.cfa.harvard.edu/~arots/TimeWCS/WCSPaper-IV-v1.1A4.pdf          
+   "For time, more than any other coordinate, precision may be a concern and naive use of double precision floating point parameters for time values (especially Julian Dates) will be inadequate in some cases. However, a judicious combination of keywords and their values, as described in the remainder of this section, will allow almost any required precision to be achieved without having to resort to anything beyond double precision data types in handling keywordvalues. We urgecreatorsof data productsto apply special care, so that clients can rely on this being the case. If and when, in addition to the 32-bit (E) and 64-bit (D) floating point types, a 128-bit floating point data type becomes available and supported, we envision that such a type will also be used for time values, removing the need for any special provisions."
