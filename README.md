@@ -69,6 +69,18 @@ It's true that *some* timescale conversions are defined precisely by conventiona
 - time zones are not part of this library
 - a `Date` always has a `Calendar`, and a `Time` always has a `Timescale`
 
+### Time Precision in Various Domains
+
+|Precision|Description|
+|---------|-----------|
+|100,000 ns|Network Time Protocal on a LAN|
+|~130 ns|5G cell towers|
+|~20 ns|GPS receiver|
+|~2 ns|GPS satellite|
+|~0.001 ns|ALMA telescope master clock|
+|~0.000 002 ns|World's best clocks|
+
+
 
 ## What I Learned
 
@@ -107,15 +119,6 @@ Astropy seems to mirror lower level (?) implementations like SOFA, ERFA.
 
  
 
-
-|Precision|Description|
-|---------|-----------|
-|100,000 ns|Financial markets, NTP on a LAN|
-|~130 ns|5G cell towers|
-|~20 ns|GPS receiver|
-|~2 ns|GPS satellite|
-|~0.001 ns|ALMA telescope master clock|
-|~0.000 002 ns|World's best clocks|
 
 
 
