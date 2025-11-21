@@ -73,7 +73,7 @@ It's true that *some* timescale conversions are defined precisely by conventiona
 
 |Precision|Description|
 |---------|-----------|
-|100,000 ns|Network Time Protocal on a LAN|
+|100,000 ns|Network Time Protocol on a LAN|
 |~130 ns|5G cell towers|
 |~20 ns|GPS receiver|
 |~2 ns|GPS satellite|
