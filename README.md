@@ -1,9 +1,12 @@
-## Precision Timekeeping in Java
+## Precision Timekeeping 
 
 References for context:
 - The *Explanatory Supplement to the Astronomical Almanac*, various editions
 - <a href='https://www.iausofa.org/'>SOFA</a> and its Cookbook called *SOFA Time Scale and Calendar Tools* 
 
+This project is implemented in Java. 
+Porting to other languages is probably obvious. 
+You would need a library or tool that supports <a href='https://en.wikipedia.org/wiki/List_of_arbitrary-precision_arithmetic_software'>arbitrary precision arithmetic</a>. 
 
 ## Design Choices In This Library
 
