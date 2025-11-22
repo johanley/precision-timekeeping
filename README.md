@@ -56,7 +56,7 @@ But *conversions between* timescales is another story:
 - some conversions are defined *by convention*, and can be taken to be "infinitely precise", so to speak
 - for the remaining conversions, the precision of the conversion varies
  
-Here, the goals are:
+In this library, the goals are:
 - to **ensure timescale conversions are always accurate to sub-millisecond level**, as a kind of minimal baseline 
 - to execute timescale conversions in a **single method call**
 
@@ -81,20 +81,20 @@ This allows conversion from A to B in one method call.
 - UT1, whose offset from TAI comes from data files from IERS, which you need to update manually
 - UTC, modeled as a fixed offset from TAI, with a back-door to override the value
 
-### Other Items
+### Also Notable
+- in this library, a `Date` always has a `Calendar`, and a `Time` always has a `Timescale`
 - time zones are not part of this library
-- a `Date` always has a `Calendar`, and a `Time` always has a `Timescale`
 
 ### Time Precision in Various Domains
 
 |Precision|Description|
 |---------|-----------|
-|~100,000 ns|Network Time Protocol on a LAN|
-|~130 ns|5G cell towers|
-|~20 ns|GPS receiver|
-|~2 ns|GPS satellite|
-|~0.001 ns|ALMA telescope master clock|
 |~0.000 002 ns|World's best clocks|
+|~0.001 ns|ALMA telescope master clock|
+|~2 ns|GPS satellite|
+|~20 ns|GPS receiver|
+|~130 ns|5G cell towers|
+|~100,000 ns|Network Time Protocol on a LAN|
 
 
 
