@@ -62,7 +62,7 @@ But *conversions between* timescales is another story:
 - for the remaining conversions, the precision of the conversion varies
  
 In this library, the goals are:
-- to **ensure timescale conversions are always accurate to sub-millisecond level**, as a kind of minimal baseline 
+- to **ensure timescale conversions are always accurate to sub-millisecond level from 1980-01-01 to the present day**, as a kind of minimal baseline 
 - to execute timescale conversions in a **single method call**
 
 The design of <a href='https://www.iausofa.org/'>SOFA</a> is different in this regard. 
@@ -72,13 +72,14 @@ But in SOFA, to go from one timescale to another, you need to think about the sp
 In this library, it's always a single method call.
 
 
-### UT1 Supported After 1980
-The difference UT1-TAI in seconds is taken from a snapshot of the <a href='https://hpiers.obspm.fr/eop-pc/index.php?index=C04&lang=en'>IERS EOP C04 series data set</a>.
-Before 1980-01-01, the sigma for the UT1-TAI value is generally above 1.0 milliseconds. 
-That date has been adopted as a cutoff.
+### UT1 Supported For 1980-01-01 Onward
+For converting UT1 to other timescales, the difference UT1-TAI in seconds is taken from a downloaded snapshot of the <a href='https://hpiers.obspm.fr/eop-pc/index.php?index=C04&lang=en'>IERS EOP C04 series data set</a>.
+You will need to manually update that snapshot to get the most recent data.
+The sigma for the UT1-TAI value is generally below 1.0 milliseconds after 1980-01-01, and above 1.0 milliseconds before that date. 
 
-If you use a date which is after the range of the snapshot IERS data set, then the code will silently use the most recent value. 
-If you use a date before 1980-01-01, then the library will fail.
+If you use a date that comes after the range of the downloaded snapshot of the IERS data set, 
+then the timescale conversion code will silently use the most recent value found in the snapshot. 
+If you use a date before 1962-01-01, then the timescale conversion will fail.
 
 You can override all of this logic by using a back-door System property that lets you manually set a specific value for UT1-TAI.  
 
