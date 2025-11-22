@@ -52,19 +52,23 @@ If needed, the offset can be easily overridden using a simple System property.
 
 ### Conversions Between Timescales At Sub-Millisecond Level
 Time can be represented to arbitrary precision in this library. 
-But *conversions* between timescales is another story. 
+But *conversions between* timescales is another story:
+- some conversions are defined *by convention*, and can be taken to be "infinitely precise", so to speak
+- for the remaining conversions, the precision of the conversion varies
+ 
 Here, the goal is to **ensure timescale conversions are accurate to sub-millisecond level**, as a kind of minimal baseline.
 
 The design of <a href='https://www.iausofa.org/'>SOFA</a> is different in this regard. 
-In SOFA, specific conversions between timescales are implemented, each at the best precision possible. 
+In SOFA, specific conversions between timescales are implemented, each at the best possible precision. 
 This is a good design for SOFA.
-But in SOFA, you need to think about the specific chain of conversions that gets you from one timescale to another.
+But in SOFA, to go from one timescale to another, you need to think about the specific chain of conversions that gets you from A to B.
 
-So there's a choice or trade-off in the design of conversions between timescales: 
+There's a choice or trade-off in the design of conversions between timescales: 
 - execute a specific sequence of multiple steps (more steps, but each step retains its maximum precision), as in SOFA
 - execute in a single step, as in this library 
 
-The single-step design is implemented here by defining how each timescale differs from TAI.
+The single-step design is implemented here by simply requiring each timescale to define how it differs from TAI.
+This allows inter-conversion from A to B in one method call.
 
 
 ### Included Timescales
