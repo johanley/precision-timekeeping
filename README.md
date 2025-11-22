@@ -73,9 +73,14 @@ In this library, it's always a single method call.
 
 
 ### UT1 Supported After 1980
-The difference UT1-TAI in seconds is taken from the <a href='https://hpiers.obspm.fr/eop-pc/index.php?index=C04&lang=en'>IERS EOP C04 series data set</a>.
-The sigma for the UT1-TAI value is generally below 1.0 milliseconds after 1980-01-01, so that date has been adopted as the cut-off here.
-There's also a back-door System property that lets you manually set a specific value for UT1-TAI.  
+The difference UT1-TAI in seconds is taken from a snapshot of the <a href='https://hpiers.obspm.fr/eop-pc/index.php?index=C04&lang=en'>IERS EOP C04 series data set</a>.
+Before 1980-01-01, the sigma for the UT1-TAI value is generally above 1.0 milliseconds. 
+That date has been adopted as a cutoff.
+
+If you use a date which is after the range of the snapshot IERS data set, then the code will silently use the most recent value. 
+If you use a date before 1980-01-01, then the library will fail.
+
+You can override all of this logic by using a back-door System property that lets you manually set a specific value for UT1-TAI.  
 
 
 ### UTC Is Minimally Supported
