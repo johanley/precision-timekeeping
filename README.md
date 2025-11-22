@@ -14,8 +14,10 @@ Similar implementations in other languages would need
 |---------|-----------|
 |~0.000 002 ns|World's best clocks|
 |~0.001 ns|ALMA telescope master clock|
+|~1 ns|CPU access L1 cache|
 |~2 ns|GPS satellite|
 |~20 ns|GPS receiver|
+|~100 ns|CPU access main memory|
 |~130 ns|5G cell towers|
 |~100,000 ns|Network Time Protocol on a LAN|
 
@@ -232,3 +234,14 @@ Astropy seems to mirror lower level (?) implementations like SOFA, ERFA.
    There are tools in C for arbitrary precision values: https://gmplib.org/
    https://hea-www.cfa.harvard.edu/~arots/TimeWCS/WCSPaper-IV-v1.1A4.pdf          
    "For time, more than any other coordinate, precision may be a concern and naive use of double precision floating point parameters for time values (especially Julian Dates) will be inadequate in some cases. However, a judicious combination of keywords and their values, as described in the remainder of this section, will allow almost any required precision to be achieved without having to resort to anything beyond double precision data types in handling keywordvalues. We urgecreatorsof data productsto apply special care, so that clients can rely on this being the case. If and when, in addition to the 32-bit (E) and 64-bit (D) floating point types, a 128-bit floating point data type becomes available and supported, we envision that such a type will also be used for time values, removing the need for any special provisions."
+
+   
+Finals.data: 1992-01-01 to 2027-01-17, with predictions; quick-look weekly estimates
+Finals.all:  1973-01-02 to 2027-01-17, can't see the difference other than the start-date
+
+EOP C04 series has UT1-TAI, I think.
+https://hpiers.obspm.fr/eop-pc/index.php?index=C04&lang=en
+https://www.bipm.org/documents/20126/28429869/working-document-ID-7399/aed6f662-7a8a-64b3-3b70-f36d3c8ef037  - see slide #5
+https://hpiers.obspm.fr/iers/eop/eopc04/eopc04.1962-now
+https://hpiers.obspm.fr/eop-pc/products/combined/C04.php?date=1&eop=22&year1=1962&month1=1&day1=1&year2=2027&month2=1&day2=1&SUBMIT=Submit+Search
+
