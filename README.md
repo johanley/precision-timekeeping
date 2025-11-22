@@ -8,6 +8,18 @@ This project is implemented in Java.
 Similar implementations in other languages would need 
 <a href='https://en.wikipedia.org/wiki/List_of_arbitrary-precision_arithmetic_software'>arbitrary precision arithmetic</a>, which is widely implemented.  
 
+### Time Precision in Various Domains
+
+|Precision|Description|
+|---------|-----------|
+|~0.000 002 ns|World's best clocks|
+|~0.001 ns|ALMA telescope master clock|
+|~2 ns|GPS satellite|
+|~20 ns|GPS receiver|
+|~130 ns|5G cell towers|
+|~100,000 ns|Network Time Protocol on a LAN|
+
+
 ## Design Choices In This Library
 
 This library is not very large or complex. 
@@ -84,17 +96,6 @@ This allows conversion from A to B in one method call.
 ### Also Notable
 - in this library, a `Date` always has a `Calendar`, and a `Time` always has a `Timescale`
 - time zones are not part of this library
-
-### Time Precision in Various Domains
-
-|Precision|Description|
-|---------|-----------|
-|~0.000 002 ns|World's best clocks|
-|~0.001 ns|ALMA telescope master clock|
-|~2 ns|GPS satellite|
-|~20 ns|GPS receiver|
-|~130 ns|5G cell towers|
-|~100,000 ns|Network Time Protocol on a LAN|
 
 
 
