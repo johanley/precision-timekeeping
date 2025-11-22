@@ -5,7 +5,7 @@ References for context:
 - <a href='https://www.iausofa.org/'>SOFA</a> and its Cookbook called *SOFA Time Scale and Calendar Tools* 
 
 This project is implemented in Java. 
-Implementations in other languages would need 
+Similar implementations in other languages would need 
 <a href='https://en.wikipedia.org/wiki/List_of_arbitrary-precision_arithmetic_software'>arbitrary precision arithmetic</a>, which is widely implemented.  
 
 ## Design Choices In This Library
@@ -28,7 +28,7 @@ This restriction is unfortunately found in many date-time libraries.
 The date-time and Julian date can be defined to **arbitrary precision** for seconds and fractional days.
 This is implemented by using Java's <a href='https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html'>BigDecimal</a> class.
 This is an unusual property. 
-Most date-time libraries don't allow arbitrary precision for the time of day:
+Most date-time libraries don't allow arbitrary precision for the time of day. For example:
 - Java's <a href='https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/package-summary.html'>java.time</a> package stops at nanoseconds.
 - <a href='https://www.iausofa.org/'>SOFA</a> implements Julian dates with a pair of `double`s. 
 That library can represent a moment in time to an accuracy of <a href='https://aa.usno.navy.mil/downloads/novas/USNOAA-TN2011-02.pdf'>~20 microseconds</a>.
@@ -39,6 +39,7 @@ UTC is the only timescale that uses leap seconds. **Leap seconds are problematic
 Superficially they seem simple, but this is misleading.
 The BIPM is <a href='https://www.bipm.org/en/cgpm-2022/resolution-4'>seeking to change things</a> because 
 <em>"the consequent introduction of leap seconds creates discontinuities that risk causing serious malfunctions in critical digital infrastructure"</em>.
+
 Here's an example of <a href='https://github.com/liberfa/erfa/issues/91'>a tricky leap second bug</a>.
 
 Because of their complexity, it's likely that international standards bodies will add **no new leap seconds** in the future.
@@ -52,18 +53,27 @@ If needed, the offset can be easily overridden using a simple System property.
 ### Conversions Between Timescales At Sub-Millisecond Level
 Time can be represented to arbitrary precision in this library. 
 But *conversions* between timescales is another story. 
-Here, the goal is to **ensure timescale conversions are accurate to sub-millisecond level**.
+Here, the goal is to **ensure timescale conversions are accurate to sub-millisecond level**, as a kind of minimal baseline.
 
-The distinction is needed because, in general, conversions between timescales simply aren't *always* known to arbitrary precision. 
-It's true that *some* timescale conversions are defined precisely by conventional relations, but that's not always true.
+The design of <a href='https://www.iausofa.org/'>SOFA</a> is different in this regard. 
+In SOFA, specific conversions between timescales are implemented, each at the best precision possible. 
+This is a good design for SOFA.
+But in SOFA, you need to think about the specific chain of conversions that gets you from one timescale to another.
+
+So there's a choice or trade-off in the design of conversions between timescales: 
+- execute a specific sequence of multiple steps (more steps, but each step retains its maximum precision), as in SOFA
+- execute in a single step, as in this library 
+
+The single-step design is implemented here by defining how each timescale differs from TAI.
+
 
 ### Included Timescales
 - TAI is the core timescale. Other timescales are defined with respect to TAI.
 - TT has a fixed offset from TAI
-- TDB, whose offset from TAI is a simple periodic function
-- GPS has a fixed offset from TAI
+- TDB, whose offset from TAI is modeled as a simple periodic function
+- GPS is modeled with a fixed offset from TAI
 - UT1, whose offset from TAI comes from data files from IERS, which you need to update manually
-- UTC, modeled here as a fixed offset from TAI, with a back-door to override the value
+- UTC, modeled as a fixed offset from TAI, with a back-door to override the value
 
 ### Other Items
 - time zones are not part of this library
