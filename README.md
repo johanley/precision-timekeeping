@@ -81,7 +81,7 @@ If you use a date that comes after the range of the downloaded snapshot of the I
 then the timescale conversion code will silently use the most recent value found in the snapshot. 
 If you use a date before 1962-01-01, then the timescale conversion will fail.
 
-You can override all of this logic by using a back-door System property that lets you manually set a specific value for UT1-TAI.  
+You can **override** all of this logic by using a back-door System property that lets you manually set a specific value for UT1-TAI.  
 
 
 ### UTC-TAI Is Given A Fixed Value
@@ -107,7 +107,7 @@ The most recent (and likely the last) leap second was [2016-12-31 23:59:60.0, 20
 In this library, UTC is implemented as having a *simple constant offset from TAI*, equal to its current value at the time of writing.
 That constant offset is hard-coded.
 
-You can override the hard-coded value by using a back-door System property that lets you manually set a specific value for UTC-TAI.  
+You can **override** the hard-coded value by using a back-door System property that lets you manually set a specific value for UTC-TAI.  
 
 
 
