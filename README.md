@@ -69,11 +69,13 @@ The design of <a href='https://www.iausofa.org/'>SOFA</a> is different in this r
 In SOFA, specific conversions between timescales are implemented, each at the best possible precision. 
 This is a good design for SOFA.
 But in SOFA, to go from one timescale to another, you need to think about the specific chain of conversions that gets you from A to B.
+In this library, it's always a single method call.
 
 
 ### UT1 Supported After 1980
 The difference UT1-TAI in seconds is taken from the <a href='https://hpiers.obspm.fr/eop-pc/index.php?index=C04&lang=en'>IERS EOP C04 series data set</a>.
-The sigma for the UT1-TAI value is generally below 1.0 milliseconds after 1980-01-01. 
+The sigma for the UT1-TAI value is generally below 1.0 milliseconds after 1980-01-01, so that date has been adopted as the cut-off here.
+There's also a back-door System property that lets you manually set a specific value for UT1-TAI.  
 
 
 ### UTC Is Minimally Supported
