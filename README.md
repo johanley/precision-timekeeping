@@ -47,6 +47,35 @@ Most date-time libraries don't allow arbitrary precision for the time of day. Fo
 - <a href='https://www.iausofa.org/'>SOFA</a> implements Julian dates with a pair of `double`s. 
 That library can represent a moment in time to an accuracy of <a href='https://aa.usno.navy.mil/downloads/novas/USNOAA-TN2011-02.pdf'>~20 microseconds</a>.
 
+### Included Timescales
+- TAI is the core timescale. Other timescales are defined with respect to TAI.
+- TT has a fixed offset from TAI
+- TDB, whose offset from TAI is modeled as a simple periodic function
+- GPS is modeled with a fixed offset from TAI
+- UT1, whose offset from TAI comes from data files from IERS, which you need to update manually
+- UTC, modeled as a fixed offset from TAI, with a back-door to override the value
+
+### Conversions Between Timescales At Sub-Millisecond Level
+Time can be represented to arbitrary precision in this library. 
+But *conversions between* timescales is another story:
+- some conversions are defined *by convention*, and can be taken to be "infinitely precise", so to speak
+- for the remaining conversions, the precision of the conversion varies
+ 
+In this library, the goals are:
+- to **ensure timescale conversions are always accurate to sub-millisecond level**, as a kind of minimal baseline 
+- to execute timescale conversions in a **single method call**
+
+The design of <a href='https://www.iausofa.org/'>SOFA</a> is different in this regard. 
+In SOFA, specific conversions between timescales are implemented, each at the best possible precision. 
+This is a good design for SOFA.
+But in SOFA, to go from one timescale to another, you need to think about the specific chain of conversions that gets you from A to B.
+
+
+### UT1 Supported After 1980
+The difference UT1-TAI in seconds is taken from the <a href='https://hpiers.obspm.fr/eop-pc/index.php?index=C04&lang=en'>IERS EOP C04 series data set</a>.
+The sigma for the UT1-TAI value is generally below 1.0 milliseconds after 1980-01-01. 
+
+
 ### UTC Is Minimally Supported
 UTC is the only timescale that uses leap seconds. **Leap seconds are problematic.**
  
@@ -71,31 +100,9 @@ In this library, UTC is implemented as having a *simple constant offset from TAI
 That constant offset is hard-coded.
 If needed, the offset can be easily overridden using a simple System property.
 
-### Conversions Between Timescales At Sub-Millisecond Level
-Time can be represented to arbitrary precision in this library. 
-But *conversions between* timescales is another story:
-- some conversions are defined *by convention*, and can be taken to be "infinitely precise", so to speak
-- for the remaining conversions, the precision of the conversion varies
- 
-In this library, the goals are:
-- to **ensure timescale conversions are always accurate to sub-millisecond level**, as a kind of minimal baseline 
-- to execute timescale conversions in a **single method call**
-
-The design of <a href='https://www.iausofa.org/'>SOFA</a> is different in this regard. 
-In SOFA, specific conversions between timescales are implemented, each at the best possible precision. 
-This is a good design for SOFA.
-But in SOFA, to go from one timescale to another, you need to think about the specific chain of conversions that gets you from A to B.
 
 
-### Included Timescales
-- TAI is the core timescale. Other timescales are defined with respect to TAI.
-- TT has a fixed offset from TAI
-- TDB, whose offset from TAI is modeled as a simple periodic function
-- GPS is modeled with a fixed offset from TAI
-- UT1, whose offset from TAI comes from data files from IERS, which you need to update manually
-- UTC, modeled as a fixed offset from TAI, with a back-door to override the value
-
-### Also Notable
+### Also Notablee
 - in this library, a `Date` always has a `Calendar`, and a `Time` always has a `Timescale`
 - time zones are not part of this library
 
@@ -244,4 +251,4 @@ https://hpiers.obspm.fr/eop-pc/index.php?index=C04&lang=en
 https://www.bipm.org/documents/20126/28429869/working-document-ID-7399/aed6f662-7a8a-64b3-3b70-f36d3c8ef037  - see slide #5
 https://hpiers.obspm.fr/iers/eop/eopc04/eopc04.1962-now
 https://hpiers.obspm.fr/eop-pc/products/combined/C04.php?date=1&eop=22&year1=1962&month1=1&day1=1&year2=2027&month2=1&day2=1&SUBMIT=Submit+Search
-
+This data has the sigma for UT1-TAI under 1.0ms after 1980-01-01. Before that it's generally larger than 1.0ms.
