@@ -50,9 +50,16 @@ UTC is the only timescale that uses leap seconds. **Leap seconds are problematic
  
 Superficially they seem simple, but this is misleading.
 The BIPM is <a href='https://www.bipm.org/en/cgpm-2022/resolution-4'>seeking to change things</a> because 
+
 <em>"the consequent introduction of leap seconds creates discontinuities that risk causing serious malfunctions in critical digital infrastructure"</em>.
 
 Here's an example of <a href='https://github.com/liberfa/erfa/issues/91'>a tricky leap second bug</a>.
+
+From the <a href='https://www.iausofa.org/2023-10-11c'>SOFA Cookbook</a> on *Time Scales and Calendar Tools*:
+
+<em>"Leap seconds pose tricky problems for software writers, and consequently there are concerns that these events put safety-critical systems at risk. 
+The correct solution is for designers to base such systems on TAI or some other glitch-free time scale, not UTC, but this option is often overlooked 
+until it is too late."</em>
 
 Because of their complexity, it's likely that international standards bodies will add **no new leap seconds** in the future.
 So, for modern dates and times, UTC will have a *fixed* offset from TAI.
@@ -76,13 +83,6 @@ The design of <a href='https://www.iausofa.org/'>SOFA</a> is different in this r
 In SOFA, specific conversions between timescales are implemented, each at the best possible precision. 
 This is a good design for SOFA.
 But in SOFA, to go from one timescale to another, you need to think about the specific chain of conversions that gets you from A to B.
-
-There's a choice or trade-off in the design of conversions between timescales: 
-- execute a specific sequence of multiple steps which you have to be aware of (more steps, but each step retains its maximum precision), as in SOFA
-- execute in a single step, and always in the same way, as in this library 
-
-The single-step design is implemented here by simply requiring each timescale to define how it differs from TAI.
-This allows conversion from A to B in one method call.
 
 
 ### Included Timescales
