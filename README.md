@@ -72,7 +72,7 @@ But in SOFA, to go from one timescale to another, you need to think about the sp
 In this library, it's always a single method call.
 
 
-### UT1 Supported For 1980-01-01 Onward
+### UT1-TAI Data From 1962-01-01 Onward
 For converting UT1 to other timescales, the difference UT1-TAI in seconds is taken from a downloaded snapshot of the <a href='https://hpiers.obspm.fr/eop-pc/index.php?index=C04&lang=en'>IERS EOP C04 series data set</a>.
 You will need to manually update that snapshot to get the most recent data.
 The sigma for the UT1-TAI value is generally below 1.0 milliseconds after 1980-01-01, and above 1.0 milliseconds before that date. 
@@ -84,7 +84,7 @@ If you use a date before 1962-01-01, then the timescale conversion will fail.
 You can override all of this logic by using a back-door System property that lets you manually set a specific value for UT1-TAI.  
 
 
-### UTC Is Minimally Supported
+### UTC-TAI Is Given A Fixed Value
 UTC is the only timescale that uses leap seconds. **Leap seconds are problematic.**
  
 Superficially they seem simple, but this is misleading.
@@ -104,9 +104,10 @@ Because of their complexity, it's likely that international standards bodies wil
 So, for modern dates and times, UTC will have a *fixed* offset from TAI.
 The most recent (and likely the last) leap second was [2016-12-31 23:59:60.0, 2017-01-01 00:00:00.0).
 
-In this library, UTC is implemented as having a *simple constant offset from TAI*, equal to its current value at time of writing.
+In this library, UTC is implemented as having a *simple constant offset from TAI*, equal to its current value at the time of writing.
 That constant offset is hard-coded.
-If needed, the offset can be easily overridden using a simple System property.
+
+You can override the hard-coded value by using a back-door System property that lets you manually set a specific value for UTC-TAI.  
 
 
 
