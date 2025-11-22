@@ -104,13 +104,13 @@ If needed, the offset can be easily overridden using a simple System property.
 
 
 
-### Also Notablee
+### Also Notable
 - in this library, a `Date` always has a `Calendar`, and a `Time` always has a `Timescale`
 - time zones are not part of this library
 
 
 
-## What I Learned
+## What I Learnedd
 
 - the IAU seems to be leaning towards not establishing any more leap seconds.
 - UTC and leaps seconds are the most problematic aspect of timekeeping.
