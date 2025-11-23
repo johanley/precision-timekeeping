@@ -11,13 +11,18 @@ import astrolib.util.Check;
 
 /**
  Look up the value UT1-TAI from a data file.
- The source is <a href='https://hpiers.obspm.fr/eop-pc/index.php?index=C04&lang=en'>IERS EOP C04 series</a>.
+ The source is a snapshot of the <a href='https://hpiers.obspm.fr/eop-pc/index.php?index=C04&lang=en'>IERS EOP C04 series</a>.
  The values in the source file are expressed in milliseconds.
 */
 final class Ut1Helper {
   
+  /** Read in source data file. */
+  Ut1Helper(){
+    readInSourceData();
+  }
+  
   /**
-   Look up the value of UT1 - TAI from an IERS data file (EOP C04 Series).
+   Return the value of UT1 - TAI in seconds using an IERS data file (EOP C04 Series).
    <ul>
     <li>before the file's earliest date: return an empty value. 
     <li>after the file's most recent date: use the file's most recent value, with no extrapolation
@@ -56,10 +61,14 @@ final class Ut1Helper {
       }
       res = interpolateUsingTimeOfDay(dateTime);
     }
+    
+    //milliseconds to seconds
+    if (res != null) {
+      res = res.multiply(new BigDecimal("1000"));
+    }
     return Optional.of(res);
   }
   
-  @SuppressWarnings("unused")
   private BigDecimal override() {
     BigDecimal res = null; 
     String override = System.getProperty(TimescaleCommon.UT1_SYS_PROPERTY);
@@ -83,7 +92,13 @@ final class Ut1Helper {
    */
   private Date earliestDate; 
   private Date mostRecentDate;
-  /** This map is large. It's lifetime is the lifetime of this object. */
+  /** 
+   This map is large. 
+   It's lifetime is the lifetime of this object. 
+   The keys and values are just raw strings from the file. 
+   (This avoids the unnecessary creation of thousands of DateTime and BigDecimal objects.)
+   To look up values in the table, just format the input date-time as a string in the same format. 
+  */
   private Map<String /*1980  9 30*/, String /*-18967.5278*/> table = new LinkedHashMap<>();
 
   /** Format a date in the same style as the underlying data file. Note the extra space. */
@@ -110,6 +125,8 @@ final class Ut1Helper {
   }
 
   /**
+   Build a map containing the data in the file.
+   
    Example of two lines of data, and the header:
    
    #   date    ut1-tai    sig      (ms)                    
@@ -120,6 +137,7 @@ final class Ut1Helper {
   */
   private void readInSourceData() {
     //the file is assumed to be in this directory
+    //Util.DataFileReader is needed
     //it's big; should it be streamed into memory?
     //use its fixed-width character
     //add to the map
