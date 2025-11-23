@@ -10,9 +10,9 @@ import java.util.Optional;
 import astrolib.util.Check;
 
 /**
-  Look up the value UT1-TAI from a data file.
-  The source is <a href='https://hpiers.obspm.fr/eop-pc/index.php?index=C04&lang=en'>IERS EOP C04 series</a>.
-  The values in the source file are expressed in milliseconds.
+ Look up the value UT1-TAI from a data file.
+ The source is <a href='https://hpiers.obspm.fr/eop-pc/index.php?index=C04&lang=en'>IERS EOP C04 series</a>.
+ The values in the source file are expressed in milliseconds.
 */
 final class Ut1Helper {
   
@@ -21,24 +21,40 @@ final class Ut1Helper {
    <ul>
     <li>before the file's earliest date: return an empty value. 
     <li>after the file's most recent date: use the file's most recent value, with no extrapolation
-    <li>otherwise, interpolate between dates in the file 
+    <li>otherwise, look up the value for the given date; interpolate using time-of-day if non-zero
    </ul> 
    
-   <P>The above logic can be overridden by setting a System property named {@link TimescaleCommon#UT1_SYS_PROPERTY} to a specific numeric value.
+   <P>The above logic can be overridden by setting a System property named 
+   {@link TimescaleCommon#UT1_SYS_PROPERTY} to a specific numeric value.
    In that case, only that specific numeric value is returned by this method.
+   
+   @param dt will be internally converted to use {@link Calendar#GREGORIAN} and 
+   {@link TimescaleCommon#UTC}, if they are not already in use. (In practice, the 
+   timescale is of little significance in this context.) 
   */
   Optional<BigDecimal> lookup(DateTime dt) {
     BigDecimal res = override();
     if (res != null) return Optional.of(res);
 
-    if (dt.date().lt(earliestDate)) {
+    DateTime dateTime = dt; 
+    if (Calendar.GREGORIAN != dateTime.date().calendar()) {
+      dateTime = DateTime.from(dt.toJulianDate(), Calendar.GREGORIAN);
+    }
+    if (TimescaleCommon.UTC != dateTime.time().timescale()) {
+      dateTime = Timescale.convertTo(TimescaleCommon.UTC, dateTime);
+    }
+    
+    if (dateTime.date().lt(earliestDate)) {
       //do nothing: null
     }
-    else if (dt.date().gteq(mostRecentDate)) {
+    else if (dateTime.date().gteq(mostRecentDate)) {
       res = lookup(mostRecentDate);
     }
-    else if (dt.date().gteq(earliestDate) && dt.date().lt(mostRecentDate)) {
-      res = interpolate(dt);
+    else if (dateTime.date().gteq(earliestDate) && dateTime.date().lt(mostRecentDate)) {
+      if (dateTime.time().equals(Time.zero(dateTime.time().timescale()))) {
+        res = lookup(dateTime.date());
+      }
+      res = interpolateUsingTimeOfDay(dateTime);
     }
     return Optional.of(res);
   }
@@ -67,6 +83,7 @@ final class Ut1Helper {
    */
   private Date earliestDate; 
   private Date mostRecentDate;
+  /** This map is large. It's lifetime is the lifetime of this object. */
   private Map<String /*1980  9 30*/, String /*-18967.5278*/> table = new LinkedHashMap<>();
 
   /** Format a date in the same style as the underlying data file. Note the extra space. */
@@ -80,23 +97,32 @@ final class Ut1Helper {
     return new BigDecimal(table.get(key(date)));
   }
 
-  private BigDecimal interpolate(DateTime dt) {
-    return null;
+  /** 
+   Simple linear interpolation. 
+   It might the case that a 'bigger' interpolation algorithm is more appropriate, given the data. 
+  */ 
+  private BigDecimal interpolateUsingTimeOfDay(DateTime dt) {
+    BigDecimal fraction = dt.fractionalDay();
+    BigDecimal d0 = lookup(dt.date());
+    BigDecimal d1 = lookup(dt.date().plusMinusDays(1));
+    BigDecimal diff = d1.subtract(d0);
+    return d0.add(diff.multiply(fraction));
   }
 
-  /*
-   Example of two lines of data:
-     1980  9 30 -18967.5278  0.4000 
-     1980 10  1 -18969.7139  0.4000
+  /**
+   Example of two lines of data, and the header:
+   
+   #   date    ut1-tai    sig      (ms)                    
+   1980  9 30 -18967.5278  0.4000 
+   1980 10  1 -18969.7139  0.4000
+   
+   The sigma value at the end is discarded here.
   */
   private void readInSourceData() {
     //the file is assumed to be in this directory
     //it's big; should it be streamed into memory?
-    //chop using white space? or fixed width
+    //use its fixed-width character
     //add to the map
     //the keys and values are strings! The conversions come when needed, later
   }
-  
-
-
 }
