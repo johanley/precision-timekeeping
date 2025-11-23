@@ -201,6 +201,9 @@ public enum TimescaleCommon implements Timescale {
   /** Used to set a System property, and override a default value for UTC - TAI: {@value}. */
   public static final String UTC_SYS_PROPERTY = "UTC-minus-TAI";
   
+  /** Used to set a System property, and override a default value for UT1 - TAI: {@value}. */
+  public static final String UT1_SYS_PROPERTY = "UT1-minus-TAI";
+  
   /** {@value} seconds. */
   static final Double TT_MINUS_TAI = 32.184;
 }
