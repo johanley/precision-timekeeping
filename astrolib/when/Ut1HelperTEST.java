@@ -10,6 +10,15 @@ import org.junit.Test;
 /** Unit tests. */
 public final class Ut1HelperTEST {
   
+  @Test public void override() {
+    System.setProperty(TimescaleCommon.UT1_SYS_PROPERTY, "-88.123");
+    Date date = Date.gregorian(1852, 4, 12);
+    Time time = Time.zero(timescale);
+    Optional<BigDecimal> seconds = lookup(DateTime.from(date, time));
+    assertEquals("-88.1230000", seconds.get().toString());
+    System.clearProperty(TimescaleCommon.UT1_SYS_PROPERTY);
+  }
+  
   @Test public void beforeFirstDate() {
     Date date = Date.gregorian(1961, 12, 31);
     Time time = Time.zero(timescale);
@@ -21,7 +30,7 @@ public final class Ut1HelperTEST {
     Date date = Date.gregorian(1962, 1, 1);
     Time time = Time.zero(timescale);
     Optional<BigDecimal> seconds = lookup(DateTime.from(date, time));
-    assertEquals("-1.8132242", seconds.get().doubleValue() + "");
+    assertEquals("-1.8132242", seconds.get().toString());
   }
   
   @Test public void intermediateExactDate() {

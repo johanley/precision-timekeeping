@@ -76,7 +76,7 @@ final class Ut1Helper {
     //milliseconds to seconds
     if (res != null) {
       res = divide(res, big("1000"));
-      res = round(res, 7, RoundingMode.HALF_EVEN);
+      res = rounded(res);
     }
     return res != null ? Optional.of(res) : Optional.empty();
   }
@@ -103,7 +103,7 @@ final class Ut1Helper {
     String override = System.getProperty(TimescaleCommon.UT1_SYS_PROPERTY);
     if (Check.textHasContent(override)) {
       try {
-        res = big(override);
+        res = rounded(big(override));
       }
       catch(NumberFormatException ex) {
         throw new IllegalArgumentException("System property " + TimescaleCommon.UT1_SYS_PROPERTY + " should be a double, but isn't: " + override);
@@ -180,5 +180,9 @@ final class Ut1Helper {
     int m = Integer.valueOf(parts[1]);
     int d = Integer.valueOf(parts[2]);
     return Date.from(y, m, d, GREGORIAN);
+  }
+  
+  private BigDecimal rounded(BigDecimal res) {
+    return round(res, 7, RoundingMode.HALF_EVEN);
   }
 }
