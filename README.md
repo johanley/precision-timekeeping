@@ -48,12 +48,16 @@ Most date-time libraries don't allow arbitrary precision for the time of day. Fo
 That library can represent a moment in time to an accuracy of <a href='https://aa.usno.navy.mil/downloads/novas/USNOAA-TN2011-02.pdf'>~20 microseconds</a>.
 
 ### Included Timescales
-- TAI is the core timescale. Other timescales are defined with respect to TAI.
-- TT has a fixed offset from TAI
-- TDB, whose offset from TAI is modeled as a simple periodic function
-- GPS is modeled with a fixed offset from TAI
-- UT1, whose offset from TAI comes from data files from IERS, which you need to update manually
-- UTC, modeled as a fixed offset from TAI, with a back-door to override the value
+- TAI is the core timescale. Other timescales are defined using an offset from TAI.
+- TT has a fixed offset from TAI.
+- TDB, whose offset from TAI is modeled as a simple periodic function.
+- GPS is modeled with a fixed offset from TAI.
+- UT1, whose offset from TAI comes from data files from IERS. 
+That data starts 1962-01-01. 
+You need to update that file manually. 
+Has a back-door to let you define a fixed override value.
+- UTC, modeled as a fixed offset from TAI. 
+Has a back-door to let you define a fixed override value.
 
 ### Conversions Between Timescales At Sub-Millisecond Level
 Time can be represented to arbitrary precision in this library. 
@@ -155,7 +159,7 @@ Astropy seems to mirror lower level (?) implementations like SOFA, ERFA.
  
 
 
-
+<!--
 
 ## Sketchy Notes
 
@@ -261,3 +265,5 @@ https://www.bipm.org/documents/20126/28429869/working-document-ID-7399/aed6f662-
 https://hpiers.obspm.fr/iers/eop/eopc04/eopc04.1962-now
 https://hpiers.obspm.fr/eop-pc/products/combined/C04.php?date=1&eop=22&year1=1962&month1=1&day1=1&year2=2027&month2=1&day2=1&SUBMIT=Submit+Search
 This data has the sigma for UT1-TAI under 1.0ms after 1980-01-01. Before that it's generally larger than 1.0ms.
+
+-->
