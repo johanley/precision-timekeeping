@@ -121,22 +121,30 @@ You can **override** the hard-coded value by using a back-door System property t
 
 
 
-## What I Learned
+## What I Learned On This Project
 
 - clocks on the rotating geoid run all at the same rate! [link](https://www.gpsworld.com/inside-the-box-gps-and-relativity/)  
-- the IAU seems to be leaning towards not establishing any more leap seconds.
+- standards bodies seem to be leaning towards not establishing any more leap seconds.
 - UTC and leaps seconds are the most problematic aspect of timekeeping.
 - UTC was introduced January 1, 1960. SOFA states that, strictly speaking, using UTC before this date is dubious.  
 - the java.time package has no support for leap seconds.
-- the amount of precision in an IEEE 754 double is not quite enough to model a Julian date precisely. Using BigDecimal in Java can solve that.
-- in astronomy, the terms Julian date and Julian calendar are confusing. They refer to separate ideas. A Julian date can be related to different calendars. I had forgotten that.
-- calculations with dates and times are much simplified when you have robust conversions from/to Julian dates. Adding days or seconds no longer needs 
-to deal with calendar logic, because that's done by the robust conversion logic. This only works well when you have the arbitrary precision of 
-something like BigDecimal at your disposal.
-- Network Time Protocal (NTP) is based on UTC within a few msecs. 
-The newer Precision Time Protocal (PTP) is based on TAI within a few nanoseconds (?).
-- The second [might be re-defined](https://www.scientificamerican.com/article/worlds-most-accurate-clocks-could-redefine-time/) in the future. Newer, more precise clocks are obsoleting the old definition of the second. The new clocks have optical frequencies (~4*10^14 Hz, ~0.000 002ns), not microwave frequencies (~10^10 Hz, ~0.1ns).
-- The world's most accurate clocks can measure the GR time-dilation for differences in altitude on the order a 1mm! 
+- the amount of precision in an IEEE 754 double is not quite enough to model a Julian date precisely. 
+A library that implements arbitrary precision arithmetic (BigDecimal in Java, for example) can solve that.
+- in astronomy, the terms Julian date and Julian calendar are confusing. 
+They refer to separate ideas. 
+A Julian date can be related to different calendars. 
+I had forgotten that.
+- calculations with dates and times are much simplified when you have robust conversions from/to Julian dates. 
+Adding days or seconds no longer needs to deal with calendar logic, because that's done by the robust conversion logic. 
+This only works well when you have the arbitrary precision arithmetic at hand.
+- I found an algorithm for Julian dates that has no restriction to positive Julian dates. 
+This algorithm has been done before, but it doesn't seem to be as popular as it probably should be. 
+- The older Network Time Protocal (NTP) has a target precision usually in the millisecond range.
+The newer Precision Time Protocal (PTP) has a target precision in the nanosecond range, or even better.
+- The second [might be re-defined](https://www.scientificamerican.com/article/worlds-most-accurate-clocks-could-redefine-time/) in the future. 
+Newer, more precise clocks are obsoleting the old definition of the second. 
+The new clocks have optical frequencies (~4*10^14 Hz, ~0.000 002ns), not microwave frequencies (~10^10 Hz, ~0.1ns).
+- The world's most accurate clocks can measure the gravitational time-dilation for differences in altitude on the order a 1mm! 
 That precision is just *bonkers*.
 
 
