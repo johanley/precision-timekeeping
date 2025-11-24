@@ -15,7 +15,7 @@ import org.junit.runners.Suite.SuiteClasses;
   JulianDateConverterTEST.class,
   OdometerTEST.class,
   RoundSecondsTEST.class,
-  TimescaleCommonTEST.class,
+  TimescaleImplTEST.class,
   TimescaleTEST.class,
   TimeTEST.class,
   Ut1HelperTEST.class

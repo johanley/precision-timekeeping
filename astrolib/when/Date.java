@@ -51,7 +51,7 @@ public final class Date implements Comparable<Date> {
   /** The day of the week corresponding to this {@link Date}, in its given {@link Calendar}. */
   public DayOfWeek weekday() {
     //Explanatory Supplement 2006, page 603
-    DateTime dt = DateTime.from(this, Time.from(12, 0, BigDecimal.ZERO, TimescaleCommon.TAI));
+    DateTime dt = DateTime.from(this, Time.from(12, 0, BigDecimal.ZERO, TimescaleImpl.TAI));
     BigDecimal jd = dt.toJulianDate().jd();
     BigDecimal a = divideAndRemainder(jd.add(big(1)), big(7))[INTEGER_PART].multiply(big(7));
     int b = integer(jd.add(big(2)).subtract(a)).intValue(); //rounds toward 0; 1..7 Sunday..Saturday
@@ -87,7 +87,7 @@ public final class Date implements Comparable<Date> {
       throw new IllegalArgumentException("Calendar conversion aborted. Trying to convert to the same calendar: " + toCalendar);
     }
     //to avoid possible hard-to-spot rounding differences near 0h, temporarily add a wee bit of time to this date:
-    Time weeTime = Time.from(0, 5, BigDecimal.ZERO, TimescaleCommon.TT);
+    Time weeTime = Time.from(0, 5, BigDecimal.ZERO, TimescaleImpl.TT);
     DateTime nonce = DateTime.from(this, weeTime);
     JulianDate nonceJd = JulianDateConverter.using(this.calendar).toJulianDate(nonce);
     DateTime converted = JulianDateConverter.using(toCalendar).toDateTime(nonceJd);
@@ -152,7 +152,7 @@ public final class Date implements Comparable<Date> {
    @param other can have any calendar
    */
   public long daysFrom(Date other) {
-    Time time = Time.from(12, 0, BigDecimal.ZERO, TimescaleCommon.TAI); //12h has integral Julian date
+    Time time = Time.from(12, 0, BigDecimal.ZERO, TimescaleImpl.TAI); //12h has integral Julian date
     DateTime dt_a = DateTime.from(this, time);
     JulianDate jd_a = JulianDateConverter.using(this.calendar).toJulianDate(dt_a);
     
@@ -168,7 +168,7 @@ public final class Date implements Comparable<Date> {
   */
   public Date plusMinusDays(int days) {
     //just borrow the full implementation of this, in {@link DateTime}
-    DateTime dt = DateTime.from(this, Time.zero(TimescaleCommon.TT));
+    DateTime dt = DateTime.from(this, Time.zero(TimescaleImpl.TT));
     DateTime dtNew = dt.plusMinusDays(big(days), 0, RoundingMode.HALF_EVEN);
     return dtNew.date();
   }

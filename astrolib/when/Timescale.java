@@ -4,6 +4,7 @@ import static astrolib.util.Consts.*;
 import static astrolib.when.BigDecimalHelper.*;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 /** 
  A timescale is a precise and well-defined way of measuring time.
@@ -14,7 +15,7 @@ import java.math.BigDecimal;
  Transformations between timescales are <em>sometimes</em> known with complete precision because of how they 
  are conventionally defined, but this is not always the case. 
 
- <P>For example, the difference {@link TimescaleCommon#TAI} - {@link TimescaleCommon#GPS} is 
+ <P>For example, the difference {@link TimescaleImpl#TAI} - {@link TimescaleImpl#GPS} is 
  modeled here as exactly 19 seconds. But that's not precisely correct at the nanosecond level. 
 
  <P><b>The target policy adopted here is to model all transformations between timescales to least sub-millisecond precision.</b>
@@ -37,22 +38,22 @@ import java.math.BigDecimal;
 public interface Timescale {
   
   /** 
-   The difference between this {@link Timescale} and {@link TimescaleCommon#TAI}, in seconds.
+   The difference between this {@link Timescale} and {@link TimescaleImpl#TAI}, in seconds.
    Positive if this timescale is ahead of TAI, negative otherwise.
    In this library, TAI is taken as the base timescale.
    
-   <P>In general, this difference changes at a slow rate. 
    @param when the moment for which the difference is required. 
-   This {@link DateTime} uses the {@link Calendar#GREGORIAN}.
-   This {@link DateTime} can use any {@link Timescale}, because in practice the transformations are only 
-   very weakly dependent on time (if at all).
-   @return default is 0.
+   @return default is 0. The returned object will be empty iff the timescale has no  
+   defined difference with TAI for the given DateTime.
   */
-  default BigDecimal secondsFromTAI(DateTime when) {
-    return BigDecimal.ZERO;
+  default Optional<BigDecimal> secondsFromTAI(DateTime when) {
+    return Optional.of(BigDecimal.ZERO);
   } 
   
-  /** A convenient identifier for this {@link Timescale}, usually an abbreviation. */
+  /**
+   A convenient identifier for this {@link Timescale}, usually an abbreviation.
+   @return the object's toString() value by default. 
+  */
   default String id() { return this.toString(); }
 
   /** 
@@ -63,24 +64,31 @@ public interface Timescale {
    @param toTimescale the target {@link Timescale}.
    @param fromWhen the moment to convert. It contains the source {@link Timescale}, attached to its {@link Time}.  
    If the source {@link Timescale} is the same as the target {@link Timescale}, then <tt>fromWhen</tt> is simply returned unchanged.
-   @return a {@link DateTime} whose date and time reflects the target {@link Timescale}.  
+   @return a {@link DateTime} whose date and time reflects the target {@link Timescale}. 
+   The returned object is empty iff the conversion to TAI is not defined for both 
+   timescales, for the given DateTime.   
   */
-  public static DateTime convertTo(Timescale toTimescale, DateTime fromWhen) {
+  public static Optional<DateTime> convertTo(Timescale toTimescale, DateTime fromWhen) {
     if (toTimescale == fromWhen.time().timescale()) {
-      return fromWhen; //early exit; no conversion is possible
+      return Optional.of(fromWhen); //early exit; no conversion is possible
     }
     BigDecimal jd = JulianDateConverter.using(fromWhen.date().calendar()).toJulianDate(fromWhen).jd();
 
     //the calc is simple since BigDecimal handles any number of decimal places
     //any 'rollover' effects into another minute-hour-day-year are already handled by other classes
     BigDecimal seconds = jd.multiply(big(SECONDS_PER_DAY)); 
-    BigDecimal toMinusTAI = toTimescale.secondsFromTAI(fromWhen);
-    BigDecimal fromMinusTAI = fromWhen.time().timescale().secondsFromTAI(fromWhen);
-    seconds = seconds.add(toMinusTAI).subtract(fromMinusTAI);
-    
-    BigDecimal days = divide(seconds, big(SECONDS_PER_DAY));
-    JulianDate jdConverted = JulianDate.from(days, toTimescale);
-    DateTime result = JulianDateConverter.using(fromWhen.date().calendar()).toDateTime(jdConverted);
-    return result;
+    Optional<BigDecimal> toMinusTAI = toTimescale.secondsFromTAI(fromWhen);
+    Optional<BigDecimal> fromMinusTAI = fromWhen.time().timescale().secondsFromTAI(fromWhen);
+    if (toMinusTAI.isPresent() && fromMinusTAI.isPresent()) {
+      seconds = seconds.add(toMinusTAI.get()).subtract(fromMinusTAI.get());
+      
+      BigDecimal days = divide(seconds, big(SECONDS_PER_DAY));
+      JulianDate jdConverted = JulianDate.from(days, toTimescale);
+      DateTime result = JulianDateConverter.using(fromWhen.date().calendar()).toDateTime(jdConverted);
+      return Optional.of(result);
+    }
+    else {
+      return Optional.empty();
+    }
   }
 }

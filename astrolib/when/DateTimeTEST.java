@@ -13,9 +13,9 @@ public final class DateTimeTEST {
   @Test public void plusMinusDays() {
     int year = 2026; //not a leap year, nor next to a leap year
     int month = 1;
-    Timescale ts = TimescaleCommon.UTC;
+    Timescale ts = TimescaleImpl.UTC;
     Date date = Date.gregorian(year, month, 1);
-    Time time = Time.zero(TimescaleCommon.UTC);
+    Time time = Time.zero(TimescaleImpl.UTC);
     DateTime dt = DateTime.from(date, time);
     plusMinusDays(dt, "1", DateTime.from(Date.gregorian(year, month, 2), Time.zero(ts)));
     plusMinusDays(dt, "30", DateTime.from(Date.gregorian(year, month, 31), Time.zero(ts)));
@@ -30,9 +30,9 @@ public final class DateTimeTEST {
   @Test public void plusMinusSeconds() {
     int year = 2026; //not a leap year, nor next to a leap year
     int month = 1;
-    Timescale ts = TimescaleCommon.UTC;
+    Timescale ts = TimescaleImpl.UTC;
     Date date = Date.gregorian(year, month, 1);
-    Time time = Time.zero(TimescaleCommon.UTC);
+    Time time = Time.zero(TimescaleImpl.UTC);
     DateTime dt = DateTime.from(date, time);
     plusMinusSeconds(dt, "1", 0, DateTime.from(date, Time.from(0,0,big(1),ts)));
     plusMinusSeconds(dt, "59", 0, DateTime.from(date, Time.from(0,0,big(59),ts)));
@@ -53,7 +53,7 @@ public final class DateTimeTEST {
   
   @Test public void daysFrom() {
     Date date = Date.gregorian(2025, 1, 1);
-    Time time = Time.zero(TimescaleCommon.TT);
+    Time time = Time.zero(TimescaleImpl.TT);
     DateTime start = DateTime.from(date, time);
     
     int numPlaces = 0;
@@ -104,9 +104,9 @@ public final class DateTimeTEST {
   
   @Test public void secondsFrom() {
     Date date = Date.gregorian(2025, 1, 1);
-    Time time = Time.zero(TimescaleCommon.TT);
+    Time time = Time.zero(TimescaleImpl.TT);
     DateTime start = DateTime.from(date, time);
-    Timescale ts = TimescaleCommon.TT;
+    Timescale ts = TimescaleImpl.TT;
     int numPlaces = 0;
     
     DateTime end = DateTime.from(date, time);

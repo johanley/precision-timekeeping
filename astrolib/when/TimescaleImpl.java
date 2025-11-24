@@ -8,9 +8,10 @@ import java.util.Optional;
 import astrolib.util.Check;
 
 /**
- Commonly used {@link Timescale}s.
+ Implementations of commonly used {@link Timescale}s.
  
- <P>Here's a sketch of the time-order of timescales in 2025, with time values increasing to the right:
+ <P>Here's a sketch of the time-order of these timescales in 2025, with time values 
+ increasing to the right:
  <pre>
     UTx      GPS       TAI               TT TDB        
  ----+--------+---------+-----------------++-------&gt;
@@ -18,8 +19,11 @@ import astrolib.util.Check;
  </pre>
 
  <P>The difference (TDB - TT) is very small and varies during the year; it can have either sign.
+ 
+ <P>UTx stands for both UT1 and UTC, which are never far apart.
 
-  <P>A notable instant in the past is January 1.0, 1977, related to the conventional definition of {@link TT}:
+  <P>A notable instant in the past is January 1.0, 1977, related to the conventional 
+  definition of {@link TT}:
   <pre>
  TAI: 1977-01-01 00:00:00.0   
  TT : 1977-01-01 00:00:32.184 
@@ -27,11 +31,15 @@ import astrolib.util.Check;
   
  <P>Reference: the <a href='https://www.iausofa.org/2023-10-11c'>SOFA Timescale and Calendar Tools</a> cookbook.
 */
-public enum TimescaleCommon implements Timescale {
+public enum TimescaleImpl implements Timescale {
   
   /** 
    International Atomic Time, the basis for modern time measurments. 
-   Corresponds to atomic clocks on the rotating geoid. (The geoid is approximately an ideal surface at mean sea level.)
+   Corresponds to atomic clocks on the rotating geoid. 
+   The geoid is an ideal surface near mean sea level on the Earth.
+   
+   <P>Here, TAI is taken as the base timescale. 
+   Other timescales have small differences with respect to TAI.
    
    <P>TAI: 
    <ul> 
@@ -50,7 +58,8 @@ public enum TimescaleCommon implements Timescale {
   /** 
    Terrestrial Time is a dynamical time attached to apparent geocentric ephemerides in the solar system.
    
-   <P>TT is a successor to Ephemeris Time (ET, introduced in 1952). From 1984 to 2000, TT was called TDT.
+   <P>TT is a successor to Ephemeris Time (ET, introduced in 1952). 
+   From 1984 to 2000, TT was called TDT.
    
    <P>The unit of measurement of TT agrees with the SI second on the rotating geoid. 
 
@@ -60,17 +69,28 @@ public enum TimescaleCommon implements Timescale {
    For the Moon, the error from using TT instead of {@link TDB} is less than 0.001 arcseconds.
   */
   TT {
-    /** TT - TAI. Fixed value of +32.184s. This is an approximation. Deviations are on the order of 10 microseconds. */
-    @Override public BigDecimal secondsFromTAI(DateTime when) {
-      return big(TT_MINUS_TAI);
+    /** 
+     TT - TAI. 
+     Fixed value of +32.184s at all times. 
+     This is an approximation. Deviations are on the order of 10 microseconds. 
+    */
+    @Override public Optional<BigDecimal> secondsFromTAI(DateTime when) {
+      return Optional.of(big(TT_MINUS_TAI));
     }
   },
   
-  /** The timescale used by the Global Positioning System. */
+  /** 
+   The timescale used by the Global Positioning System.
+   Began 1980-01-06 00:00:00 UTC? But it was first launched ~ Feb 1978?
+  */
   GPS {
-    /** GPS - TAI. Fixed value of -19s. This value is precise to sub-microsecond accuracy (according to SOFA). */
-    @Override public BigDecimal secondsFromTAI(DateTime when) {
-      return big("-19");
+    /** 
+     GPS - TAI. 
+     Fixed value of -19.0s for times after 1980-01-06 00:00:00 in any timescale (otherwise empty).
+     This value is precise to sub-microsecond accuracy (according to SOFA). 
+    */
+    @Override public Optional<BigDecimal> secondsFromTAI(DateTime when) {
+      return when.date().lt(Date.gregorian(1980, 1, 6)) ? Optional.empty() : Optional.of(big("-19"));
     }
   },
 
@@ -88,8 +108,7 @@ public enum TimescaleCommon implements Timescale {
    In short, it has no support for leap seconds. 
    It models UTC as a simple <em>fixed</em> offset from TAI, and that's it.</b> 
    The offset has a default value, hard-coded here.
-   But that value can be overridden by setting a System property named <em>UTC-minus-TAI</em> to the desired value:
-   <pre>-DUTC-minus-TAI=-38</pre>
+   See below for how to override the default value.
 
    <P>In short, this library can only handle spans of UTC-time that contain no leap second.
 
@@ -103,78 +122,64 @@ public enum TimescaleCommon implements Timescale {
    <P>For dates previous to 2017-01-01, you can:
      <ul> 
       <li>use {@link UT1} as an approximation to UTC (since it differs from UTC by 0.9 seconds or less).
-      <li>or, you can set a specific offset from {@link TAI} manually, using the System property mentioned above.
+      <li>or, you can set a specific offset from {@link TAI} manually, using the System property mentioned below.
       This will let you use UTC <em>over the time span that corresponds to that specific offset from {@link TAI}</em>. 
     </ul>
   */
   UTC {
-    /**  UTC - TAI. Default is -37s.  */
-    @Override public BigDecimal secondsFromTAI(DateTime when) {
-      String delta = "-37";
-      String override = System.getProperty(TimescaleCommon.UTC_SYS_PROPERTY);
+    /** 
+     UTC - TAI. 
+     <b>Fixed value for all times.</b> 
+     Default is -37s.  
+     An empty value is returned if the date is before 2017-01-01 (the date of the most recent leap second),
+     unless the caller has set an override.
+     
+     <P>An override is set with a System property named <em>UTC-minus-TAI</em> to the desired value:
+     <pre>-DUTC-minus-TAI=-38</pre>
+     Override values must be an integral number of seconds.
+    */
+    @Override public Optional<BigDecimal> secondsFromTAI(DateTime when) {
+      String override = System.getProperty(TimescaleImpl.UTC_SYS_PROPERTY);
       if (Check.textHasContent(override)) {
         try {
           @SuppressWarnings("unused")
           Integer overrideSeconds = Integer.valueOf(override);
-          delta = override;
+          return Optional.of(big(override));
         }
         catch(NumberFormatException ex) {
           throw new IllegalArgumentException("System property " + UTC_SYS_PROPERTY + " should be an integer, but isn't: " + override);
         }
       }
-      return big(delta);
+      
+      if (when.date().lt(Date.gregorian(2017, 1, 1))) {
+        return Optional.empty();
+      }
+      else {
+        return Optional.of(big("-37"));
+      }
     }
   },
   
   /** 
-   Universal Time. Within +/- 0.9 seconds of UTC. Also referred to as 'UT', in some contexts.
-   SHOULD THIS BE HERE? OR SHOULD IT BE SEPARATE?
-   IT'S IRREGULAR. SEEMS FUNDAMENTALLY DIFFERENT FROM THE OTHERS.
-   
-   ES 2006:
-   "Apparent sidereal time, because of its variable rate, is used only as a measure of epoch; it is not used as a measure of time interval."
-   "Owing to precession, the mean sidereal day of 24 hours of mean sidereal time is shorter than the actual period of rotation of Earth 
-   by about 0.0084s, the amount of precession in right ascension in one day."
-   "Universal Time is directly related to sidereal time by means of a numerical formula."
-   Formula 2.24-1 for GMST1 and UT1, for 0hUT1
-   "Optical observations can determine UT to about 5ms of time." More advanced methods: 0.1ms or 0.05ms.
-   
-   Precession, nutation. 
+   Universal Time, reflecting the rotation of the Earth. 
+   Sometimes referred to as <em>UT</em>. 
+   Always within 0.9 seconds of UTC.
   */
   UT1 {
-    /** UT1 - TAI. */
-    @Override public BigDecimal secondsFromTAI(DateTime when) {
+    /** 
+     UT1 - TAI in seconds.
+     <P>Uses an underlying table of values from a text file. 
+     The text file is placed in the same directory as this class.
+     The text file contains a snapshot of the <a href='https://hpiers.obspm.fr/eop-pc/index.php?index=C04&lang=en'>IERS EOP C04 series</a>.
+     Manually updates to this file are needed in order to stay current. 
+ 
+     <P>An empty value is returned for dates preceding 1962-01-01, unless the caller has specified an override.
+     <P>Override values can be set using a System property named <em>UT1-minus-TAI</em> to the desired value:
+     <pre>-DUT1-minus-TAI=27</pre>
+    */
+    @Override public Optional<BigDecimal> secondsFromTAI(DateTime when) {
       Ut1Helper helper = new Ut1Helper();
-      Optional<BigDecimal> res = helper.lookup(when);
-      return res.get();
-      //INCORRECT. This needs to use a table of values. See IERS.
-      /*
-      https://bitbucket.org/psrsoft/tempo2/src/master/T2runtime/clock/ut1.dat  source of this file?
-      https://github.com/astropy/astropy  has the data file ut1.dat?
-      https://www.iers.org/IERS/EN/Science/EarthRotation/UT1-TAI.html?nn=12932
-      https://www.bipm.org/documents/20126/270183862/1-+Stamatakos+BIPM_IERS_v4/08643617-307f-09ee-78ae-2aaa9b043eda   slide show
-      https://www.bipm.org/en/time-metrology
-      https://webtai.bipm.org/api/index.html
-      https://webtai.bipm.org/api/v1.0/index.html  seems to focus on UTC-GNSS systems; no UT1.
-      
-      https://www.iers.org/IERS/EN/DataProducts/EarthOrientationData/eop.html
-      
-      astropy:
-      https://github.com/search?q=repo%3Aastropy%2Fastropy%20ut1&type=code
-      https://github.com/astropy/astropy/blob/137b86f98804f7197988ee8e0bb142e6ac64c51f/astropy/utils/iers/data/ReadMe.eopc04_IAU2000#L31
-      https://github.com/astropy/astropy/blob/137b86f98804f7197988ee8e0bb142e6ac64c51f/astropy/utils/iers/iers.py
-      it apparently, by default, downloads the most recent data automagically IERS-A
-      they say that IERS-B (monthly) has some weird data issues?
-      https://docs.astropy.org/en/stable/time/index.html#convert-time-scale
-      Guido seems out to lunch regarding dates: https://discuss.python.org/t/bc-date-support/582
-      https://github.com/astropy/astropy/issues/9231  - complaint about no support for early dates BC 
-      
-      This has the data, as UT1-UTC(s), once a day (about 1 ms per day), but its stale by about 30 days.
-      https://datacenter.iers.org/data/latestVersion/EOP_20u23_C04_12h_dPsi_dEps_1984-now.txt  
-      https://datacenter.iers.org/data/latestVersion/bulletinA.txt  - present and future (1 year) IERS-A, Bulletin A
-      
-      */
-      //return big("-37");
+      return helper.lookup(when);
     }
   },
   
@@ -188,8 +193,13 @@ public enum TimescaleCommon implements Timescale {
    Thus J2000.0 is 2000 January 1.5 TDB, which is 2451545.0 TDB.</em>
   */
   TDB {
-    /** TDB - TAI. Reference: Explanatory Supplement, 2006, page 42, Equation 2.222-1. */
-    @Override public BigDecimal secondsFromTAI(DateTime when) {
+    /** 
+     TDB - TAI. 
+     Never empty. Modeled as a simple periodic function. 
+     Has 50 microsecond accuracy in years 1980-2100 (SOFA Cookbook). 
+     Reference: Explanatory Supplement (2006), page 42, Equation 2.222-1. 
+    */
+    @Override public Optional<BigDecimal> secondsFromTAI(DateTime when) {
       //uses TT as a base
       //TDB - TT = 0.001658s * sin(g) + 0.000014s * sin(2g)
       //g = 357.53 + 0.9856003 * (JD - 2451545.0)
@@ -198,7 +208,7 @@ public enum TimescaleCommon implements Timescale {
       BigDecimal diff = jd.jd().subtract(JulianDate.J2000);
       double g = Math.toRadians(357.53 + 0.985_6003 * (diff.doubleValue()));
       BigDecimal tdbMinusTT = big(0.001_658 * Math.sin(g) + 0.000_014 * Math.sin(2*g)); //seconds
-      return TT.secondsFromTAI(when).add(tdbMinusTT); 
+      return Optional.of(TT.secondsFromTAI(when).get().add(tdbMinusTT)); 
     }
   };
   

@@ -17,7 +17,7 @@ public final class OdometerTEST {
   
   @Test public void rollover() {
     Calendar cal = Calendar.GREGORIAN;
-    Timescale ts = TimescaleCommon.TT;
+    Timescale ts = TimescaleImpl.TT;
     RoundingMode mode = RoundingMode.HALF_EVEN;
     BigDecimal zero = BigDecimal.ZERO;
     

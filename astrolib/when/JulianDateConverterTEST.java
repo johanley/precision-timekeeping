@@ -168,7 +168,7 @@ public final class JulianDateConverterTEST {
   }
   
   
-  private static final TimescaleCommon TIMESCALE = TimescaleCommon.TT;
+  private static final TimescaleImpl TIMESCALE = TimescaleImpl.TT;
   
   // It's easy to compute the JD manually.
   private void testSmallYears(Calendar calendar) {

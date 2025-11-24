@@ -15,7 +15,7 @@ import org.junit.Test;
 public final class TimeTEST {
 
   @Test public void ctor() {
-    Time t = Time.from(1, 2, big(3.14), TimescaleCommon.TAI);
+    Time t = Time.from(1, 2, big(3.14), TimescaleImpl.TAI);
     assertEquals(1, t.hour());
     assertEquals(2, t.minute());
     assertEquals(big(3.14), t.seconds());
@@ -40,15 +40,15 @@ public final class TimeTEST {
   }
   
   @Test public void fraction() {
-    Time t = Time.from(big(0.25), TimescaleCommon.TAI);
+    Time t = Time.from(big(0.25), TimescaleImpl.TAI);
     assertEquals(6, t.hour());
     assertEquals(0, t.minute());
     assertEquals(big("0.00"), t.seconds()); //I guess I'm okay with this; the precision varies with the data
 
-    t = Time.from(12, 0, BigDecimal.ZERO, TimescaleCommon.TAI);
+    t = Time.from(12, 0, BigDecimal.ZERO, TimescaleImpl.TAI);
     assertEquals(big("0.5"), t.fraction()); 
 
-    t = Time.from(12, 30, BigDecimal.ZERO, TimescaleCommon.TAI);
+    t = Time.from(12, 30, BigDecimal.ZERO, TimescaleImpl.TAI);
     // non-terminating decimals are tricky
     assertEquals(big("0.5208333333333333333333333333333333"), t.fraction()); 
   }
@@ -60,15 +60,15 @@ public final class TimeTEST {
   }
 
   private void ctorFails(int hour, int minute, BigDecimal seconds) {
-    assertThrows(IllegalArgumentException.class, () -> {Time.from(hour, minute, seconds, TimescaleCommon.TAI);} );
+    assertThrows(IllegalArgumentException.class, () -> {Time.from(hour, minute, seconds, TimescaleImpl.TAI);} );
   }
   
   private void fractionFails(BigDecimal fraction) {
-    assertThrows(IllegalArgumentException.class, () -> {Time.from(fraction, TimescaleCommon.TAI);} );
+    assertThrows(IllegalArgumentException.class, () -> {Time.from(fraction, TimescaleImpl.TAI);} );
   }
 
   @SuppressWarnings("unused")
   private void ctorSucceeds(int hour, int minute, BigDecimal seconds) {
-    Time t = Time.from(hour, minute, seconds, TimescaleCommon.TAI);
+    Time t = Time.from(hour, minute, seconds, TimescaleImpl.TAI);
   }
 }

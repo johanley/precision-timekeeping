@@ -11,12 +11,12 @@ import org.junit.Test;
 public final class Ut1HelperTEST {
   
   @Test public void override() {
-    System.setProperty(TimescaleCommon.UT1_SYS_PROPERTY, "-88.123");
+    System.setProperty(TimescaleImpl.UT1_SYS_PROPERTY, "-88.123");
     Date date = Date.gregorian(1852, 4, 12);
     Time time = Time.zero(timescale);
     Optional<BigDecimal> seconds = lookup(DateTime.from(date, time));
     assertEquals("-88.1230000", seconds.get().toString());
-    System.clearProperty(TimescaleCommon.UT1_SYS_PROPERTY);
+    System.clearProperty(TimescaleImpl.UT1_SYS_PROPERTY);
   }
   
   @Test public void beforeFirstDate() {
@@ -74,6 +74,6 @@ public final class Ut1HelperTEST {
   
   /** This reads in the large data file into memory. */
   private Ut1Helper ut1 = new Ut1Helper();
-  private Timescale timescale = TimescaleCommon.UTC;
+  private Timescale timescale = TimescaleImpl.UTC;
   
 }

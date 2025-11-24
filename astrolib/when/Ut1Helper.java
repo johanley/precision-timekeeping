@@ -39,12 +39,12 @@ final class Ut1Helper {
    </ul> 
    
    <P>The above logic can be overridden by setting a System property named 
-   {@link TimescaleCommon#UT1_SYS_PROPERTY} to a specific numeric value.
+   {@link TimescaleImpl#UT1_SYS_PROPERTY} to a specific numeric value.
    In that case, only that specific numeric value is returned by this method.
    
-   @param dt will be internally converted to use {@link Calendar#GREGORIAN} and 
-   {@link TimescaleCommon#UTC}, if they are not already in use. (In practice, the 
-   timescale is of little significance in this context.) 
+   @param dt will be internally converted to use {@link Calendar#GREGORIAN} if 
+   its not already in use. The result is only very weakly dependent on the {@link Timescale}.
+   To a sub-millisecond accuracy, any {@link Timescale} may be used for the input {@link DateTime}.
   */
   Optional<BigDecimal> lookup(DateTime dt) {
     BigDecimal res = override();
@@ -54,9 +54,7 @@ final class Ut1Helper {
     if (GREGORIAN != dateTime.date().calendar()) {
       dateTime = DateTime.from(dt.toJulianDate(), GREGORIAN);
     }
-    if (TimescaleCommon.UTC != dateTime.time().timescale()) {
-      dateTime = Timescale.convertTo(TimescaleCommon.UTC, dateTime);
-    }
+    //any concerns regarding the timescale here?
     
     if (dateTime.date().lt(earliestDate)) {
       //do nothing: null
@@ -100,13 +98,13 @@ final class Ut1Helper {
 
   private BigDecimal override() {
     BigDecimal res = null; 
-    String override = System.getProperty(TimescaleCommon.UT1_SYS_PROPERTY);
+    String override = System.getProperty(TimescaleImpl.UT1_SYS_PROPERTY);
     if (Check.textHasContent(override)) {
       try {
         res = rounded(big(override));
       }
       catch(NumberFormatException ex) {
-        throw new IllegalArgumentException("System property " + TimescaleCommon.UT1_SYS_PROPERTY + " should be a double, but isn't: " + override);
+        throw new IllegalArgumentException("System property " + TimescaleImpl.UT1_SYS_PROPERTY + " should be a double, but isn't: " + override);
       }
     }
     return res;
