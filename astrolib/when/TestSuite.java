@@ -17,7 +17,8 @@ import org.junit.runners.Suite.SuiteClasses;
   RoundSecondsTEST.class,
   TimescaleCommonTEST.class,
   TimescaleTEST.class,
-  TimeTEST.class
+  TimeTEST.class,
+  Ut1HelperTEST.class
 })
 public final class TestSuite {
   //an empty abyss of non-code

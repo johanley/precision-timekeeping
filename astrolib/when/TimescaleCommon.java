@@ -3,6 +3,7 @@ package astrolib.when;
 import static astrolib.when.BigDecimalHelper.*;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import astrolib.util.Check;
 
@@ -143,6 +144,9 @@ public enum TimescaleCommon implements Timescale {
   UT1 {
     /** UT1 - TAI. */
     @Override public BigDecimal secondsFromTAI(DateTime when) {
+      Ut1Helper helper = new Ut1Helper();
+      Optional<BigDecimal> res = helper.lookup(when);
+      return res.get();
       //INCORRECT. This needs to use a table of values. See IERS.
       /*
       https://bitbucket.org/psrsoft/tempo2/src/master/T2runtime/clock/ut1.dat  source of this file?
@@ -170,7 +174,7 @@ public enum TimescaleCommon implements Timescale {
       https://datacenter.iers.org/data/latestVersion/bulletinA.txt  - present and future (1 year) IERS-A, Bulletin A
       
       */
-      return big("-37");
+      //return big("-37");
     }
   },
   

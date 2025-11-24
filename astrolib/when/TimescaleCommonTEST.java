@@ -18,7 +18,7 @@ public final class TimescaleCommonTEST {
     test(TT, "32.184", null);
     test(GPS, "-19", null);
     test(UTC, "-37", null);
-
+    
     //TDB for J2000, to 9 decimal places
     double g = Math.toRadians(357.53);
     int DECIMAL_PLACES = 9;
@@ -36,6 +36,11 @@ public final class TimescaleCommonTEST {
     //32.184 - 65.5 microseconds
     //32.184_000_0 - 0.000_065_5  = 32.183_934_5
     test(TDB, "32.1839", dt, 4); //0.1 msec
+    
+    //2016  9 20 -36265.3820  0.0227 
+    date = Date.from(2016, 9, 20, Calendar.GREGORIAN);
+    time = Time.zero(TimescaleCommon.UTC);
+    test(UT1, "-36.2653820", DateTime.from(date, time));
   }
   
   @Test public void overrideForUTC() {

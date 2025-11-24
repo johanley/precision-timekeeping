@@ -1,22 +1,31 @@
 package astrolib.when;
 
+import static astrolib.when.BigDecimalHelper.*;
+
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.math.RoundingMode;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import astrolib.util.Check;
+import astrolib.util.DataFileReader;
+import static astrolib.when.Calendar.*;
 
 /**
  Look up the value UT1-TAI from a data file.
  The source is a snapshot of the <a href='https://hpiers.obspm.fr/eop-pc/index.php?index=C04&lang=en'>IERS EOP C04 series</a>.
  The values in the source file are expressed in milliseconds.
+ The source file needs to be updated manually.
 */
 final class Ut1Helper {
   
-  /** Read in source data file. */
+  /** 
+   Read in source data file. 
+   The file is large.
+   Its contents are in memory until this object is garbage-collected. 
+  */
   Ut1Helper(){
     readInSourceData();
   }
@@ -42,8 +51,8 @@ final class Ut1Helper {
     if (res != null) return Optional.of(res);
 
     DateTime dateTime = dt; 
-    if (Calendar.GREGORIAN != dateTime.date().calendar()) {
-      dateTime = DateTime.from(dt.toJulianDate(), Calendar.GREGORIAN);
+    if (GREGORIAN != dateTime.date().calendar()) {
+      dateTime = DateTime.from(dt.toJulianDate(), GREGORIAN);
     }
     if (TimescaleCommon.UTC != dateTime.time().timescale()) {
       dateTime = Timescale.convertTo(TimescaleCommon.UTC, dateTime);
@@ -59,22 +68,42 @@ final class Ut1Helper {
       if (dateTime.time().equals(Time.zero(dateTime.time().timescale()))) {
         res = lookup(dateTime.date());
       }
-      res = interpolateUsingTimeOfDay(dateTime);
+      else {
+        res = interpolateUsingTimeOfDay(dateTime);
+      }
     }
     
     //milliseconds to seconds
     if (res != null) {
-      res = res.multiply(new BigDecimal("1000"));
+      res = divide(res, big("1000"));
+      res = round(res, 7, RoundingMode.HALF_EVEN);
     }
-    return Optional.of(res);
+    return res != null ? Optional.of(res) : Optional.empty();
   }
   
+  /*
+   Example of two lines of data:
+     1980  9 30 -18967.5278  0.4000 
+     1980 10  1 -18969.7139  0.4000
+   Idea: use strings as keys. Avoid the creation of many date-time objects.
+   */
+  private Date earliestDate; 
+  private Date mostRecentDate;
+  
+  /** 
+   This map is large. 
+   The keys and values are just raw strings from the file. 
+   (This avoids the unnecessary creation of thousands of DateTime and BigDecimal objects.)
+   To look up values in the table, just format the input date-time as a string in the same format. 
+  */
+  private Map<String /*1980  9 30*/, String /*-18967.5278*/> table = new LinkedHashMap<>();
+
   private BigDecimal override() {
     BigDecimal res = null; 
     String override = System.getProperty(TimescaleCommon.UT1_SYS_PROPERTY);
     if (Check.textHasContent(override)) {
       try {
-        res = new BigDecimal(override);
+        res = big(override);
       }
       catch(NumberFormatException ex) {
         throw new IllegalArgumentException("System property " + TimescaleCommon.UT1_SYS_PROPERTY + " should be a double, but isn't: " + override);
@@ -82,34 +111,21 @@ final class Ut1Helper {
     }
     return res;
   }
-
-  /*
-   Example of two lines of data:
-     1980  9 30 -18967.5278  0.4000 
-     1980 10  1 -18969.7139  0.4000
-   Idea: use strings as keys. Avoid the creation of many date-time objects.
-   Format the input date-time as a string in the same format, in order to look up values in the table.
-   */
-  private Date earliestDate; 
-  private Date mostRecentDate;
-  /** 
-   This map is large. 
-   It's lifetime is the lifetime of this object. 
-   The keys and values are just raw strings from the file. 
-   (This avoids the unnecessary creation of thousands of DateTime and BigDecimal objects.)
-   To look up values in the table, just format the input date-time as a string in the same format. 
-  */
-  private Map<String /*1980  9 30*/, String /*-18967.5278*/> table = new LinkedHashMap<>();
-
-  /** Format a date in the same style as the underlying data file. Note the extra space. */
+  
+  /** Format a date in the same style as the underlying data file. */
   private String key(Date dt) {
-    LocalDate localDt = LocalDate.of((int)dt.year(), dt.month(), dt.day());
-    return localDt.format(DateTimeFormatter.ofPattern("yyyy  M  d"));
+    String sep = " ";
+    return dt.year() + sep + padOnLeft(dt.month()) + sep + padOnLeft(dt.day());
+  }
+  
+  private String padOnLeft(int n) {
+    String padding = n < 10 ? " " : "";
+    return padding + n;
   }
 
   /** Assumes the lookup succeeds! */
   private BigDecimal lookup(Date date) {
-    return new BigDecimal(table.get(key(date)));
+    return big(table.get(key(date)));
   }
 
   /** 
@@ -117,7 +133,7 @@ final class Ut1Helper {
    It might the case that a 'bigger' interpolation algorithm is more appropriate, given the data. 
   */ 
   private BigDecimal interpolateUsingTimeOfDay(DateTime dt) {
-    BigDecimal fraction = dt.fractionalDay();
+    BigDecimal fraction = dt.time().fraction();
     BigDecimal d0 = lookup(dt.date());
     BigDecimal d1 = lookup(dt.date().plusMinusDays(1));
     BigDecimal diff = d1.subtract(d0);
@@ -136,11 +152,33 @@ final class Ut1Helper {
    The sigma value at the end is discarded here.
   */
   private void readInSourceData() {
-    //the file is assumed to be in this directory
-    //Util.DataFileReader is needed
-    //it's big; should it be streamed into memory?
-    //use its fixed-width character
-    //add to the map
-    //the keys and values are strings! The conversions come when needed, later
+    DataFileReader reader = new DataFileReader();
+    List<String> lines = reader.readFileUTF8(this.getClass(), "UT1-TAI.txt");
+    String first = "", last = "";
+    for(String line : lines) {
+      if (line.trim().startsWith(DataFileReader.COMMENT)) continue;
+      if (!Check.textHasContent(line)) continue;
+      
+      String date = line.substring(0, 10);
+      String[] parts = line.split("\\s+");
+      String seconds = parts[3];
+      table.put(date, seconds);
+      
+      if (!Check.textHasContent(first)) {
+        first = date;
+      }
+      last = date;
+    }
+    this.earliestDate = buildDate(first);
+    this.mostRecentDate = buildDate(last);
+  }
+
+  /**  '1980  9 30' */
+  private Date buildDate(String text) {
+    String[] parts = text.split("\\s+");
+    int y = Integer.valueOf(parts[0]);
+    int m = Integer.valueOf(parts[1]);
+    int d = Integer.valueOf(parts[2]);
+    return Date.from(y, m, d, GREGORIAN);
   }
 }
