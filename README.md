@@ -121,34 +121,30 @@ You can **override** the hard-coded value by using a back-door System property t
 
 
 
-## What I Learnedd
+## What I Learned
 
+- clocks on the rotating geoid run all at the same rate! [link](https://www.gpsworld.com/inside-the-box-gps-and-relativity/)  
 - the IAU seems to be leaning towards not establishing any more leap seconds.
 - UTC and leaps seconds are the most problematic aspect of timekeeping.
 - UTC was introduced January 1, 1960. SOFA states that, strictly speaking, using UTC before this date is dubious.  
-- SOFA hard-codes data for leap seconds, rate changes, and DUT1, and you are expected to re-compile when future data arrives. In this project, I just read data files. 
-- for leap seconds and Julian date, SOFA defines what they call a quasi-JD, in which the length-of-day is increased/decreased by 1 second.
-- the java.time package has no support for leap seconds. 
-- the ideas of timescale and calendar are logically independent. In this library, I explicitly attach a Calendar to a Date, and a Timescale to a Time.
-- the Angle class is a pleasing abstraction.
-- in astronomy, the terms Julian date and Julian calendar are confusing. They refer to separate ideas. A Julian date can be related to different calendars.
-- most astronomical libraries that create a Julian date from a given date have restrictions in the range of accepted years. This seems increasingly problematic. 
-For example, modern theories of long-term precession can be used over timescales of tens of thousands of years. In this library, I avoid such restrictions on the year.
+- the java.time package has no support for leap seconds.
 - the amount of precision in an IEEE 754 double is not quite enough to model a Julian date precisely. Using BigDecimal in Java can solve that.
-- cursory look: SOFA's tests don't seem to be very extensive
+- in astronomy, the terms Julian date and Julian calendar are confusing. They refer to separate ideas. A Julian date can be related to different calendars. I had forgotten that.
 - calculations with dates and times are much simplified when you have robust conversions from/to Julian dates. Adding days or seconds no longer needs 
 to deal with calendar logic, because that's done by the robust conversion logic. This only works well when you have the arbitrary precision of 
 something like BigDecimal at your disposal.
-- NOVAS: its julian_date function doesn't document any conditions on the input year, but I think there is one
-- I think the idea of 'tagging' every date with a calendar, and every time with a timescale, is a sound one.
-- Network Time Protocal (NTP) is based on UTC within a few msecs. Precision Time Protocal (PTP) is based on TAI within a few nanoseconds (?).
-- Global Navigation Satellite System GNSS = (GPS | Galileo | GLONASS | ...) All have atomic clocks. Precision ~2ns. Receivers are ~20ns, but can combine signals to get better results.
-- GNSS clocks and relativity: 7,000ns/day for speed (slower), but 45,000ns/day for gravity well (faster) [link](https://www.gpsworld.com/inside-the-box-gps-and-relativity/)
-- Clocks on the geoid run all at the same rate! [link](https://www.gpsworld.com/inside-the-box-gps-and-relativity/)  
+- Network Time Protocal (NTP) is based on UTC within a few msecs. 
+The newer Precision Time Protocal (PTP) is based on TAI within a few nanoseconds (?).
 - The second [might be re-defined](https://www.scientificamerican.com/article/worlds-most-accurate-clocks-could-redefine-time/) in the future. Newer, more precise clocks are obsoleting the old definition of the second. The new clocks have optical frequencies (~4*10^14 Hz, ~0.000 002ns), not microwave frequencies (~10^10 Hz, ~0.1ns).
-- The world's most accurate clocks can measure the GR time-dilation for differences in altitude on the order a 1mm!
-- Cell phone networks often use GNSS as the time-source.
-- The idea of using delta-this and delta-that for timescales seems to be less effective. Stating the difference of each timescale with respect to the base TAI is all you need. With that in place, all possible conversions are easy to implement.
+- The world's most accurate clocks can measure the GR time-dilation for differences in altitude on the order a 1mm! 
+That precision is just *bonkers*.
+
+
+<!--
+
+## Sketchy Notes
+
+- for leap seconds and Julian date, SOFA defines what they call a quasi-JD, in which the length-of-day is increased/decreased by 1 second.
 
 Astropy seems to mirror lower level (?) implementations like SOFA, ERFA. 
  - they implement JDs as a pair of doubles. 
@@ -156,12 +152,8 @@ Astropy seems to mirror lower level (?) implementations like SOFA, ERFA.
  - "The Time object maintains an internal representation of time as a pair of double precision numbers expressing Julian days. The sum of the two numbers is the Julian Date for that time relative to the given time scale. Users requiring no better than microsecond precision over human time scales (~100 years) can safely ignore the internal representation details and skip this section. This representation is driven by the underlying ERFA C-library implementation."
  - "Note that the limit of 9 digits [decimal seconds] is driven by the way that ERFA handles fractional seconds. In practice this should should not be an issue."
 
- 
+- SOFA hard-codes data for leap seconds, rate changes, and DUT1, and you are expected to re-compile when future data arrives. In this project, I just read data files. 
 
-
-<!--
-
-## Sketchy Notes
 
    Support TT, UT1, UTC. The last two need data files for best results. 1960..present? When UTC began. 1970, when leap seconds began?
    data files for leap seconds, TT-UT1
