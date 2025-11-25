@@ -1,4 +1,4 @@
-package bigtime.when.examples;
+package bigtime.examples;
 
 import static bigtime.when.BigDecimalHelper.*;
 import static bigtime.when.Calendar.*;
@@ -35,6 +35,7 @@ Multiple conversions:
 Done.
  </pre>
 */
+@SuppressWarnings("unused")
 public class ExampleCode {
 
   /** Run, examples, run! */
