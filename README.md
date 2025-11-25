@@ -6,7 +6,10 @@ References for context:
 
 This project is implemented in Java. 
 Similar implementations in other languages would need 
-<a href='https://en.wikipedia.org/wiki/List_of_arbitrary-precision_arithmetic_software'>arbitrary precision arithmetic</a>, which is widely implemented.  
+<a href='https://en.wikipedia.org/wiki/List_of_arbitrary-precision_arithmetic_software'>arbitrary precision arithmetic</a>, which is widely implemented.
+
+Quick view of <a href='https://github.com/johanley/precision-timekeeping/blob/master/bigtime/examples/ExampleCode.java'>example code</a> 
+that uses this library.  
 
 ### Time Precision in Various Domains
 
