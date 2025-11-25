@@ -113,7 +113,7 @@ public class ExampleCode {
     b = a.plusMinusDays(-10);
   }
 
-  /* 
+  /** 
    You can build a DateTime from a JulianDate, but not a Date.
    A JulianDate object carries fractional day information, but Date does not. 
   */
@@ -147,7 +147,7 @@ public class ExampleCode {
     //and so on...
   }
   
-  /* The Calendar and Timescale are explicit in toString(). */
+  /** The Calendar and Timescale are explicit in toString(). */
   private static void dateTimeString() {
     Date date = Date.gregorian(1987, 12, 25);
     Time time = Time.from(12, 30, big(15.123_456), TDB);
