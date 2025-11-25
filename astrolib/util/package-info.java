@@ -1,2 +1,0 @@
-/** Utilities. */
-package astrolib.util;
