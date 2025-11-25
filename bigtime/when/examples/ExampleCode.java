@@ -6,22 +6,52 @@ import static bigtime.when.TimescaleImpl.*;
 import static java.math.RoundingMode.*;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import bigtime.when.Calendar;
 import bigtime.when.Date;
 import bigtime.when.DateTime;
 import bigtime.when.JulianDate;
 import bigtime.when.Time;
+import bigtime.when.Timescale;
+import bigtime.when.TimescaleImpl;
 
 /** 
  Basic examples of using the library.
  This is not a complete set of examples.
  
- Note the use of BigDecimal to represent seconds/days.
+ <p>Note the use of {@link BigDecimal} to represent seconds/days.
  The 'big(...)' methods are simple helper methods defined in BigDecimalHelper, 
- for making BigDecimal objects. 
+ for making BigDecimal objects.
+
+ <P>Example output to stdout:
+ <pre>
+ DateTime.toString(): 1987-12-25 GR 12:30:15.123456 TDB
+Multiple conversions:
+ Start with:   1987-12-25 GR 12:30:15.123456 TDB
+ Intermediate: 1987-12-25 GR 12:29:42.939726506771634249600019200 TAI
+ Unrounded:    1987-12-25 GR 12:30:15.123455989343589575700000000 TDB
+ End with:     1987-12-25 GR 12:30:15.123456 TDB
+Done.
+ </pre>
 */
-public class ExerciseDates {
+public class ExampleCode {
+
+  /** Run, examples, run! */
+  public static void main(String[] args) {
+    buildDates();
+    buildTimes();
+    buildDatesAndTimes();
+    calendarConversion();
+    compareDates();
+    daysFrom();
+    nextPreviousDayEtc();
+    dateToJulianDate();
+    dateTimeMethods();
+    dateTimeString();
+    circularConversion();
+    stdout("Done.");
+  }
   
   private static void buildDates() {
     Date a = Date.from(1987, 12, 25, GREGORIAN);
@@ -34,8 +64,9 @@ public class ExerciseDates {
   private static void buildTimes() {
     //12:30:15.123_456_789_012
     Time a = Time.from(12, 30, big(15.123_456_789_012), GPS);
+    Time b = Time.from(12, 30, big("15.1234567890123456789012345678"), GPS);
     //using fraction of a day
-    Time b = Time.from(big(0.123_456_789_012), TAI);
+    Time c = Time.from(big(0.123_456_789_012), TAI);
     Time startOfDay = Time.zero(TAI);
   }
   
@@ -48,6 +79,7 @@ public class ExerciseDates {
     dt = DateTime.from(date, big(0.123_465_789_012), TDB);
     
     dt = DateTime.from(1999, 12, 31, 23, 59, big(59.999), GREGORIAN, UTC);
+    dt = DateTime.from(1999, 12, 31, 23, 59, big("59.999999999999999999999999999"), GREGORIAN, UTC);
     
     JulianDate jd = JulianDate.from(big(2_545_321.5), TT);
     dt = DateTime.from(jd, GREGORIAN);
@@ -120,6 +152,34 @@ public class ExerciseDates {
     Date date = Date.gregorian(1987, 12, 25);
     Time time = Time.from(12, 30, big(15.123_456), TDB);
     DateTime a = DateTime.from(date, time);
-    a.toString(); //1987-12-25 GR 12:30:15.123456 TDB
+    stdout("DateTime.toString(): " + a.toString()); //1987-12-25 GR 12:30:15.123456 TDB
+  }
+  
+  /** 
+   Multiple conversions 'a -> b -> c -> ... -> a' get you back to where you started. 
+   You need to apply rounding at the end to get an exact match. 
+  */
+  private static void circularConversion() {
+    Date date = Date.gregorian(1987, 12, 25);
+    Time time = Time.from(12, 30, big(15.123_456), TDB);
+    DateTime a = DateTime.from(date, time);
+    stdout("Multiple conversions:"); 
+    stdout(" Start with:   " + a.toString()); 
+    JulianDate jd = a.toJulianDate();
+    DateTime b = DateTime.from(jd, JULIAN); //jd + different calendar
+    //given the date range, this conversion will work:
+    Optional<DateTime> c = Timescale.convertTo(TimescaleImpl.TAI, b); //new Timescale
+    DateTime d = c.get();
+    DateTime e = DateTime.from(d.toJulianDate(), Calendar.GREGORIAN); //back to Gregorian
+    stdout(" Intermediate: " + e.toString());
+    Optional<DateTime> f = Timescale.convertTo(TimescaleImpl.TDB, e);
+    //given the date range, this conversion will work:
+    DateTime g = f.get();
+    stdout(" Unrounded:    " + g.toString());
+    stdout(" End with:     " + g.roundSeconds(6, HALF_EVEN));
+  }
+  
+  private static void stdout(Object thing) {
+    System.out.println(thing.toString());
   }
 }

@@ -143,7 +143,8 @@ This algorithm has been done before, but it doesn't seem to be as popular as it 
 The newer Precision Time Protocal (PTP) has a target precision in the nanosecond range, or even better.
 - The second [might be re-defined](https://www.scientificamerican.com/article/worlds-most-accurate-clocks-could-redefine-time/) in the future. 
 Newer, more precise clocks are obsoleting the old definition of the second. 
-The new clocks have optical frequencies (~4*10^14 Hz, ~0.000 002ns), not microwave frequencies (~10^10 Hz, ~0.1ns).
+The <a href='https://a1120960.github.io/PAC-SWaP/'>new clocks</a> have optical frequencies (~4*10^14 Hz, ~0.000 002ns), 
+not microwave frequencies (~10^10 Hz, ~0.1ns).
 - The world's most accurate clocks can measure the gravitational time-dilation for differences in altitude on the order a 1mm! 
 That precision is just *bonkers*.
 

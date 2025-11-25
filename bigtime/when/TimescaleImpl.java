@@ -197,14 +197,15 @@ public enum TimescaleImpl implements Timescale {
      TDB - TAI. 
      Never empty. Modeled as a simple periodic function. 
      Has 50 microsecond accuracy in years 1980-2100 (SOFA Cookbook). 
-     Reference: Explanatory Supplement (2006), page 42, Equation 2.222-1. 
+     Reference: Explanatory Supplement (2006), page 42, Equation 2.222-1.
+     @param when has any timescale, since the result varies only very slowly with time. 
     */
     @Override public Optional<BigDecimal> secondsFromTAI(DateTime when) {
       //uses TT as a base
       //TDB - TT = 0.001658s * sin(g) + 0.000014s * sin(2g)
       //g = 357.53 + 0.9856003 * (JD - 2451545.0)
       //50 microsecond accuracy in 1980-2100 (SOFA Cookbook) - 0.05 msec
-      JulianDate jd = JulianDateConverter.using(Calendar.GREGORIAN).toJulianDate(when);
+      JulianDate jd = JulianDateConverter.using(when.date().calendar()).toJulianDate(when);
       BigDecimal diff = jd.jd().subtract(JulianDate.J2000);
       double g = Math.toRadians(357.53 + 0.985_6003 * (diff.doubleValue()));
       BigDecimal tdbMinusTT = big(0.001_658 * Math.sin(g) + 0.000_014 * Math.sin(2*g)); //seconds
