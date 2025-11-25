@@ -4,6 +4,7 @@ import static astrolib.when.BigDecimalHelper.*;
 
 import java.math.BigDecimal;
 
+/** Common boolean checks and validations. */
 public final class Check {
 
   /** Return true only if the text has visible content. */

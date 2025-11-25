@@ -1,7 +1,7 @@
 package astrolib.when;
 
 import static astrolib.util.Consts.*;
-import static astrolib.util.LogUtil.*;
+import static astrolib.util.Pad.*;
 import static astrolib.when.BigDecimalHelper.*;
 
 import java.math.BigDecimal;

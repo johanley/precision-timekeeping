@@ -8,8 +8,6 @@ import java.math.RoundingMode;
 
 import org.junit.Test;
 
-import astrolib.util.Mathy;
-
 /** Unit test. */
 public final class TimescaleImplTEST {
   
@@ -23,7 +21,7 @@ public final class TimescaleImplTEST {
     //TDB for J2000, to 9 decimal places
     double g = Math.toRadians(357.53);
     int DECIMAL_PLACES = 9;
-    Double val =  Mathy.round(TimescaleImpl.TT_MINUS_TAI + 0.001658 * Math.sin(g) + 0.000014 * Math.sin(2*g), DECIMAL_PLACES); //seconds
+    Double val =  roundy(TimescaleImpl.TT_MINUS_TAI + 0.001658 * Math.sin(g) + 0.000014 * Math.sin(2*g), DECIMAL_PLACES); //seconds
     test(TDB, val.toString(), 
       DateTime.from(Date.from(2000, 1, 1, Calendar.GREGORIAN), Time.from(big(0.5), TimescaleImpl.TT)), 
       DECIMAL_PLACES
@@ -80,4 +78,14 @@ public final class TimescaleImplTEST {
     test(UTC, val, null);
     System.clearProperty(key);
   }
+  
+  /** Round the given value to the given number of (non-negative) decimals. */
+  private static double roundy(double val, int numDecimals) {
+    //start with 5.236, and round it to two decimals
+    Double factor = Math.pow(10, numDecimals); //100
+    Double temp = val * factor; //523.6
+    Long result = Math.round(temp); //524
+    return result.doubleValue() / factor; //5.24, this avoids integer division 
+  }
+  
 }
