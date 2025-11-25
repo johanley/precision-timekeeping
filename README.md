@@ -125,7 +125,7 @@ You can **override** the hard-coded value by using a back-door System property t
 
 - clocks on the rotating geoid run all at the same rate! [link](https://www.gpsworld.com/inside-the-box-gps-and-relativity/)  
 - standards bodies seem to be leaning towards not establishing any more leap seconds.
-- UTC and leaps seconds are the most problematic aspect of timekeeping.
+- UTC and leaps seconds are the most problematic aspect of timekeeping. They aren't uniform.
 - UTC was introduced January 1, 1960. SOFA states that, strictly speaking, using UTC before this date is dubious.  
 - the java.time package has no support for leap seconds.
 - the amount of precision in an IEEE 754 double is not quite enough to model a Julian date precisely. 

@@ -1,6 +1,9 @@
 package astrolib.when.examples;
 
 import static astrolib.when.BigDecimalHelper.*;
+import static astrolib.when.Calendar.*;
+import static astrolib.when.TimescaleImpl.*;
+import static java.math.RoundingMode.*;
 
 import java.math.BigDecimal;
 
@@ -9,55 +12,114 @@ import astrolib.when.Date;
 import astrolib.when.DateTime;
 import astrolib.when.JulianDate;
 import astrolib.when.Time;
-import astrolib.when.Timescale;
-import astrolib.when.TimescaleImpl;
 
+/** 
+ Basic examples of using the library.
+ This is not a complete set of examples.
+ 
+ Note the use of BigDecimal to represent seconds/days.
+ The 'big(...)' methods are simple helper methods defined in BigDecimalHelper, 
+ for making BigDecimal objects. 
+*/
 public class ExerciseDates {
   
-  public static void main(String[] args) {
-    ExerciseDates ex = new ExerciseDates();
-    ex.doubleConversion(2025, 1, 1, Calendar.GREGORIAN, Calendar.JULIAN);
-    ex.doubleConversion(-4713, 11, 24, Calendar.GREGORIAN, Calendar.JULIAN);
-    ex.doubleConversion(2025,  1, 1, Calendar.GREGORIAN);
-    ex.doubleConversionJd(2025, 1, 1, 0, 0, big(13.05), Calendar.GREGORIAN); //repeating decimal; some rounding 
-    ex.doubleConversionJd(2025, 1, 1, 0, 0, big(0), Calendar.GREGORIAN); 
-    ex.doubleConversionJd(2025, 1, 1, 12, 0, big(0), Calendar.GREGORIAN); 
-    ex.doubleConversionJd(2025, 1, 1, 1, 0, big(0), Calendar.GREGORIAN); //repeating decimal; some rounding 
-    ex.doubleConversionJd(2025, 1, 1, 1, 30, big(0), Calendar.GREGORIAN);  
-    ex.doubleConversionJd(2025, 1, 1, 17, 32, big(56.00000001), Calendar.GREGORIAN);  //repeating decimal; some rounding 
-    ex.doubleConversionJd(1599, 10, 11, 19, 56, big(47.98123), Calendar.GREGORIAN);  //repeating decimal; some rounding
-    Date date = Date.from(-4799, 1, 1, Calendar.GREGORIAN);
-    System.out.println("-4799 Jan 1: " + date.jd(TimescaleImpl.TAI).jd());
+  private static void buildDates() {
+    Date a = Date.from(1987, 12, 25, GREGORIAN);
+    Date b = Date.gregorian(1987, 12, 25);
+    Date c = Date.julian(1095, 11, 12);
+    //the year is a 'long' data type
+    Date d = Date.gregorian(3213132131321313131L, 12, 31);
+  }
+  
+  private static void buildTimes() {
+    //12:30:15.123_456_789_012
+    Time a = Time.from(12, 30, big(15.123_456_789_012), GPS);
+    //using fraction of a day
+    Time b = Time.from(big(0.123_456_789_012), TAI);
+    Time startOfDay = Time.zero(TAI);
+  }
+  
+  private static void buildDatesAndTimes() {
+    Date date = Date.gregorian(1987, 12, 25);
+    Time time = Time.from(12, 30, big(15.123), UT1);
+    DateTime dt = DateTime.from(date, time);
     
-    JulianDate jd = JulianDate.from(JulianDate.MODIFIED_JD_ORIGIN, TimescaleImpl.TAI);
-    DateTime dt = jd.toDateTime(Calendar.GREGORIAN);
-    System.out.println(dt);
+    //using a fraction of a day
+    dt = DateTime.from(date, big(0.123_465_789_012), TDB);
+    
+    dt = DateTime.from(1999, 12, 31, 23, 59, big(59.999), GREGORIAN, UTC);
+    
+    JulianDate jd = JulianDate.from(big(2_545_321.5), TT);
+    dt = DateTime.from(jd, GREGORIAN);
+    JulianDate jd2 = dt.toJulianDate();
   }
   
-  private void doubleConversion(long year, int month, int day, Calendar fromCalendar, Calendar toCalendar) {
-    Date d = Date.from(year, month, day, fromCalendar);
-    Date dc = d.convertTo(toCalendar);
-    Date dcc = dc.convertTo(fromCalendar);
-    System.out.println(d + " to " + dc + " back to " + dcc);
+  private static void calendarConversion() {
+    Date a = Date.gregorian(1400, 12, 1);
+    Date b = a.convertTo(JULIAN);
   }
   
-  private void doubleConversion(long year, int month, int day, Calendar calendar) {
-    Date d = Date.from(year, month, day, calendar);
-    JulianDate jd = d.jd(TimescaleImpl.TAI);
-    DateTime d2 = jd.toDateTime(calendar);
-    System.out.println(d + " " + jd + " " + d2);
+  private static void compareDates() {
+    Date a = Date.gregorian(1400, 12, 1);
+    Date b = Date.julian(1095, 11, 16);
+    boolean isAfter = a.gt(b);
+    boolean isSame = a.eq(b);
+    //and so on...
   }
-  
-  private void doubleConversionJd(long year, int month, int day, int hour, int minute, BigDecimal seconds, Calendar calendar) {
-    Date d = Date.from(year, month, day, calendar);
-    Timescale timescale = TimescaleImpl.TAI;
-    Time t = Time.from(hour, minute, seconds, timescale);
-    DateTime dt = DateTime.from(d, t);
-    JulianDate jd = dt.toJulianDate();
-    DateTime dt2 = jd.toDateTime(calendar);
-    System.out.println(dt + " " + jd + " " + dt2);
-  }
-  
-  
 
+  private static void daysFrom() {
+    Date a = Date.gregorian(1400, 12, 1);
+    Date b = Date.julian(1095, 11, 16);
+    long days = a.daysFrom(b);
+  }
+  
+  private static void nextPreviousDayEtc() {
+    Date a = Date.gregorian(2023, 12, 1);
+    Date b = a.next();
+    b = a.previous();
+    b = a.plusMinusDays(10);
+    b = a.plusMinusDays(-10);
+  }
+
+  /* 
+   You can build a DateTime from a JulianDate, but not a Date.
+   A JulianDate object carries fractional day information, but Date does not. 
+  */
+  private static void dateToJulianDate() {
+    Date a = Date.gregorian(2023, 12, 1);
+    JulianDate jd = a.jd(TT); //for 0h that day
+    DateTime b = DateTime.from(jd, Calendar.GREGORIAN);
+    
+    //no restriction to JD >= 0
+    Date ancient = Date.gregorian(-15000, 1, 1);
+    jd = a.jd(TT); 
+  }
+  
+  private static void dateTimeMethods() {
+    Date date = Date.gregorian(1987, 12, 25);
+    Time time1 = Time.from(12, 30, big(15.123_456), TDB);
+    Time time2 = Time.from(12, 30, big(15.000_002), TDB);
+    DateTime a = DateTime.from(date, time1);
+    DateTime b = DateTime.from(date, time2);
+    
+    int comparison = a.compareTo(b);
+    BigDecimal days = a.daysFrom(b, 3, HALF_EVEN); //round to three decimals
+    BigDecimal seconds = a.secondsFrom(b, 3, HALF_EVEN); //round to three decimals
+    BigDecimal frac = a.fractionalDay(); //day and time-of-day as one number
+    DateTime c = a.plusMinusDays(big(10), 4, HALF_EVEN);
+    DateTime d = a.plusMinusSeconds(big(-62.132), 4, HALF_EVEN);
+    DateTime e = a.roundSeconds(3, HALF_EVEN);
+    JulianDate jd = a.toJulianDate();
+    long year = a.year();
+    int month = a.month();
+    //and so on...
+  }
+  
+  /* The Calendar and Timescale are explicit in toString(). */
+  private static void dateTimeString() {
+    Date date = Date.gregorian(1987, 12, 25);
+    Time time = Time.from(12, 30, big(15.123_456), TDB);
+    DateTime a = DateTime.from(date, time);
+    a.toString(); //1987-12-25 GR 12:30:15.123456 TDB
+  }
 }
