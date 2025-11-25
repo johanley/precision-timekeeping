@@ -6,6 +6,7 @@ import static bigtime.when.BigDecimalHelper.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
+import java.util.Optional;
 
 /** Immutable data-carrier for date and time information. */
 public final class DateTime implements Comparable<DateTime> {
@@ -70,6 +71,11 @@ public final class DateTime implements Comparable<DateTime> {
   /** Convert this {@link DateTime} to a {@link JulianDate}. */
   public JulianDate toJulianDate() {
     return JulianDateConverter.using(date.calendar()).toJulianDate(this);
+  }
+
+  /** See {@link Timescale#convertTo(Timescale, DateTime)}. */
+  public Optional<DateTime> convertTo(Timescale timescale){
+    return Timescale.convertTo(timescale, this);
   }
 
   /** 

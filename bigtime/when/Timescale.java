@@ -66,7 +66,7 @@ public interface Timescale {
    If the source {@link Timescale} is the same as the target {@link Timescale}, then <tt>fromWhen</tt> is simply returned unchanged.
    @return a {@link DateTime} whose date and time reflects the target {@link Timescale}. 
    The returned object is empty iff the conversion to TAI is not defined for both 
-   timescales, for the given DateTime.   
+   timescales, for the given {@link DateTime}.   
   */
   public static Optional<DateTime> convertTo(Timescale toTimescale, DateTime fromWhen) {
     if (toTimescale == fromWhen.time().timescale()) {

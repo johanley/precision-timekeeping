@@ -121,7 +121,7 @@ public class ExampleCode {
   private static void dateToJulianDate() {
     Date a = Date.gregorian(2023, 12, 1);
     JulianDate jd = a.jd(TT); //for 0h that day
-    DateTime b = DateTime.from(jd, Calendar.GREGORIAN);
+    DateTime b = DateTime.from(jd, GREGORIAN);
     
     //no restriction to JD >= 0
     Date ancient = Date.gregorian(-15000, 1, 1);
@@ -142,6 +142,8 @@ public class ExampleCode {
     DateTime c = a.plusMinusDays(big(10), 4, HALF_EVEN);
     DateTime d = a.plusMinusSeconds(big(-62.132), 4, HALF_EVEN);
     DateTime e = a.roundSeconds(3, HALF_EVEN);
+    Optional<DateTime> f = e.convertTo(UT1);
+    DateTime g = f.get(); //should work, the conversion is supported for this date
     JulianDate jd = a.toJulianDate();
     long year = a.year();
     int month = a.month();
@@ -169,11 +171,11 @@ public class ExampleCode {
     JulianDate jd = a.toJulianDate();
     DateTime b = DateTime.from(jd, JULIAN); //jd + different calendar
     //given the date range, this conversion will work:
-    Optional<DateTime> c = Timescale.convertTo(TimescaleImpl.TAI, b); //new Timescale
+    Optional<DateTime> c = b.convertTo(TAI); //new Timescale
     DateTime d = c.get();
-    DateTime e = DateTime.from(d.toJulianDate(), Calendar.GREGORIAN); //back to Gregorian
+    DateTime e = DateTime.from(d.toJulianDate(), GREGORIAN); //back to Gregorian
     stdout(" Intermediate: " + e.toString());
-    Optional<DateTime> f = Timescale.convertTo(TimescaleImpl.TDB, e);
+    Optional<DateTime> f = Timescale.convertTo(TDB, e);
     //given the date range, this conversion will work:
     DateTime g = f.get();
     stdout(" Unrounded:    " + g.toString());
