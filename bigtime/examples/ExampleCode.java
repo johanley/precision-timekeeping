@@ -26,7 +26,7 @@ import bigtime.when.TimescaleImpl;
 
  <P>Example output to stdout:
  <pre>
- DateTime.toString(): 1987-12-25 GR 12:30:15.123456 TDB
+DateTime.toString(): 1987-12-25 GR 12:30:15.123456 TDB
 Multiple conversions:
  Start with:   1987-12-25 GR 12:30:15.123456 TDB
  Intermediate: 1987-12-25 GR 12:29:42.939726506771634249600019200 TAI
