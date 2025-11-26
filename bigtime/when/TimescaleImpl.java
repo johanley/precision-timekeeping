@@ -168,18 +168,14 @@ public enum TimescaleImpl implements Timescale {
   UT1 {
     /** 
      UT1 - TAI in seconds.
-     <P>Uses an underlying table of values from a text file. 
-     The text file is placed in the same directory as this class.
-     The text file contains a snapshot of the <a href='https://hpiers.obspm.fr/eop-pc/index.php?index=C04&lang=en'>IERS EOP C04 series</a>.
-     Manually updates to this file are needed in order to stay current. 
+     See {@link Ut1Helper}.
  
      <P>An empty value is returned for dates preceding 1962-01-01, unless the caller has specified an override.
      <P>Override values can be set using a System property named <em>UT1-minus-TAI</em> to the desired value:
      <pre>-DUT1-minus-TAI=27</pre>
     */
     @Override public Optional<BigDecimal> secondsFromTAI(DateTime when) {
-      Ut1Helper helper = new Ut1Helper();
-      return helper.lookup(when);
+      return ut1Helper().lookup(when);
     }
   },
   
@@ -221,4 +217,13 @@ public enum TimescaleImpl implements Timescale {
   
   /** {@value} seconds. */
   static final Double TT_MINUS_TAI = 32.184;
+
+  /** This object is expensive, since it reads a large file during its construction. */
+  private static Ut1Helper ut1Helper = null;
+  private static Ut1Helper ut1Helper() {
+    if (ut1Helper == null) {
+      ut1Helper = new Ut1Helper();
+    }
+    return ut1Helper;
+  }
 }

@@ -55,6 +55,20 @@ public final class TimescaleImplTEST {
     overrideForUTCFails("-40.0");
   }
   
+  @Test public void overrideForUT1() {
+    Date date = Date.gregorian(1965, 1, 1);
+    DateTime when = DateTime.from(date, Time.zero(UT1));
+    overrideForUT1("0", when);
+    overrideForUT1("1", when);
+    overrideForUT1("-1", when);
+    overrideForUT1("-40", when);
+    overrideForUT1("40", when);
+    overrideForUT1("40.123456", when);
+    overrideForUT1("-40.123456", when);
+    overrideForUT1Fails("blah", when);
+  }
+  
+  
   /** Assumes the conversion always works.  */
   private void test(Timescale timescale, String secondsFromTAI, DateTime when) {
     assertEquals(big(secondsFromTAI), timescale.secondsFromTAI(when).get());
@@ -76,6 +90,20 @@ public final class TimescaleImplTEST {
     String key = TimescaleImpl.UTC_SYS_PROPERTY;
     System.setProperty(key, val);
     test(UTC, val, null);
+    System.clearProperty(key);
+  }
+  
+  private void overrideForUT1(String val, DateTime when) {
+    String key = TimescaleImpl.UT1_SYS_PROPERTY;
+    System.setProperty(key, val);
+    test(UT1, val, when);
+    System.clearProperty(key);
+  }
+  
+  private void overrideForUT1Fails(String val, DateTime when) {
+    String key = TimescaleImpl.UT1_SYS_PROPERTY;
+    System.setProperty(key, val);
+    assertThrows(IllegalArgumentException.class, () -> UT1.secondsFromTAI(when));
     System.clearProperty(key);
   }
   

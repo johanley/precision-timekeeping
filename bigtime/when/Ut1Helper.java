@@ -17,14 +17,32 @@ import bigtime.util.DataFileReader;
  Look up the value UT1-TAI from a data file.
  The source is a snapshot of the <a href='https://hpiers.obspm.fr/eop-pc/index.php?index=C04&lang=en'>IERS EOP C04 series</a>.
  The values in the source file are expressed in milliseconds.
- The source file needs to be updated manually.
+ The source file needs to be updated manually, and placed in the same directory as this class.
+ 
+ <P>UT1-TAI can vary by up to about 3 milliseconds per day.
+ To achieve millisecond precision, interpolation for the time-of-day is needed.
 */
 final class Ut1Helper {
+
+  /** 
+   Here, values (in seconds) that come from the IERS file are always rounded to this many decimal places - {@value}.
+   
+   <P>The sigma values for UT1-TAI vary widely over time, starting at 2.0 milliseconds 
+   and going as low as ~0.004 milliseconds in the table.
+   
+   <P>The sigma value for each entry is not used here, so some information about the UT1-TAI value is lost.
+   A more sensitive implementation would react to the sigma values, and round dynamically to a varying 
+   number of decimal places.
+  */
+  static final int NUM_DECIMALS = 7;
   
   /** 
-   Read in source data file. 
-   The file is large.
-   Its contents are in memory until this object is garbage-collected. 
+   Read in source IERS data file. 
+   WARNING: The file is large.
+   Its contents are in memory until this object is garbage-collected.
+   
+   <P>{@link Timescale} has a field of this class, which is initialized 
+   only when a conversion to UT1 is first needed. 
   */
   Ut1Helper(){
     readInSourceData();
@@ -78,7 +96,7 @@ final class Ut1Helper {
     }
     return res != null ? Optional.of(res) : Optional.empty();
   }
-  
+
   /*
    Example of two lines of data:
      1980  9 30 -18967.5278  0.4000 
@@ -101,7 +119,7 @@ final class Ut1Helper {
     String override = System.getProperty(TimescaleImpl.UT1_SYS_PROPERTY);
     if (Check.textHasContent(override)) {
       try {
-        res = rounded(big(override));
+        res = big(override);
       }
       catch(NumberFormatException ex) {
         throw new IllegalArgumentException("System property " + TimescaleImpl.UT1_SYS_PROPERTY + " should be a double, but isn't: " + override);
@@ -181,6 +199,6 @@ final class Ut1Helper {
   }
   
   private BigDecimal rounded(BigDecimal res) {
-    return round(res, 7, RoundingMode.HALF_EVEN);
+    return round(res, NUM_DECIMALS, RoundingMode.HALF_EVEN);
   }
 }

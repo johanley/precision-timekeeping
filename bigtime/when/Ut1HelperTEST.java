@@ -11,11 +11,11 @@ import org.junit.Test;
 public final class Ut1HelperTEST {
   
   @Test public void override() {
-    System.setProperty(TimescaleImpl.UT1_SYS_PROPERTY, "-88.123");
+    System.setProperty(TimescaleImpl.UT1_SYS_PROPERTY, "-88.1234");
     Date date = Date.gregorian(1852, 4, 12);
     Time time = Time.zero(timescale);
     Optional<BigDecimal> seconds = lookup(DateTime.from(date, time));
-    assertEquals("-88.1230000", seconds.get().toString());
+    assertEquals("-88.1234", seconds.get().toString());
     System.clearProperty(TimescaleImpl.UT1_SYS_PROPERTY);
   }
   
