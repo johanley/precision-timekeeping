@@ -21,6 +21,7 @@ import bigtime.util.DataFileReader;
  
  <P>UT1-TAI can vary by up to about 3 milliseconds per day.
  To achieve millisecond precision, interpolation for the time-of-day is needed.
+ That is implemented here with simple linear interpolation between two values.
 */
 final class Ut1Helper {
 
@@ -61,7 +62,9 @@ final class Ut1Helper {
    In that case, only that specific numeric value is returned by this method.
    
    @param dt will be internally converted to use {@link Calendar#GREGORIAN} if 
-   its not already in use. The result is only very weakly dependent on the {@link Timescale}.
+   its not already in use.
+   The caller is encouraged to use UT1 for the {@link Timescale} of this param, but that is not enforced. 
+   The result is only very weakly dependent on the {@link Timescale}.
    To a sub-millisecond accuracy, any {@link Timescale} may be used for the input {@link DateTime}.
   */
   Optional<BigDecimal> lookup(DateTime dt) {
