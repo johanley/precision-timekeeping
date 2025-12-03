@@ -1,6 +1,6 @@
 ## Precision Timekeeping 
 
-References for context:
+References for adding context:
 - The *Explanatory Supplement to the Astronomical Almanac*, various editions
 - <a href='https://www.iausofa.org/'>SOFA</a> and its Cookbook called *SOFA Time Scale and Calendar Tools* 
 - <a href='https://github.com/barrettp/Astrometry.jl'>Astrometry.jl</a>
